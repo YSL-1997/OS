@@ -129,6 +129,7 @@ int main(int argc, char *argv[]){
             // now we have s s.t. stores 15 tokens   
             printf("user time: %ul. ", s[13]); // utime is at the 14th location
             free(s);
+            fclose(fptr);
             break;
             
         case 'S': // Display the amount of system time consumed so far by this process. In: stat file, "stime" field.
@@ -155,6 +156,7 @@ int main(int argc, char *argv[]){
             // now we have s s.t. stores 15 tokens   
             printf("system time: %ul. ", s[14]); // stime is at the 15th location
             free(s);
+            fclose(fptr);
             break;
 
         case 'v': // Display the amount of virtual memory currently being used (in pages) by this program. 
