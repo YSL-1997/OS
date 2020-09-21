@@ -74,19 +74,28 @@ mation for all processes of the current user
              // if the user does not provide pid, then display information for all processes of the "current" user
             printf("optarg = %s\n", optarg);
             printf("optarg in int = %d\n", atoi(optarg));
-
+            // TO DO
+            
+            
+            
+            
             break;
-        case 's':                                                                                                           
+          case 's': // Display the single-character state information about the process.In: stat file, third ("state") field. 
+                    // Note that the information that you read from the stat file is a character string. 
+                    // This option defaults to be false, so if it is not present, do not display this information. 
+                    // -s- is valid but has no effect.
             char* path = "/proc/";
             strncat(path, optarg, strlen(optarg)); // path completed
             char* filename = "stat"
             FILE* fptr = readDirFile(path, filename)
-            int unused;
-            char comm[1000];
+            int processID;
+            char filenameOfExecutable[1024];
             char state;
-            int ppid;
-            fscanf(fptr, "%d %s %c %d", &unused, comm, &state, &ppid);
+            int parentPid;
+            fscanf(fptr, "%d %s %c %d", &processID, filenameOfExecutable, &state, &parentPid);
+            // need modification
             printf("state = %c\n", state);
+            // need modification
             fclose(fptr);
             break;                                                                                                                
         
@@ -98,6 +107,14 @@ mation for all processes of the current user
             char* filename = "stat"
             FILE* fptr = readDirFile(path, filename)
             // TO DO  
+            // Since in this case, utime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
+            char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
+            char* tmp = (char*)malloc(sizeof(unsigned long));// temporary stores one read each time
+            char* tok = strtok(fptr, tmp); // use strtok() to get the first token
+            // TO DO
+            
+            free(tmp);
+            free(s);
               
               
             
