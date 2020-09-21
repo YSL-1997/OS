@@ -1,5 +1,5 @@
 /*
-Author: Yusen Liu
+Authors: Yusen Liu, Yingjia Gu
 Project #1 - a simple version of the ps command
 */
 
