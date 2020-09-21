@@ -59,12 +59,11 @@ FILE* readDirFile(char* path, char* filename){
 
 int main(int argc, char *argv[]){
     int c = 0;
-    if(argc == 1){ // basically no other options listed(i.e. 537ps is the only thing that on the cmd), just display infor\
-mation for all processes of the current user
-    return 0;
+    if(argc == 1){ // basically no other options listed(i.e. 537ps is the only thing that on the cmd), just display information for all processes of the current user
+        return 0;
 
   }
-    while((c = getopt(argc, argv, "p:sUSvc")) != -1){ // read the argument
+    while((c = getopt(argc, argv, "p:s::U::S::v::c::")) != -1){ // read the argument
         switch(c){
         case 'p':
             long int processID = atoi(optarg); // need to handle the PID provided by the user in optarg
@@ -78,12 +77,22 @@ mation for all processes of the current user
             
             
             
-            
+            // still need to manage the default for each case
             break;
-          case 's': // Display the single-character state information about the process.In: stat file, third ("state") field. 
+        case 's': // Display the single-character state information about the process.In: stat file, third ("state") field. 
                     // Note that the information that you read from the stat file is a character string. 
                     // This option defaults to be false, so if it is not present, do not display this information. 
                     // -s- is valid but has no effect.
+                
+                //TODO
+                
+            if(optarg == "-")
+            else if(optarg == NULL)
+            else...
+                
+                
+                
+                
             char* path = "/proc/";
             strncat(path, optarg, strlen(optarg)); // path completed
             char* filename = "stat"
@@ -91,33 +100,35 @@ mation for all processes of the current user
             int processID;
             char filenameOfExecutable[1024];
             char state;
-            int parentPid;
-            fscanf(fptr, "%d %s %c %d", &processID, filenameOfExecutable, &state, &parentPid);
-            // need modification
-            printf("state = %c\n", state);
-            // need modification
+            fscanf(fptr, "%d %s %c", &processID, filenameOfExecutable, &state);
+            printf("state: %c. ", state);
             fclose(fptr);
             break;                                                                                                                
         
-          case 'U': // Display the amount of user time consumed by this process. In: stat file, "utime" field. 
+        case 'U': // Display the amount of user time consumed by this process. In: stat file, "utime" field. 
                     // This option defaults to be true, so if it is not present, then this information is displayed. 
                     // -U- turns this option off.
             char* path = "/proc/";
             strncat(path, optarg, strlen(optarg)); // path completed
             char* filename = "stat"
-            FILE* fptr = readDirFile(path, filename)
-            // TO DO  
+            FILE* fptr = readDirFile(path, filename);
             // Since in this case, utime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
+            // first need to use fgets() to get a string as input from the FILE* fptr
+            char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
             char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
-            char* tmp = (char*)malloc(sizeof(unsigned long));// temporary stores one read each time
-            char* tok = strtok(fptr, tmp); // use strtok() to get the first token
-            // TO DO
-            
-            free(tmp);
+            const char delimeter[4] = " "; // delimeter is " " only
+            while(fgets(line, sizeof(line), fptr)){
+                char* tok = strtok(fptr, delimeter); // use strtok() to get the first token
+                int i = 0;
+                while(tok != NULL){
+                    s[i] = tok;
+                    i++;
+                    tok = strtok(NULL, delimeter);
+                }
+            }
+            // now we have s s.t. stores 15 tokens   
+            printf("user time: %ul. ", s[13]); // utime is at the 14th location
             free(s);
-              
-              
-            
             break;
             
         case 'S': // Display the amount of system time consumed so far by this process. In: stat file, "stime" field.
@@ -127,8 +138,23 @@ mation for all processes of the current user
             strncat(path, optarg, strlen(optarg)); // path completed
             char* filename = "stat"
             FILE* fptr = readDirFile(path, filename)
-            
-
+            // Since in this case, utime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
+            // first need to use fgets() to get a string as input from the FILE* fptr
+            char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
+            char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
+            const char delimeter[4] = " "; // delimeter is " " only
+            while(fgets(line, sizeof(line), fptr)){
+                char* tok = strtok(fptr, delimeter); // use strtok() to get the first token
+                int i = 0;
+                while(tok != NULL){
+                    s[i] = tok;
+                    i++;
+                    tok = strtok(NULL, delimeter);
+                }
+            }
+            // now we have s s.t. stores 15 tokens   
+            printf("system time: %ul. ", s[14]); // stime is at the 15th location
+            free(s);
             break;
 
         case 'v': // Display the amount of virtual memory currently being used (in pages) by this program. 
@@ -141,12 +167,12 @@ mation for all processes of the current user
             FILE* fptr = readDirFile(path, filename)
             long int size;
             fscanf(fptr, "%d", &size);
-            printf("size = %d\n", size)
+            printf("size: %d. ", size)
             fclose(fptr);
             break;
 
         case 'c':
-
+            // TO DO
             break;
         case '?': // getopt() returns "?" when getopt finds an option character in argv that was not included in options
               // OR, a missing option argument(PID in this case)
