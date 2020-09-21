@@ -50,9 +50,10 @@ FILE* readDirFile(char* path, char* filename){
             printf("Cannot open file: %s.\n", filename);
             exit(0);
         }
-        else{
+      	else{
             closedir(myDirectory);
-            return fptr;                                                                                                          }
+            return fptr;
+		}
     }
     return NULL;
 }
@@ -64,6 +65,12 @@ int main(int argc, char *argv[]){
 
   }
     while((c = getopt(argc, argv, "p:s::U::S::v::c::")) != -1){ // read the argument
+		int s_flag = 0; // defaults to be false
+		int U_flag = 1; // defaults to be true
+		int S_flag = 0; // defaults to be false
+		int v_flag = 0; // defaults to be false
+		int c_flag = 1; // defaults to be true
+		
         switch(c){
         case 'p':
             long int processID = atoi(optarg); // need to handle the PID provided by the user in optarg
@@ -85,31 +92,35 @@ int main(int argc, char *argv[]){
                     // -s- is valid but has no effect.
                 
                 //TODO
+            if(optarg != "-" || optarg != NULL){
+				printf("Value of errno: %d\n", errno);
+				perror("argument after -s should be NULL or -");
+			}
+            if(optarg == "-" || optarg == NULL){
+				char* path = "/proc/";
+            	strncat(path, optarg, sizeof(optarg)-1); // path completed
+            	char* filename = "stat"
+            	FILE* fptr = readDirFile(path, filename)
+            	int processID;
+            	char filenameOfExecutable[1024];
+            	char state;
+            	fscanf(fptr, "%d %s %c", &processID, filenameOfExecutable, &state);
+            	printf("state: %c. ", state);
+            	fclose(fptr);
+            	break;
+			}
+            
                 
-            if(optarg == "-")
-            else if(optarg == NULL)
-            else...
                 
                 
                 
-                
-            char* path = "/proc/";
-            strncat(path, optarg, strlen(optarg)); // path completed
-            char* filename = "stat"
-            FILE* fptr = readDirFile(path, filename)
-            int processID;
-            char filenameOfExecutable[1024];
-            char state;
-            fscanf(fptr, "%d %s %c", &processID, filenameOfExecutable, &state);
-            printf("state: %c. ", state);
-            fclose(fptr);
-            break;                                                                                                                
+                                                                                                                            
         
         case 'U': // Display the amount of user time consumed by this process. In: stat file, "utime" field. 
                     // This option defaults to be true, so if it is not present, then this information is displayed. 
                     // -U- turns this option off.
             char* path = "/proc/";
-            strncat(path, optarg, strlen(optarg)); // path completed
+            strncat(path, optarg, sizeof(optarg)-1); // path completed
             char* filename = "stat"
             FILE* fptr = readDirFile(path, filename);
             // Since in this case, utime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
@@ -136,7 +147,7 @@ int main(int argc, char *argv[]){
               // This option defaults to be false, so if it is not present, then this information is not displayed.
               // "-S-" is valid but has no effect.
             char* path = "/proc/";
-            strncat(path, optarg, strlen(optarg)); // path completed
+            strncat(path, optarg, sizeof(optarg)-1); // path completed
             char* filename = "stat"
             FILE* fptr = readDirFile(path, filename)
             // Since in this case, utime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
@@ -164,7 +175,7 @@ int main(int argc, char *argv[]){
                   // This option defaults to be false, so if it is not present, then this information is not displayed. 
                   // -v- is valid but has no effect.
             char* path = "/proc/";
-            strncat(path, optarg, strlen(optarg)); // path completed
+            strncat(path, optarg, sizeof(optarg)-1); // path completed
             char* filename = "statm"
             FILE* fptr = readDirFile(path, filename)
             long int size;
@@ -173,7 +184,10 @@ int main(int argc, char *argv[]){
             fclose(fptr);
             break;
 
-        case 'c':
+        case 'c': // Display the command-line that started this program. In cmdline file in process's directory. 
+				  // Be careful on this one, because this file contains a list of null (zero byte) terminated strings. 
+				  // This option defaults to be true, so if it is not present, then this information is displayed. 
+				  // -c- turns this option off.
             // TO DO
             break;
         case '?': // getopt() returns "?" when getopt finds an option character in argv that was not included in options
