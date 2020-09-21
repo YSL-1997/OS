@@ -77,7 +77,7 @@ mation for all processes of the current user
 
             break;
         case 's':                                                                                                           
-            char* path = "/proc";
+            char* path = "/proc/";
             strncat(path, optarg, strlen(optarg)); // path completed
             char* filename = "stat"
             FILE* fptr = readDirFile(path, filename)
@@ -90,21 +90,44 @@ mation for all processes of the current user
             fclose(fptr);
             break;                                                                                                                
         
-        case 'U':                                                                                                           
+          case 'U': // Display the amount of user time consumed by this process. In: stat file, "utime" field. 
+                    // This option defaults to be true, so if it is not present, then this information is displayed. 
+                    // -U- turns this option off.
+            char* path = "/proc/";
+            strncat(path, optarg, strlen(optarg)); // path completed
+            char* filename = "stat"
+            FILE* fptr = readDirFile(path, filename)
+            // TO DO  
+              
+              
+            
             break;
+            
         case 'S': // Display the amount of system time consumed so far by this process. In: stat file, "stime" field.
               // This option defaults to be false, so if it is not present, then this information is not displayed.
               // "-S-" is valid but has no effect.
-            char* path = "/proc";
+            char* path = "/proc/";
             strncat(path, optarg, strlen(optarg)); // path completed
             char* filename = "stat"
             FILE* fptr = readDirFile(path, filename)
             
 
             break;
-        case 'v':
 
+        case 'v': // Display the amount of virtual memory currently being used (in pages) by this program. 
+                  // In: statm file, first ("size") field. 
+                  // This option defaults to be false, so if it is not present, then this information is not displayed. 
+                  // -v- is valid but has no effect.
+            char* path = "/proc/";
+            strncat(path, optarg, strlen(optarg)); // path completed
+            char* filename = "statm"
+            FILE* fptr = readDirFile(path, filename)
+            long int size;
+            fscanf(fptr, "%d", &size);
+            printf("size = %d\n", size)
+            fclose(fptr);
             break;
+
         case 'c':
 
             break;
