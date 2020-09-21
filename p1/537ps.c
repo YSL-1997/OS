@@ -81,13 +81,13 @@ mation for all processes of the current user
             strncat(path, optarg, strlen(optarg)); // path completed
             char* filename = "stat"
             FILE* fptr = readDirFile(path, filename)
+            int unused;
+            char comm[1000];
             char state;
-            fscanf(fptr, "%c", &state);
-            printf("state = %c\n", state)
+            int ppid;
+            fscanf(fptr, "%d %s %c %d", &unused, comm, &state, &ppid);
+            printf("state = %c\n", state);
             fclose(fptr);
-            
-            
-            
             break;                                                                                                                
         
         case 'U':                                                                                                           
