@@ -92,7 +92,7 @@ int main(int argc, char *argv[]){
                     // -s- is valid but has no effect.
                 
                 //TODO
-            if(optarg != "-" || optarg != NULL){
+            if(optarg != "-" && optarg != NULL){
 				printf("Value of errno: %d\n", errno);
 				perror("argument after -s should be NULL or -");
 			}
