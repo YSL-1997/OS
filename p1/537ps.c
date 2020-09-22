@@ -68,211 +68,239 @@ int main(int argc, char *argv[]){
     while((c = getopt(argc, argv, "p:s::U::S::v::c::")) != -1){ // read the argument
 		// flags are used to handle duplicates
 		int s_flag = 0; // defaults to be false
-		int U_flag = 1; // defaults to be true
+		int U_flag = 0; // defaults to be true
 		int S_flag = 0; // defaults to be false
 		int v_flag = 0; // defaults to be false
-		int c_flag = 1; // defaults to be true
+		int c_flag = 0; // defaults to be true
 		
         switch(c){
-        case 'p':
-            pid = atoi(optarg); // need to handle the PID provided by the user in optarg
-			itoa(pid, pid_str, 10); // convert pid from int to string, stored in pid_str
-            //DIR* myDirectory;
-            //struct dirent* myFile;
-            return 0;
-             // if the user does not provide pid, then display information for all processes of the "current" user
-            printf("optarg = %s\n", optarg);
-            printf("optarg in int = %d\n", atoi(optarg));
-            // TO DO
-            
-            
-            
-            // still need to manage the default for each case
-            break;
+			case 'p':
+				pid = atoi(optarg); // need to handle the PID provided by the user in optarg
+				itoa(pid, pid_str, 10); // convert pid from int to string, stored in pid_str
+				//DIR* myDirectory;
+				//struct dirent* myFile;
+				return 0;
+				 // if the user does not provide pid, then display information for all processes of the "current" user
+				printf("optarg = %s\n", optarg);
+				printf("optarg in int = %d\n", atoi(optarg));
+				// TO DO
 
-		case 's': // Display the single-character state information about the process.In: stat file, third ("state") field. 
-                    // Note that the information that you read from the stat file is a character string. 
-                    // This option defaults to be false, so if it is not present, do not display this information. 
-                    // -s- is valid but has no effect.
-                
-                //TODO
-			if(strcmp(optarg, "-") != 0 && optarg != NULL){
-				printf("Value of errno: %d\n", errno);
-				perror("argument after -s should be NULL or -\n");
-			}
-            if(strcmp(optarg, "-") == 0 || optarg == NULL){
-				char* path = "/proc/";
-				if(pid_str != NULL){
-					strncat(path, pid_str, strlen(pid_str)); // path completed
-				}
-            	else { // handle the case when pid_str is NULL
-					perror("pid_str is NULL, cannot display the corresponding information.\n")
-				}
-            	char* filename = "stat";
-            	FILE* fptr = readDirFile(path, filename);
-            	int processID;
-            	char filenameOfExecutable[1024];
-            	char state;
-            	fscanf(fptr, "%d %s %c", &processID, filenameOfExecutable, &state);
-				if(processID == pid){ // check if the pid matches
-					printf("state: %c. ", state);
-					fclose(fptr);
+
+
+				// still need to manage the default for each case
+				break;
+
+			case 's': // Display the single-character state information about the process.In: stat file, third ("state") field. 
+						// Note that the information that you read from the stat file is a character string. 
+						// This option defaults to be false, so if it is not present, do not display this information. 
+						// -s- is valid but has no effect.
+				if(s_flag != 0){
 					break;
 				}
 				else {
-					fclose(fptr);
-					perror("processID and pid not match\n");
-					break;
+					s_flag = 1;
 				}
-			}
-            
-                
-                
-                
-                
-                                                                                                                            
-        
-		case 'U': // Display the amount of user time consumed by this process. In: stat file, "utime" field. 
-                    // This option defaults to be true, so if it is not present, then this information is displayed. 
-                    // -U- turns this option off.
-			if(strcmp(optarg, "-") != 0 && optarg != NULL){
-				printf("Value of errno: %d\n", errno);
-				perror("argument after -U should be NULL or -");
-			}
-			if(strcmp(optarg, "-") == 0){ // Not display
-				break;
-			}
-			if(optarg == NULL){
-				char* path = "/proc/";
-				if(pid_str != NULL){
-					strncat(path, pid_str, strlen(pid_str)); // path completed
+				if(strcmp(optarg, "-") != 0 && optarg != NULL){
+					printf("Value of errno: %d\n", errno);
+					perror("argument after -s should be NULL or -\n");
 				}
-            	else { // handle the case when pid_str is NULL
-					perror("pid_str is NULL, cannot display the corresponding information.\n")
-				}
-				char* filename = "stat";
-				FILE* fptr = readDirFile(path, filename);
-				// Since in this case, utime locates at the 14th (13th if starts from 0) position of stat file, we try a different way from case 's'.
-				// first need to use fgets() to get a string as input from the FILE* fptr
-				char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
-				char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
-				const char delimeter[4] = " "; // delimeter is " " only
-				while(fgets(line, sizeof(line), fptr)){
-					char* tok = strtok(line, delimeter); // use strtok() to get the first token
-					char* tmp = s;
-					while(tok != NULL){
-						strncpy(tmp, tok, strlen(tok));
-						tmp += sizeof(unsigned long);
-						tok = strtok(NULL, delimeter);
+				if(strcmp(optarg, "-") == 0 || optarg == NULL){
+					char* path = "/proc/";
+					if(pid_str != NULL){
+						strncat(path, pid_str, strlen(pid_str)); // path completed
+					}
+					else { // handle the case when pid_str is NULL
+						perror("pid_str is NULL, cannot display the corresponding information.\n")
+					}
+					char* filename = "stat";
+					FILE* fptr = readDirFile(path, filename);
+					int processID;
+					char filenameOfExecutable[1024];
+					char state;
+					fscanf(fptr, "%d %s %c", &processID, filenameOfExecutable, &state);
+					if(processID == pid){ // check if the pid matches
+						printf("state: %c. ", state);
+						fclose(fptr);
+						break;
+					}
+					else {
+						fclose(fptr);
+						perror("processID and pid not match\n");
+						break;
 					}
 				}
-				// now we have s s.t. stores 15 tokens
-				if(strcmp(s, pid_str) == 0){ // check if the pid matches
-					printf("user time: %s. ", s+sizeof(unsigned long)*13); // utime is at the 14th location
-					free(s);
+
+
+
+
+
+
+
+			case 'U': // Display the amount of user time consumed by this process. In: stat file, "utime" field. 
+						// This option defaults to be true, so if it is not present, then this information is displayed. 
+						// -U- turns this option off.
+				if(U_flag != 0){
+					break;
+				}
+				else {
+					U_flag = 1;
+				}
+				if(strcmp(optarg, "-") != 0 && optarg != NULL){
+					printf("Value of errno: %d\n", errno);
+					perror("argument after -U should be NULL or -");
+				}
+				if(strcmp(optarg, "-") == 0){ // Not display
+					break;
+				}
+				if(optarg == NULL){
+					char* path = "/proc/";
+					if(pid_str != NULL){
+						strncat(path, pid_str, strlen(pid_str)); // path completed
+					}
+					else { // handle the case when pid_str is NULL
+						perror("pid_str is NULL, cannot display the corresponding information.\n")
+					}
+					char* filename = "stat";
+					FILE* fptr = readDirFile(path, filename);
+					// Since in this case, utime locates at the 14th (13th if starts from 0) position of stat file, we try a different way from case 's'.
+					// first need to use fgets() to get a string as input from the FILE* fptr
+					char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
+					char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
+					const char delimeter[4] = " "; // delimeter is " " only
+					while(fgets(line, sizeof(line), fptr)){
+						char* tok = strtok(line, delimeter); // use strtok() to get the first token
+						char* tmp = s;
+						while(tok != NULL){
+							strncpy(tmp, tok, strlen(tok));
+							tmp += sizeof(unsigned long);
+							tok = strtok(NULL, delimeter);
+						}
+					}
+					// now we have s s.t. stores 15 tokens
+					if(strcmp(s, pid_str) == 0){ // check if the pid matches
+						printf("user time: %s. ", s+sizeof(unsigned long)*13); // utime is at the 14th location
+						free(s);
+						fclose(fptr);
+						break;
+					}
+					else{
+						free(s);
+						fclose(fptr);
+						perror("processID and pid not match\n");
+						break;
+					}
+
+				}
+
+			case 'S': // Display the amount of system time consumed so far by this process. In: stat file, "stime" field.
+					  // This option defaults to be false, so if it is not present, then this information is not displayed.
+					  // "-S-" is valid but has no effect.
+				if(S_flag != 0){
+					break;
+				}
+				else {
+					S_flag = 1;
+				}
+				if(strcmp(optarg, "-") != 0 && optarg != NULL){
+					printf("Value of errno: %d\n", errno);
+					perror("argument after -S should be NULL or -");
+				}
+				if(strcmp(optarg, "-") == 0 || optarg == NULL){
+					char* path = "/proc/";
+					if(pid_str != NULL){
+						strncat(path, pid_str, strlen(pid_str)); // path completed
+					}
+					else { // handle the case when pid_str is NULL
+						perror("pid_str is NULL, cannot display the corresponding information.\n")
+					}
+					char* filename = "stat";
+					FILE* fptr = readDirFile(path, filename);
+					// Since in this case, stime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
+					// first need to use fgets() to get a string as input from the FILE* fptr
+					char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
+					char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
+					const char delimeter[4] = " "; // delimeter is " " only
+					while(fgets(line, sizeof(line), fptr)){
+						char* tok = strtok(line, delimeter); // use strtok() to get the first token
+						char* tmp = s;
+						while(tok != NULL){
+							strncpy(tmp, tok, strlen(tok));
+							tmp += sizeof(unsigned long);
+							tok = strtok(NULL, delimeter);
+						}
+					}
+					// now we have s s.t. stores 15 tokens
+					if(strcmp(s, pid_str) == 0){ // check if the pid matches
+						printf("system time: %s. ", s+sizeof(unsigned long)*14); // stime is at the 15th location
+						free(s);
+						fclose(fptr);
+						break;
+					}
+					else{
+						free(s);
+						fclose(fptr);
+						perror("processID and pid not match\n");
+						break;
+					}
+				}
+
+			case 'v': ; // we add ";" here to avoid the error: "a label can only be part of a statement and a declaration is not a statement"
+						// Display the amount of virtual memory currently being used (in pages) by this program. 
+						// In: statm file, first ("size") field. 
+						// This option defaults to be false, so if it is not present, then this information is not displayed. 
+						// -v- is valid but has no effect.
+				if(v_flag != 0){
+					break;
+				}
+				else {
+					v_flag = 1;
+				}
+				if(strcmp(optarg, "-") != 0 && optarg != NULL){
+					printf("Value of errno: %d\n", errno);
+					perror("argument after -v should be NULL or -");
+				}
+				if(strcmp(optarg, "-") == 0 || optarg == NULL){
+					char* path = "/proc/";
+					if(pid_str != NULL){
+						strncat(path, pid_str, strlen(pid_str)); // path completed
+					}
+					else { // handle the case when pid_str is NULL
+						perror("pid_str is NULL, cannot display the corresponding information.\n")
+					}
+					char* filename = "statm";
+					FILE* fptr = readDirFile(path, filename);
+					long int size;
+					fscanf(fptr, "%ld", &size);
+					printf("size: %ld. ", size);
 					fclose(fptr);
 					break;
 				}
-				else{
-					free(s);
-					fclose(fptr);
-					perror("processID and pid not match\n");
+
+			case 'c': // Display the command-line that started this program. In cmdline file in process's directory. 
+					  // Be careful on this one, because this file contains a list of null (zero byte) terminated strings. 
+					  // This option defaults to be true, so if it is not present, then this information is displayed. 
+					  // -c- turns this option off.
+				if(c_flag != 0){
 					break;
+				}
+				else {
+					c_flag = 1;
 				}
 				
-			}
-            
-		case 'S': // Display the amount of system time consumed so far by this process. In: stat file, "stime" field.
-				  // This option defaults to be false, so if it is not present, then this information is not displayed.
-				  // "-S-" is valid but has no effect.
-			if(strcmp(optarg, "-") != 0 && optarg != NULL){
-				printf("Value of errno: %d\n", errno);
-				perror("argument after -S should be NULL or -");
-			}
-            if(strcmp(optarg, "-") == 0 || optarg == NULL){
-				char* path = "/proc/";
-				if(pid_str != NULL){
-					strncat(path, pid_str, strlen(pid_str)); // path completed
-				}
-            	else { // handle the case when pid_str is NULL
-					perror("pid_str is NULL, cannot display the corresponding information.\n")
-				}
-				char* filename = "stat";
-				FILE* fptr = readDirFile(path, filename);
-				// Since in this case, stime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
-				// first need to use fgets() to get a string as input from the FILE* fptr
-				char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
-				char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
-				const char delimeter[4] = " "; // delimeter is " " only
-				while(fgets(line, sizeof(line), fptr)){
-					char* tok = strtok(line, delimeter); // use strtok() to get the first token
-					char* tmp = s;
-					while(tok != NULL){
-						strncpy(tmp, tok, strlen(tok));
-						tmp += sizeof(unsigned long);
-						tok = strtok(NULL, delimeter);
-					}
-				}
-				// now we have s s.t. stores 15 tokens
-				if(strcmp(s, pid_str) == 0){ // check if the pid matches
-					printf("system time: %s. ", s+sizeof(unsigned long)*14); // stime is at the 15th location
-					free(s);
-					fclose(fptr);
-					break;
+
+				break;
+			case '?': // getopt() returns "?" when getopt finds an option character in argv that was not included in options
+					  // OR, a missing option argument(PID in this case)
+				if(optopt == 'p'){ // if after -p, argument is missed
+					fprintf(stderr, "Option -%c needs argument(PID).\n", optopt);
 				}
 				else{
-					free(s);
-					fclose(fptr);
-					perror("processID and pid not match\n");
-					break;
+					fprintf(stderr, "Unknown option -- -%c.\n", optopt);
+					exit(1);
 				}
-			}
 
-		case 'v': ; // we add ";" here to avoid the error: "a label can only be part of a statement and a declaration is not a statement"
-		  	    	// Display the amount of virtual memory currently being used (in pages) by this program. 
-                  	// In: statm file, first ("size") field. 
-                  	// This option defaults to be false, so if it is not present, then this information is not displayed. 
-                  	// -v- is valid but has no effect.
-			if(strcmp(optarg, "-") != 0 && optarg != NULL){
-				printf("Value of errno: %d\n", errno);
-				perror("argument after -v should be NULL or -");
-			}
-            if(strcmp(optarg, "-") == 0 || optarg == NULL){
-				char* path = "/proc/";
-				if(pid_str != NULL){
-					strncat(path, pid_str, strlen(pid_str)); // path completed
-				}
-            	else { // handle the case when pid_str is NULL
-					perror("pid_str is NULL, cannot display the corresponding information.\n")
-				}
-				char* filename = "statm";
-				FILE* fptr = readDirFile(path, filename);
-				long int size;
-				fscanf(fptr, "%ld", &size);
-				printf("size: %ld. ", size);
-				fclose(fptr);
-				break;
-			}
-
-		case 'c': // Display the command-line that started this program. In cmdline file in process's directory. 
-				  // Be careful on this one, because this file contains a list of null (zero byte) terminated strings. 
-				  // This option defaults to be true, so if it is not present, then this information is displayed. 
-				  // -c- turns this option off.
-            
-			
-			break;
-		case '?': // getopt() returns "?" when getopt finds an option character in argv that was not included in options
-				  // OR, a missing option argument(PID in this case)
-			if(optopt == 'p'){ // if after -p, argument is missed
-				fprintf(stderr, "Option -%c needs argument(PID).\n", optopt);
-			}
-			else{
-				fprintf(stderr, "Unknown option -- -%c.\n", optopt);
-				exit(1);
-			}
-
-			default:
-				fprintf(stderr, "getopt");
+				default:
+					fprintf(stderr, "getopt");
 		}
 	}
 	return 1;
