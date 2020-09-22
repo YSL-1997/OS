@@ -117,9 +117,6 @@ int main(int argc, char *argv[]){
 				if(strcmp(optarg, "-") == 0 || optarg == NULL){
 					char* path = "/proc/";
 					strncat(path, pid_str, strlen(pid_str)); // path completed
-					else { // handle the case when pid_str is NULL
-						perror("pid_str is NULL, cannot display the corresponding information.\n")
-					}
 					char* filename = "stat";
 					FILE* fptr = readDirFile(path, filename);
 					int processID;
@@ -163,9 +160,6 @@ int main(int argc, char *argv[]){
 				if(optarg == NULL){
 					char* path = "/proc/";
 					strncat(path, pid_str, strlen(pid_str)); // path completed
-					else { // handle the case when pid_str is NULL
-						perror("pid_str is NULL, cannot display the corresponding information.\n")
-					}
 					char* filename = "stat";
 					FILE* fptr = readDirFile(path, filename);
 					// Since in this case, utime locates at the 14th (13th if starts from 0) position of stat file, we try a different way from case 's'.
@@ -214,9 +208,6 @@ int main(int argc, char *argv[]){
 				if(strcmp(optarg, "-") == 0 || optarg == NULL){
 					char* path = "/proc/";
 					strncat(path, pid_str, strlen(pid_str)); // path completed
-					else { // handle the case when pid_str is NULL
-						perror("pid_str is NULL, cannot display the corresponding information.\n")
-					}
 					char* filename = "stat";
 					FILE* fptr = readDirFile(path, filename);
 					// Since in this case, stime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
@@ -266,9 +257,6 @@ int main(int argc, char *argv[]){
 				if(strcmp(optarg, "-") == 0 || optarg == NULL){
 					char* path = "/proc/";
 					strncat(path, pid_str, strlen(pid_str)); // path completed
-					else { // handle the case when pid_str is NULL
-						perror("pid_str is NULL, cannot display the corresponding information.\n")
-					}
 					char* filename = "statm";
 					FILE* fptr = readDirFile(path, filename);
 					long int size;
