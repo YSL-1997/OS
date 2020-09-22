@@ -42,7 +42,7 @@ Critical:
 // filename should start with "./"
 // remember to call fclose(FILE*) to close the file, and closedir() to close the directory after producing the output
 FILE* readDirFile(char* path, char* filename){
-    struct dirent *myFile;
+
     DIR* myDirectory = opendir(path); // Upon successful completion, opendir() returns a pointer to an object of type DIR   
     if(myDirectory){ // read dir successfully, next, need to read the desired filename
         FILE* fptr = fopen(filename, "r");
@@ -64,11 +64,11 @@ int main(int argc, char *argv[]){
         return 0;
     }
     while((c = getopt(argc, argv, "p:s::U::S::v::c::")) != -1){ // read the argument
-		int s_flag = 0; // defaults to be false
-		int U_flag = 1; // defaults to be true
-		int S_flag = 0; // defaults to be false
-		int v_flag = 0; // defaults to be false
-		int c_flag = 1; // defaults to be true
+// 		int s_flag = 0; // defaults to be false
+// 		int U_flag = 1; // defaults to be true
+// 		int S_flag = 0; // defaults to be false
+// 		int v_flag = 0; // defaults to be false
+// 		int c_flag = 1; // defaults to be true
 		
         switch(c){
         case 'p':
@@ -146,7 +146,7 @@ int main(int argc, char *argv[]){
 					}
 				}
 				// now we have s s.t. stores 15 tokens   
-				printf("user time: %ul. ", s+sizeof(unsigned long)*13); // utime is at the 14th location
+				printf("user time: %s. ", s+sizeof(unsigned long)*13); // utime is at the 14th location
 				free(s);
 				fclose(fptr);
 				break;
@@ -170,7 +170,7 @@ int main(int argc, char *argv[]){
 				char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
 				const char delimeter[4] = " "; // delimeter is " " only
 				while(fgets(line, sizeof(line), fptr)){
-					char* tok = strtok(fptr, delimeter); // use strtok() to get the first token
+					char* tok = strtok(line, delimeter); // use strtok() to get the first token
 					char* tmp = s;
 					while(tok != NULL){
 						strncpy(tmp, tok, strlen(tok));
@@ -179,23 +179,24 @@ int main(int argc, char *argv[]){
 					}
 				}
 				// now we have s s.t. stores 15 tokens   
-				printf("system time: %ul. ", s+sizeof(unsigned long)*14); // stime is at the 15th location
+				printf("system time: %s. ", s+sizeof(unsigned long)*14); // stime is at the 15th location
 				free(s);
 				fclose(fptr);
 				break;
 			}
 
-        case 'v': // Display the amount of virtual memory currently being used (in pages) by this program. 
-                  // In: statm file, first ("size") field. 
-                  // This option defaults to be false, so if it is not present, then this information is not displayed. 
-                  // -v- is valid but has no effect.
+		case 'v': ; // we add ";" here to avoid the error: "a label can only be part of a statement and a declaration is not a statement"
+		  	    	// Display the amount of virtual memory currently being used (in pages) by this program. 
+                  	// In: statm file, first ("size") field. 
+                  	// This option defaults to be false, so if it is not present, then this information is not displayed. 
+                  	// -v- is valid but has no effect.
             char* path = "/proc/";
             strncat(path, optarg, sizeof(optarg)-1); // path completed
             char* filename = "statm";
             FILE* fptr = readDirFile(path, filename);
             long int size;
-            fscanf(fptr, "%d", &size);
-            printf("size: %d. ", size)
+            fscanf(fptr, "%ld", &size);
+            printf("size: %ld. ", size);
             fclose(fptr);
             break;
 
