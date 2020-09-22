@@ -66,6 +66,9 @@ FILE* readDirFile(char* path, char* filename){
 //			if the uid we read is equal to(use strcmp) uid, then (1)pid, (2)case 'U'(TIME), (3)case 'c'(cmd)
 //			else continue
 
+int ruid = getuid(); // ruid is an int
+
+
 
 
 
