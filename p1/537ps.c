@@ -42,21 +42,29 @@ Critical:
 // filename should start with "./"
 // remember to call fclose(FILE*) to close the file, and closedir() to close the directory after producing the output
 FILE* readDirFile(char* path, char* filename){
-
-    DIR* myDirectory = opendir(path); // Upon successful completion, opendir() returns a pointer to an object of type DIR   
-    if(myDirectory){ // read dir successfully, next, need to read the desired filename
-        FILE* fptr = fopen(filename, "r");
-        if(fptr == NULL){ // failed to open the desired file
-            printf("Cannot open file: %s.\n", filename);
-            exit(0);
-        }
-      	else{
-            closedir(myDirectory);
-            return fptr;
+	DIR* myDirectory = opendir(path); // Upon successful completion, opendir() returns a pointer to an object of type DIR   
+	if(myDirectory){ // read dir successfully, next, need to read the desired filename
+		FILE* fptr = fopen(filename, "r");
+		if(fptr == NULL){ // failed to open the desired file
+			printf("Cannot open file: %s.\n", filename);
+			exit(0);
+		}
+		else{
+			closedir(myDirectory);
+			return fptr;
+		}
 	}
-    }
-    return NULL;
+	return NULL;
 }
+
+
+// ** produce the process info of all processes by current user
+// int uid = getuid()
+// readdir() to read /proc
+// foreach dir in /proc, read dir, check if status file exists, 
+// 		if yes, then read status file, Uid is on the 9th line, with 4 numbers listed, only need to get real uid, i.e. the first number
+//			if the uid we read is equal to(use strcmp) uid, then (1)pid, (2)case 'U'(TIME), (3)case 'c'(cmd)
+//			else continue
 
 
 
@@ -289,6 +297,10 @@ int main(int argc, char *argv[]){
 				else {
 					c_flag = 1;
 				}
+				// if -p pid, then print the cmd for pid
+				// else, print cmd for all process by current user
+				// cmd info is stored in /proc/<pid>/cmdline
+				
 				
 
 				break;
