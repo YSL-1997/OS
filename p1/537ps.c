@@ -86,17 +86,17 @@ int main(int argc, char *argv[]){
             // still need to manage the default for each case
             break;
 
-        case 's': // Display the single-character state information about the process.In: stat file, third ("state") field. 
+		case 's': // Display the single-character state information about the process.In: stat file, third ("state") field. 
                     // Note that the information that you read from the stat file is a character string. 
                     // This option defaults to be false, so if it is not present, do not display this information. 
                     // -s- is valid but has no effect.
                 
                 //TODO
-            if(optarg != "-" && optarg != NULL){
+			if(*optarg != "-" && *optarg != NULL){
 				printf("Value of errno: %d\n", errno);
 				perror("argument after -s should be NULL or -");
 			}
-            if(optarg == "-" || optarg == NULL){
+            if(*optarg == "-" || *optarg == NULL){
 				char* path = "/proc/";
             	strncat(path, optarg, sizeof(optarg)-1); // path completed
             	char* filename = "stat"
@@ -116,59 +116,74 @@ int main(int argc, char *argv[]){
                 
                                                                                                                             
         
-        case 'U': // Display the amount of user time consumed by this process. In: stat file, "utime" field. 
+		case 'U': // Display the amount of user time consumed by this process. In: stat file, "utime" field. 
                     // This option defaults to be true, so if it is not present, then this information is displayed. 
                     // -U- turns this option off.
-            char* path = "/proc/";
-            strncat(path, optarg, sizeof(optarg)-1); // path completed
-            char* filename = "stat"
-            FILE* fptr = readDirFile(path, filename);
-            // Since in this case, utime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
-            // first need to use fgets() to get a string as input from the FILE* fptr
-            char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
-            char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
-            const char delimeter[4] = " "; // delimeter is " " only
-            while(fgets(line, sizeof(line), fptr)){
-                char* tok = strtok(fptr, delimeter); // use strtok() to get the first token
-                int i = 0;
-                while(tok != NULL){
-                    s[i] = tok;
-                    i++;
-                    tok = strtok(NULL, delimeter);
-                }
-            }
-            // now we have s s.t. stores 15 tokens   
-            printf("user time: %ul. ", s[13]); // utime is at the 14th location
-            free(s);
-            fclose(fptr);
-            break;
+			if(optarg != "-" && optarg != NULL){
+				printf("Value of errno: %d\n", errno);
+				perror("argument after -U should be NULL or -");
+			}
+            if(optarg == "-"){ // Not display
+            	break;
+			}
+			if(optarg == NULL){
+				char* path = "/proc/";
+				strncat(path, optarg, sizeof(optarg)-1); // path completed
+				char* filename = "stat"
+				FILE* fptr = readDirFile(path, filename);
+				// Since in this case, utime locates at the 14th (13th if starts from 0) position of stat file, we try a different way from case 's'.
+				// first need to use fgets() to get a string as input from the FILE* fptr
+				char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
+				char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
+				const char delimeter[4] = " "; // delimeter is " " only
+				while(fgets(line, sizeof(line), fptr)){
+					char* tok = strtok(fptr, delimeter); // use strtok() to get the first token
+					int i = 0;
+					while(tok != NULL){
+						s[i] = tok;
+						i++;
+						tok = strtok(NULL, delimeter);
+					}
+				}
+				// now we have s s.t. stores 15 tokens   
+				printf("user time: %ul. ", s[13]); // utime is at the 14th location
+				free(s);
+				fclose(fptr);
+				break;
+			}
             
         case 'S': // Display the amount of system time consumed so far by this process. In: stat file, "stime" field.
               // This option defaults to be false, so if it is not present, then this information is not displayed.
               // "-S-" is valid but has no effect.
-            char* path = "/proc/";
-            strncat(path, optarg, sizeof(optarg)-1); // path completed
-            char* filename = "stat"
-            FILE* fptr = readDirFile(path, filename)
-            // Since in this case, utime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
-            // first need to use fgets() to get a string as input from the FILE* fptr
-            char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
-            char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
-            const char delimeter[4] = " "; // delimeter is " " only
-            while(fgets(line, sizeof(line), fptr)){
-                char* tok = strtok(fptr, delimeter); // use strtok() to get the first token
-                int i = 0;
-                while(tok != NULL){
-                    s[i] = tok;
-                    i++;
-                    tok = strtok(NULL, delimeter);
-                }
-            }
-            // now we have s s.t. stores 15 tokens   
-            printf("system time: %ul. ", s[14]); // stime is at the 15th location
-            free(s);
-            fclose(fptr);
-            break;
+			if(optarg != "-" && optarg != NULL){
+				printf("Value of errno: %d\n", errno);
+				perror("argument after -s should be NULL or -");
+			}
+            if(optarg == "-" || optarg == NULL){
+				char* path = "/proc/";
+				strncat(path, optarg, sizeof(optarg)-1); // path completed
+				char* filename = "stat"
+				FILE* fptr = readDirFile(path, filename)
+				// Since in this case, stime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
+				// first need to use fgets() to get a string as input from the FILE* fptr
+				char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
+				char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
+				const char delimeter[4] = " "; // delimeter is " " only
+				while(fgets(line, sizeof(line), fptr)){
+					char* tok = strtok(fptr, delimeter); // use strtok() to get the first token
+					int i = 0;
+					while(tok != NULL){
+						s[i] = tok;
+						i++;
+						tok = strtok(NULL, delimeter);
+					}
+				}
+				// now we have s s.t. stores 15 tokens   
+				printf("system time: %ul. ", s[14]); // stime is at the 15th location
+				free(s);
+				fclose(fptr);
+				break;
+			}
 
         case 'v': // Display the amount of virtual memory currently being used (in pages) by this program. 
                   // In: statm file, first ("size") field. 
