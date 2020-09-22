@@ -53,7 +53,7 @@ FILE* readDirFile(char* path, char* filename){
       	else{
             closedir(myDirectory);
             return fptr;
-		}
+	}
     }
     return NULL;
 }
@@ -62,8 +62,7 @@ int main(int argc, char *argv[]){
     int c = 0;
     if(argc == 1){ // basically no other options listed(i.e. 537ps is the only thing that on the cmd), just display information for all processes of the current user
         return 0;
-
-  }
+    }
     while((c = getopt(argc, argv, "p:s::U::S::v::c::")) != -1){ // read the argument
 		int s_flag = 0; // defaults to be false
 		int U_flag = 1; // defaults to be true
@@ -86,6 +85,7 @@ int main(int argc, char *argv[]){
             
             // still need to manage the default for each case
             break;
+
         case 's': // Display the single-character state information about the process.In: stat file, third ("state") field. 
                     // Note that the information that you read from the stat file is a character string. 
                     // This option defaults to be false, so if it is not present, do not display this information. 
