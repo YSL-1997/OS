@@ -72,9 +72,9 @@ int main(int argc, char *argv[]){
 		
         switch(c){
         case 'p':
-            long int processID = atoi(optarg); // need to handle the PID provided by the user in optarg
-            DIR* myDirectory;
-            struct dirent* myFile;
+            //long int processID = atoi(optarg); // need to handle the PID provided by the user in optarg
+            //DIR* myDirectory;
+            //struct dirent* myFile;
             return 0;
              // if the user does not provide pid, then display information for all processes of the "current" user
             printf("optarg = %s\n", optarg);
@@ -92,15 +92,15 @@ int main(int argc, char *argv[]){
                     // -s- is valid but has no effect.
                 
                 //TODO
-			if(*optarg != "-" && *optarg != NULL){
+			if(strcmp(optarg, "-") != 0 && optarg != NULL){
 				printf("Value of errno: %d\n", errno);
 				perror("argument after -s should be NULL or -");
 			}
-            if(*optarg == "-" || *optarg == NULL){
+            if(strcmp(optarg, "-") == 0 || optarg == NULL){
 				char* path = "/proc/";
             	strncat(path, optarg, sizeof(optarg)-1); // path completed
-            	char* filename = "stat"
-            	FILE* fptr = readDirFile(path, filename)
+            	char* filename = "stat";
+            	FILE* fptr = readDirFile(path, filename);
             	int processID;
             	char filenameOfExecutable[1024];
             	char state;
@@ -119,17 +119,17 @@ int main(int argc, char *argv[]){
 		case 'U': // Display the amount of user time consumed by this process. In: stat file, "utime" field. 
                     // This option defaults to be true, so if it is not present, then this information is displayed. 
                     // -U- turns this option off.
-			if(optarg != "-" && optarg != NULL){
+			if(strcmp(optarg, "-") != 0 && optarg != NULL){
 				printf("Value of errno: %d\n", errno);
 				perror("argument after -U should be NULL or -");
 			}
-            if(optarg == "-"){ // Not display
+            if(strcmp(optarg, "-") == 0){ // Not display
             	break;
 			}
 			if(optarg == NULL){
 				char* path = "/proc/";
 				strncat(path, optarg, sizeof(optarg)-1); // path completed
-				char* filename = "stat"
+				char* filename = "stat";
 				FILE* fptr = readDirFile(path, filename);
 				// Since in this case, utime locates at the 14th (13th if starts from 0) position of stat file, we try a different way from case 's'.
 				// first need to use fgets() to get a string as input from the FILE* fptr
@@ -137,16 +137,16 @@ int main(int argc, char *argv[]){
 				char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
 				const char delimeter[4] = " "; // delimeter is " " only
 				while(fgets(line, sizeof(line), fptr)){
-					char* tok = strtok(fptr, delimeter); // use strtok() to get the first token
-					int i = 0;
+					char* tok = strtok(line, delimeter); // use strtok() to get the first token
+					char* tmp = s;
 					while(tok != NULL){
-						s[i] = tok;
-						i++;
+						strncpy(tmp, tok, strlen(tok));
+						tmp += sizeof(unsigned long);
 						tok = strtok(NULL, delimeter);
 					}
 				}
 				// now we have s s.t. stores 15 tokens   
-				printf("user time: %ul. ", s[13]); // utime is at the 14th location
+				printf("user time: %ul. ", s+sizeof(unsigned long)*13); // utime is at the 14th location
 				free(s);
 				fclose(fptr);
 				break;
@@ -155,15 +155,15 @@ int main(int argc, char *argv[]){
         case 'S': // Display the amount of system time consumed so far by this process. In: stat file, "stime" field.
               // This option defaults to be false, so if it is not present, then this information is not displayed.
               // "-S-" is valid but has no effect.
-			if(optarg != "-" && optarg != NULL){
+			if(strcmp(optarg, "-") != 0 && optarg != NULL){
 				printf("Value of errno: %d\n", errno);
 				perror("argument after -s should be NULL or -");
 			}
-            if(optarg == "-" || optarg == NULL){
+            if(strcmp(optarg, "-") == 0 || optarg == NULL){
 				char* path = "/proc/";
 				strncat(path, optarg, sizeof(optarg)-1); // path completed
-				char* filename = "stat"
-				FILE* fptr = readDirFile(path, filename)
+				char* filename = "stat";
+				FILE* fptr = readDirFile(path, filename);
 				// Since in this case, stime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
 				// first need to use fgets() to get a string as input from the FILE* fptr
 				char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
@@ -171,15 +171,15 @@ int main(int argc, char *argv[]){
 				const char delimeter[4] = " "; // delimeter is " " only
 				while(fgets(line, sizeof(line), fptr)){
 					char* tok = strtok(fptr, delimeter); // use strtok() to get the first token
-					int i = 0;
+					char* tmp = s;
 					while(tok != NULL){
-						s[i] = tok;
-						i++;
+						strncpy(tmp, tok, strlen(tok));
+						tmp += sizeof(unsigned long);
 						tok = strtok(NULL, delimeter);
 					}
 				}
 				// now we have s s.t. stores 15 tokens   
-				printf("system time: %ul. ", s[14]); // stime is at the 15th location
+				printf("system time: %ul. ", s+sizeof(unsigned long)*14); // stime is at the 15th location
 				free(s);
 				fclose(fptr);
 				break;
@@ -191,8 +191,8 @@ int main(int argc, char *argv[]){
                   // -v- is valid but has no effect.
             char* path = "/proc/";
             strncat(path, optarg, sizeof(optarg)-1); // path completed
-            char* filename = "statm"
-            FILE* fptr = readDirFile(path, filename)
+            char* filename = "statm";
+            FILE* fptr = readDirFile(path, filename);
             long int size;
             fscanf(fptr, "%d", &size);
             printf("size: %d. ", size)
