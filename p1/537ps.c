@@ -58,6 +58,9 @@ FILE* readDirFile(char* path, char* filename){
     return NULL;
 }
 
+
+
+
 int main(int argc, char *argv[]){
     int c = 0;
 	long int pid = 0;
