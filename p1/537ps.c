@@ -88,12 +88,11 @@ int main(int argc, char *argv[]){
 			case 'p':
 				pid = atoi(optarg); // need to handle the PID provided by the user in optarg
 				itoa(pid, pid_str, 10); // convert pid from int to string, stored in pid_str
-				//DIR* myDirectory;
-				//struct dirent* myFile;
+				
+			
 				return 0;
 				 // if the user does not provide pid, then display information for all processes of the "current" user
-				printf("optarg = %s\n", optarg);
-				printf("optarg in int = %d\n", atoi(optarg));
+				
 				// TO DO
 
 
@@ -117,9 +116,7 @@ int main(int argc, char *argv[]){
 				}
 				if(strcmp(optarg, "-") == 0 || optarg == NULL){
 					char* path = "/proc/";
-					if(pid_str != NULL){
-						strncat(path, pid_str, strlen(pid_str)); // path completed
-					}
+					strncat(path, pid_str, strlen(pid_str)); // path completed
 					else { // handle the case when pid_str is NULL
 						perror("pid_str is NULL, cannot display the corresponding information.\n")
 					}
@@ -165,9 +162,7 @@ int main(int argc, char *argv[]){
 				}
 				if(optarg == NULL){
 					char* path = "/proc/";
-					if(pid_str != NULL){
-						strncat(path, pid_str, strlen(pid_str)); // path completed
-					}
+					strncat(path, pid_str, strlen(pid_str)); // path completed
 					else { // handle the case when pid_str is NULL
 						perror("pid_str is NULL, cannot display the corresponding information.\n")
 					}
@@ -218,9 +213,7 @@ int main(int argc, char *argv[]){
 				}
 				if(strcmp(optarg, "-") == 0 || optarg == NULL){
 					char* path = "/proc/";
-					if(pid_str != NULL){
-						strncat(path, pid_str, strlen(pid_str)); // path completed
-					}
+					strncat(path, pid_str, strlen(pid_str)); // path completed
 					else { // handle the case when pid_str is NULL
 						perror("pid_str is NULL, cannot display the corresponding information.\n")
 					}
@@ -272,9 +265,7 @@ int main(int argc, char *argv[]){
 				}
 				if(strcmp(optarg, "-") == 0 || optarg == NULL){
 					char* path = "/proc/";
-					if(pid_str != NULL){
-						strncat(path, pid_str, strlen(pid_str)); // path completed
-					}
+					strncat(path, pid_str, strlen(pid_str)); // path completed
 					else { // handle the case when pid_str is NULL
 						perror("pid_str is NULL, cannot display the corresponding information.\n")
 					}
