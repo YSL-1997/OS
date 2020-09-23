@@ -272,7 +272,7 @@ void pid_list_by_current_user(){
         char u[10];
         int r_uid;
         sscanf(buffer, "%s %d", u, &r_uid);
-        if(r_uid == uid){// this process's info can be displayed
+        if(r_uid == uid && r_uid != 0){// this process's info can be displayed
           //convert string entry_in_proc->d_name to int
           //store in the pid_list
           pid_list[pid_list_index] = atoi(entry_in_proc->d_name);
@@ -291,6 +291,9 @@ void pid_list_by_current_user(){
 
 
 void produce_output(int pid, int s, int U, int S, int v, int c){
+	if(pid == 0){
+		return;
+	}
 	printf("PID: %d, ", pid);
 	if(s == 1){
 		s_info(pid);
@@ -326,8 +329,11 @@ int main(int argc, char *argv[]){
 	//long v_value = 0;
 	if(argc == 1){// 537ps is the only command
 		pid_list_by_current_user();
-		for(int i = 0; i < sizeof(pid_list)/sizeof(int); i++){ 
+		for(int i = 0; i < pid_list_index; i++){ 
 			int cur_pid = pid_list[i];
+			if(cur_pid == 0){
+				continue;
+			}
 			produce_output(cur_pid, s_flag, U_flag, S_flag, v_flag, c_flag);
 			printf("\n");
 		}
