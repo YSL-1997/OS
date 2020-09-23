@@ -293,6 +293,30 @@ long* pid_list_by_current_user(){
 }		
 
 
+void produce_output(long pid, int s, int U, int S, int v, int c){
+	char s_value = s_info(pid);
+	char U_value[300] = U_info(pid);
+	char S_value[300] = S_info(pid);
+	long v_value = v_info(pid);
+	char c_value[300] = c_info(pid);
+	printf("PID: %ld, ", pid);
+	if(s == 1){
+		printf("STATE: %c, ", s_value);
+	}
+	if(U == 1){
+		printf("USER TIME: %s, ", U_value);
+	}
+	if(S == 1){
+		printf("SYS TIME: %s, ", S_value);
+	}
+	if(v == 1){
+		printf("VIRTUAL MEM: %ld, ", v_value);
+	}
+	if(c == 1){
+		printf("CMDLINE: %s", c_value);
+	}
+}
+
 int main(int argc, char *argv[]){
 	int p_occurs = 0;
 	int s_flag = 0; // defaults to be false
@@ -302,8 +326,14 @@ int main(int argc, char *argv[]){
 	int c_flag = 1; // defaults to be true
 	int c = 0;
 	long pid = 0;
-
+	//long v_value = 0;
 	if(argc == 1){// 537ps is the only command
+		long pid_list[10000] = pid_list_by_current_user();
+		for(int i = 0; i < strlen(pid_list); i++){ // strlen ! caution
+			long cur_pid = pid_list[i];
+			produce_output(cur_pid, s_flag, U_flag, S_flag, v_flag, c_flag);
+			printf("\n");
+		}
 	}
 	
 	while((c = getopt(argc, argv, "p:s::U::S::v::c::")) != -1){ // read the argument
@@ -423,8 +453,8 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 	else {
-	// TO DO
-	// produce output according to the flags.
+		produce_output(pid, s_flag, U_flag, S_flag, v_flag, c_flag);
+		return 0;
 	}
 	return 1;
 }
