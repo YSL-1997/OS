@@ -35,11 +35,11 @@ Critical:
 char s_value = 0;
 char U_value[300] = "";
 char S_value[300] = "";
-long v_value = 0;
+int v_value = 0;
 char c_value[300] = "";
-long pid_list[10000]; // list to store all pids of current user
+int pid_list[10000]; // list to store all pids of current user
 int pid_list_index = 0; // pointer that points to the first available index in pid_list
-char buffer_for_long_to_str[20] = "";
+char buffer_for_int_to_str[20] = "";
 //FILE* fptr = NULL;
 
 // readDirFile(char* path, char* filename) returns a file pointer if successfully directed to the directory specified by path, false o.w.
@@ -81,24 +81,20 @@ int hasPid(char* pid_str){
     return 0; // didn't find the entry whose name is pid_str
 }
 
-// convert str to int
-long str_to_long(char* str){
-	char* ptr;
-	return strtol(str, &ptr, 10);
-}
 
-// convert long to string
-char* long_to_str(long num){
-	strcpy(buffer_for_long_to_str, "");
-	sprintf(buffer_for_long_to_str, "%ld", num);
-	return buffer_for_long_to_str;
+
+// convert int to string
+char* int_to_str(int num){
+	strcpy(buffer_for_int_to_str, "");
+	sprintf(buffer_for_int_to_str, "%d", num);
+	return buffer_for_int_to_str;
 }
 
 // case 's': state info
-void s_info(long pid){
+void s_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/stat";
-	strncat(path, long_to_str(pid), strlen(long_to_str(pid)));
+	strncat(path, int_to_str(pid), strlen(int_to_str(pid)));
 	strncat(path, filename, strlen(filename));
 	FILE* fptr = fopen(path, "r");
 	if(fptr == NULL){ // failed to open the desired file
@@ -108,12 +104,11 @@ void s_info(long pid){
 	// next, create three vars to store info, only state is important
 	char buffer[800];
 	fgets(buffer, 800, fptr);
-	long processID; // if error happens, then change long to int
+	int processID; // if error happens, then change long to int
 	char filenameOfExecutable[1024];
 	char state;
-	sscanf(buffer, "%ld %s %c", &processID, filenameOfExecutable, &state);// if error happens, then change %ld to %d
-	if(processID == pid){ // check if the pid matches what we have read
-		fclose(fptr);
+	sscanf(buffer, "%d %s %c", &processID, filenameOfExecutable, &state);// if error happens, then change %ld to %d
+	if(processID == pid){ // check if the pid matches what we have read	
 		s_value = state; // return the state
 	}
 	else{
@@ -121,13 +116,14 @@ void s_info(long pid){
 		perror("PID does not match what we have read\n");
 		exit(1);
 	}
+	fclose(fptr);
 }
 
 // case 'U': user time info
-void U_info(long pid){
+void U_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/stat";
-	strncat(path, long_to_str(pid), strlen(long_to_str(pid)));
+	strncat(path, int_to_str(pid), strlen(int_to_str(pid)));
 	strncat(path, filename, strlen(filename));
 	FILE* fptr = fopen(path, "r");
 	if(fptr == NULL){ // failed to open the desired file
@@ -148,7 +144,7 @@ void U_info(long pid){
 			tok = strtok(NULL, delimeter); // get the next token
 		}
 		// now we have s s.t. stores 15 tokens
-		if(strcmp(s, long_to_str(pid)) == 0){ // check if the pid matches
+		if(strcmp(s, int_to_str(pid)) == 0){ // check if the pid matches
 			free(s);
 			fclose(fptr);
 			strncpy(U_value, s+sizeof(unsigned long)*13, strlen(s+sizeof(unsigned long)*13)); // utime is at the 14th location
@@ -163,10 +159,10 @@ void U_info(long pid){
 }
 
 // case 'S': system time info
-void S_info(long pid){
+void S_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/stat";
-	strncat(path, long_to_str(pid), strlen(long_to_str(pid)));
+	strncat(path, int_to_str(pid), strlen(int_to_str(pid)));
 	strncat(path, filename, strlen(filename));
 	FILE* fptr = fopen(path, "r");
 	if(fptr == NULL){ // failed to open the desired file
@@ -187,7 +183,7 @@ void S_info(long pid){
 			tok = strtok(NULL, delimeter); // get the next token
 		}
 		// now we have s s.t. stores 15 tokens
-		if(strcmp(s, long_to_str(pid)) == 0){ // check if the pid matches
+		if(strcmp(s, int_to_str(pid)) == 0){ // check if the pid matches
 			free(s);
 			fclose(fptr);
 			strncpy(S_value, s+sizeof(unsigned long)*14, strlen(s+sizeof(unsigned long)*14)); // utime is at the 15th location
@@ -203,28 +199,28 @@ void S_info(long pid){
 
 
 // case 'v': virtual memory info
-void v_info(long pid){
+void v_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/statm";
-	strncat(path, long_to_str(pid), strlen(long_to_str(pid)));
+	strncat(path, int_to_str(pid), strlen(int_to_str(pid)));
 	strncat(path, filename, strlen(filename));
 	FILE* fptr = fopen(path, "r");
 	if(fptr == NULL){ // failed to open the desired file
 			printf("Cannot open file: %s.\n", filename);
 			exit(1);
 	}
-	long size;
-	fscanf(fptr, "%ld", &size);
+	int size;
+	fscanf(fptr, "%d", &size);
 	fclose(fptr);
 	v_value = size;
 }
 
 
 // case 'c': cmdline info
-void c_info(long pid){
+void c_info(int pid){
 	char c[800];
 	char path[100] = "/proc/";
-	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
+	strncat(path, int_to_str(pid), strlen(int_to_str(pid))); // path completed
 	strcat(path,"/cmdline");
 	FILE* fptr = fopen(path,"r");
 	if(fptr == NULL){ // failed to open the desired file
@@ -247,7 +243,7 @@ void c_info(long pid){
 //			if the uid we read is equal to(use strcmp) uid, then (1)pid, (2)case 'U'(TIME), (3)case 'c'(cmd)
 //			else continue
 void pid_list_by_current_user(){
-	long uid = getuid();
+	int uid = getuid();
 	pid_list_index = 0; // pointer that points to the first available index in pid_list
 	DIR* procDirectory = opendir("/proc"); // Upon successful completion, opendir() returns a pointer to an object of type DIR
 	struct dirent *entry_in_proc; // Pointer for directory entry
@@ -281,11 +277,11 @@ void pid_list_by_current_user(){
 				while(token != NULL){
 					if(count1 == 1){
 						// now, the r_uid of this process is stored in token
-						long ret = str_to_long(token);
+						int ret = str_to_int(token);
 						if(ret == uid){// this process's info can be displayed
 							//convert string entry_in_proc->d_name to int
 							//store in the pid_list
-							pid_list[pid_list_index] = str_to_long(entry_in_proc->d_name);
+							pid_list[pid_list_index] = str_to_int(entry_in_proc->d_name);
 							pid_list_index += 1;
 							
 							break;
@@ -308,7 +304,7 @@ void pid_list_by_current_user(){
 }		
 
 
-void produce_output(long pid, int s, int U, int S, int v, int c){
+void produce_output(int pid, int s, int U, int S, int v, int c){
 	printf("PID: %ld, ", pid);
 	if(s == 1){
 		s_info(pid);
@@ -340,12 +336,12 @@ int main(int argc, char *argv[]){
 	int v_flag = 0; // defaults to be false
 	int c_flag = 1; // defaults to be true
 	int c = 0;
-	long pid = 0;
+	int pid = 0;
 	//long v_value = 0;
 	if(argc == 1){// 537ps is the only command
 		pid_list_by_current_user();
-		for(int i = 0; i < sizeof(pid_list)/sizeof(long); i++){ 
-			long cur_pid = pid_list[i];
+		for(int i = 0; i < sizeof(pid_list)/sizeof(int); i++){ 
+			int cur_pid = pid_list[i];
 			produce_output(cur_pid, s_flag, U_flag, S_flag, v_flag, c_flag);
 			printf("\n");
 		}
@@ -355,7 +351,7 @@ int main(int argc, char *argv[]){
 		switch(c){
 			case 'p':
 				//p_occurs = 1;
-				pid = str_to_long(optarg);
+				pid = str_to_int(optarg);
 				break;
 
 			case 's': // Display the single-character state information about the process.In: stat file, third ("state") field. 
