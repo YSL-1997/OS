@@ -94,11 +94,13 @@ char* int_to_str(int num){
 void s_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/stat";
-	strncat(path, int_to_str(pid), strlen(int_to_str(pid)));
-	strncat(path, filename, strlen(filename));
+	char str[20];
+	sprintf(str, "%d", pid); // str stores pid in string form
+	strcat(path, str);
+	strcat(path, filename);
 	FILE* fptr = fopen(path, "r");
 	if(fptr == NULL){ // failed to open the desired file
-			printf("Cannot open file: %s.\n", filename);
+			printf("Cannot open file with path: %s.\n", path);
 			exit(1);
 	}
 	// next, create three vars to store info, only state is important
@@ -120,11 +122,13 @@ void s_info(int pid){
 }
 
 // case 'U': user time info
-void U_info(int pid){
+void U_info(int pid){ // check condition: count=14
 	char path[100] = "/proc/";
 	char* filename = "/stat";
-	strncat(path, int_to_str(pid), strlen(int_to_str(pid)));
-	strncat(path, filename, strlen(filename));
+	char str[20];
+	sprintf(str, "%d", pid); // str stores pid in string form
+	strcat(path, str);
+	strcat(path, filename);
 	FILE* fptr = fopen(path, "r");
 	if(fptr == NULL){ // failed to open the desired file
 			printf("Cannot open file: %s.\n", filename);
@@ -133,37 +137,31 @@ void U_info(int pid){
 	// Since in this case, utime locates at the 14th (13th if starts from 0) position of stat file, we try a different way from case 's'.
 	// first need to use fgets() to get a string as input from the FILE* fptr
 	char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
-	char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
-	char* tmp = s;
 	const char delimeter[4] = " "; // delimeter is " "
+	int count = 0;
 	while(fgets(line, sizeof(line), fptr) != NULL){
 		char* tok = strtok(line, delimeter); // use strtok() to get the first token
 		while(tok != NULL){
-			strncpy(tmp, tok, strlen(tok)); // copy tok into tmp(which is s as well)
-			tmp += sizeof(unsigned long); // modify tmp to point to the next block
+			count += 1;
+			if(count == 14){
+				strcpy(U_value, tok);
+				break;
+			}
 			tok = strtok(NULL, delimeter); // get the next token
 		}
-		// now we have s s.t. stores 15 tokens
-		if(strcmp(s, int_to_str(pid)) == 0){ // check if the pid matches
-			free(s);
-			fclose(fptr);
-			strncpy(U_value, s+sizeof(unsigned long)*13, strlen(s+sizeof(unsigned long)*13)); // utime is at the 14th location
-		}
-		else{
-			free(s);
-			fclose(fptr);
-			perror("PID does not match what we have read\n\n");
-			exit(1);
-		}
+		break;
 	}
+	fclose(fptr);
 }
 
 // case 'S': system time info
-void S_info(int pid){
+void S_info(int pid){ // check condition: count=15
 	char path[100] = "/proc/";
 	char* filename = "/stat";
-	strncat(path, int_to_str(pid), strlen(int_to_str(pid)));
-	strncat(path, filename, strlen(filename));
+	char str[20];
+	sprintf(str, "%d", pid); // str stores pid in string form
+	strcat(path, str);
+	strcat(path, filename);
 	FILE* fptr = fopen(path, "r");
 	if(fptr == NULL){ // failed to open the desired file
 			printf("Cannot open file: %s.\n", filename);
@@ -171,30 +169,22 @@ void S_info(int pid){
 	}
 	// in this case, stime locates at the 15th (14th if starts from 0) position of stat file
 	// first need to use fgets() to get a string as input from the FILE* fptr
-	char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
-	char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
-	char* tmp = s;
-	const char delimeter[4] = " "; // delimeter is " " only
+	char line[sizeof(unsigned long)*17]; // stat file has only one line, so need a buffer of enough size for fgets()
+	const char delimeter[4] = " "; // delimeter is " "
+	int count = 0;
 	while(fgets(line, sizeof(line), fptr) != NULL){
 		char* tok = strtok(line, delimeter); // use strtok() to get the first token
 		while(tok != NULL){
-			strncpy(tmp, tok, strlen(tok)); // copy tok into tmp(which is s as well)
-			tmp += sizeof(unsigned long); // modify tmp to point to the next block
+			count += 1;
+			if(count == 15){
+				strcpy(S_value, tok);
+				break;
+			}
 			tok = strtok(NULL, delimeter); // get the next token
 		}
-		// now we have s s.t. stores 15 tokens
-		if(strcmp(s, int_to_str(pid)) == 0){ // check if the pid matches
-			free(s);
-			fclose(fptr);
-			strncpy(S_value, s+sizeof(unsigned long)*14, strlen(s+sizeof(unsigned long)*14)); // utime is at the 15th location
-		}
-		else{
-			free(s);
-			fclose(fptr);
-			perror("PID does not match what we have read\n\n");
-			exit(1);
-		}
+		break;
 	}
+	fclose(fptr);
 }
 
 
@@ -202,8 +192,10 @@ void S_info(int pid){
 void v_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/statm";
-	strncat(path, int_to_str(pid), strlen(int_to_str(pid)));
-	strncat(path, filename, strlen(filename));
+	char str[20];
+	sprintf(str, "%d", pid); // str stores pid in string form
+	strcat(path, str);
+	strcat(path, filename);
 	FILE* fptr = fopen(path, "r");
 	if(fptr == NULL){ // failed to open the desired file
 			printf("Cannot open file: %s.\n", filename);
@@ -211,22 +203,25 @@ void v_info(int pid){
 	}
 	int size;
 	fscanf(fptr, "%d", &size);
-	fclose(fptr);
 	v_value = size;
+	fclose(fptr);
 }
 
 
 // case 'c': cmdline info
 void c_info(int pid){
-	char c[800];
 	char path[100] = "/proc/";
-	strncat(path, int_to_str(pid), strlen(int_to_str(pid))); // path completed
-	strcat(path,"/cmdline");
-	FILE* fptr = fopen(path,"r");
+	char* filename = "/cmdline";
+	char str[20];
+	sprintf(str, "%d", pid); // str stores pid in string form
+	strcat(path, str);
+	strcat(path, filename);
+	FILE* fptr = fopen(path, "r");
 	if(fptr == NULL){ // failed to open the desired file
-		printf("Cannot open file: %s.\n", path);
-		exit(1);
+			printf("Cannot open file: %s.\n", filename);
+			exit(1);
 	}
+	char c[200];
 	if(fscanf(fptr, "%s", c) < 0){
 		exit(1);
 	}
@@ -277,11 +272,11 @@ void pid_list_by_current_user(){
 				while(token != NULL){
 					if(count1 == 1){
 						// now, the r_uid of this process is stored in token
-						int ret = str_to_int(token);
+						int ret = atoi(token);
 						if(ret == uid){// this process's info can be displayed
 							//convert string entry_in_proc->d_name to int
 							//store in the pid_list
-							pid_list[pid_list_index] = str_to_int(entry_in_proc->d_name);
+							pid_list[pid_list_index] = atoi(entry_in_proc->d_name);
 							pid_list_index += 1;
 							
 							break;
@@ -305,7 +300,7 @@ void pid_list_by_current_user(){
 
 
 void produce_output(int pid, int s, int U, int S, int v, int c){
-	printf("PID: %ld, ", pid);
+	printf("PID: %d, ", pid);
 	if(s == 1){
 		s_info(pid);
 		printf("STATE: %c, ", s_value);
@@ -320,7 +315,7 @@ void produce_output(int pid, int s, int U, int S, int v, int c){
 	}
 	if(v == 1){
 		v_info(pid);
-		printf("VIRTUAL MEM: %ld, ", v_value);
+		printf("VIRTUAL MEM: %d, ", v_value);
 	}
 	if(c == 1){
 		c_info(pid);
@@ -351,7 +346,7 @@ int main(int argc, char *argv[]){
 		switch(c){
 			case 'p':
 				//p_occurs = 1;
-				pid = str_to_int(optarg);
+				pid = atoi(optarg);
 				break;
 
 			case 's': // Display the single-character state information about the process.In: stat file, third ("state") field. 
