@@ -104,8 +104,7 @@ char s_info(long pid){
 	fscanf(fptr, "%ld %s %c", &processID, filenameOfExecutable, &state);// if error happens, then change %ld to %d
 	if(processID == pid){ // check if the pid matches what we have read
 		fclose(fptr);
-		// return the state
-		return state;
+		return state; // return the state
 	}
 	else{
 		fclose(fptr);
@@ -180,6 +179,19 @@ char* S_info(long pid){
 			exit(1);
 		}
 	}
+}
+
+
+// case 'v': virtual memory info
+long v_info(long pid){
+	char* path = "/proc/";
+	char* filename = "statm";
+	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
+	FILE* fptr = readDirFile(path, filename);
+	long size;
+	fscanf(fptr, "%ld", &size);
+	fclose(fptr);
+	return size;
 }
 
 
@@ -363,25 +375,18 @@ int main(int argc, char *argv[]){
 						// In: statm file, first ("size") field. 
 						// This option defaults to be false, so if it is not present, then this information is not displayed. 
 						// -v- is valid but has no effect.
-				if(v_flag != 0){
-					break;
-				}
-				else {
-					v_flag = 1;
-				}
+				
 				if(strcmp(optarg, "-") != 0 && optarg != NULL){
 					printf("Value of errno: %d\n", errno);
 					perror("argument after -v should be NULL or -");
+					exit(1);
 				}
-				if(strcmp(optarg, "-") == 0 || optarg == NULL){
-					char* path = "/proc/";
-					strncat(path, pid_str, strlen(pid_str)); // path completed
-					char* filename = "statm";
-					FILE* fptr = readDirFile(path, filename);
-					long int size;
-					fscanf(fptr, "%ld", &size);
-					printf("size: %ld. ", size);
-					fclose(fptr);
+				if(strcmp(optarg, "-") == 0){ // turn off flag
+					v_flag = 0;
+					break;
+				}
+				if(optarg == NULL){ // turn on flag
+					v_flag = 1;
 					break;
 				}
 
