@@ -114,13 +114,81 @@ char s_info(long pid){
 	}
 }
 
+// case 'U': user time info
+char* U_info(long pid){
+	char* path = "/proc/";
+	char* filename = "stat";
+	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
+	FILE* fptr = readDirFile(path, filename);
+	// Since in this case, utime locates at the 14th (13th if starts from 0) position of stat file, we try a different way from case 's'.
+	// first need to use fgets() to get a string as input from the FILE* fptr
+	char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
+	char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
+	char* tmp = s;
+	const char delimeter[4] = " "; // delimeter is " "
+	while(fgets(line, sizeof(line), fptr) != NULL){
+		char* tok = strtok(line, delimeter); // use strtok() to get the first token
+		while(tok != NULL){
+			strncpy(tmp, tok, strlen(tok)); // copy tok into tmp(which is s as well)
+			tmp += sizeof(unsigned long); // modify tmp to point to the next block
+			tok = strtok(NULL, delimeter); // get the next token
+		}
+		// now we have s s.t. stores 15 tokens
+		if(strcmp(s, long_to_str(pid)) == 0){ // check if the pid matches
+			free(s);
+			fclose(fptr);
+			return s+sizeof(unsigned long)*13; // utime is at the 14th location
+		}
+		else{
+			free(s);
+			fclose(fptr);
+			perror("PID does not match what we have read\n\n");
+			exit(1);
+		}
+	}
+}
+
+// case 'S': system time info
+char* S_info(long pid){
+	char* path = "/proc/";
+	char* filename = "stat";
+	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
+	FILE* fptr = readDirFile(path, filename);
+	// in this case, stime locates at the 15th (14th if starts from 0) position of stat file
+	// first need to use fgets() to get a string as input from the FILE* fptr
+	char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
+	char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
+	char* tmp = s;
+	const char delimeter[4] = " "; // delimeter is " " only
+	while(fgets(line, sizeof(line), fptr) != NULL){
+		char* tok = strtok(line, delimeter); // use strtok() to get the first token
+		while(tok != NULL){
+			strncpy(tmp, tok, strlen(tok)); // copy tok into tmp(which is s as well)
+			tmp += sizeof(unsigned long); // modify tmp to point to the next block
+			tok = strtok(NULL, delimeter); // get the next token
+		}
+		// now we have s s.t. stores 15 tokens
+		if(strcmp(s, long_to_str(pid)) == 0){ // check if the pid matches
+			free(s);
+			fclose(fptr);
+			return s+sizeof(unsigned long)*14; // utime is at the 15th location
+		}
+		else{
+			free(s);
+			fclose(fptr);
+			perror("PID does not match what we have read\n\n");
+			exit(1);
+		}
+	}
+}
+
 
 int main(int argc, char *argv[]){
 	int s_flag = 0; // defaults to be false
-	int U_flag = 0; // defaults to be true
+	int U_flag = 1; // defaults to be true
 	int S_flag = 0; // defaults to be false
 	int v_flag = 0; // defaults to be false
-	int c_flag = 0; // defaults to be true
+	int c_flag = 1; // defaults to be true
 	int c = 0;
 	long pid = 0;
 	char pid_str[32]
@@ -242,13 +310,14 @@ int main(int argc, char *argv[]){
 						// Note that the information that you read from the stat file is a character string. 
 						// This option defaults to be false, so if it is not present, do not display this information. 
 						// -s- is valid but has no effect.
-				if(strcmp(optarg, "-") != 0 && optarg != NULL){ // optarg is not "-" and not NULL
+				if(strcmp(optarg, "-") != 0 && optarg != NULL){ // if this condition has an error, then try replacing NULL with ""
 					printf("Value of errno: %d\n", errno);
 					perror("argument after -s should be NULL or -\n");
 					exit(1);
 				}
 				if(strcmp(optarg, "-") == 0){ // -s- : turn off the s_flag
 					s_flag = 0;
+					break;
 				}
 				if(optarg == NULL){ // -s : turn on the s_flag
 					s_flag = 1;
@@ -258,99 +327,35 @@ int main(int argc, char *argv[]){
 			case 'U': // Display the amount of user time consumed by this process. In: stat file, "utime" field. 
 						// This option defaults to be true, so if it is not present, then this information is displayed. 
 						// -U- turns this option off.
-				if(U_flag != 0){
-					break;
-				}
-				else {
-					U_flag = 1;
-				}
-				if(strcmp(optarg, "-") != 0 && optarg != NULL){
+				if(strcmp(optarg, "-") != 0 && optarg != NULL){ // if this condition has an error, then try replacing NULL with ""
 					printf("Value of errno: %d\n", errno);
 					perror("argument after -U should be NULL or -");
+					exit(1);
 				}
-				if(strcmp(optarg, "-") == 0){ // Not display
+				if(strcmp(optarg, "-") == 0){ // turn off flag
+					U_flag = 0;
 					break;
 				}
-				if(optarg == NULL){
-					char* path = "/proc/";
-					strncat(path, pid_str, strlen(pid_str)); // path completed
-					char* filename = "stat";
-					FILE* fptr = readDirFile(path, filename);
-					// Since in this case, utime locates at the 14th (13th if starts from 0) position of stat file, we try a different way from case 's'.
-					// first need to use fgets() to get a string as input from the FILE* fptr
-					char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
-					char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
-					const char delimeter[4] = " "; // delimeter is " " only
-					while(fgets(line, sizeof(line), fptr)){
-						char* tok = strtok(line, delimeter); // use strtok() to get the first token
-						char* tmp = s;
-						while(tok != NULL){
-							strncpy(tmp, tok, strlen(tok));
-							tmp += sizeof(unsigned long);
-							tok = strtok(NULL, delimeter);
-						}
-					}
-					// now we have s s.t. stores 15 tokens
-					if(strcmp(s, pid_str) == 0){ // check if the pid matches
-						printf("user time: %s. ", s+sizeof(unsigned long)*13); // utime is at the 14th location
-						free(s);
-						fclose(fptr);
-						break;
-					}
-					else{
-						free(s);
-						fclose(fptr);
-						perror("processID and pid not match\n");
-						break;
-					}
-
+				if(optarg == NULL){ // turn on flag
+					U_flag = 1;
+					break;
 				}
 
 			case 'S': // Display the amount of system time consumed so far by this process. In: stat file, "stime" field.
 					  // This option defaults to be false, so if it is not present, then this information is not displayed.
 					  // "-S-" is valid but has no effect.
-				if(S_flag != 0){
-					break;
-				}
-				else {
-					S_flag = 1;
-				}
-				if(strcmp(optarg, "-") != 0 && optarg != NULL){
+				if(strcmp(optarg, "-") != 0 && optarg != NULL){ // if this condition has an error, then try replacing NULL with ""
 					printf("Value of errno: %d\n", errno);
 					perror("argument after -S should be NULL or -");
+					exit(1);
 				}
-				if(strcmp(optarg, "-") == 0 || optarg == NULL){
-					char* path = "/proc/";
-					strncat(path, pid_str, strlen(pid_str)); // path completed
-					char* filename = "stat";
-					FILE* fptr = readDirFile(path, filename);
-					// Since in this case, stime locates at the 15th (14th if starts from 0) position of stat file, we try a different way from case 's'.
-					// first need to use fgets() to get a string as input from the FILE* fptr
-					char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
-					char* s = (char*)malloc(sizeof(unsigned long) * 15); // stores all the reads
-					const char delimeter[4] = " "; // delimeter is " " only
-					while(fgets(line, sizeof(line), fptr)){
-						char* tok = strtok(line, delimeter); // use strtok() to get the first token
-						char* tmp = s;
-						while(tok != NULL){
-							strncpy(tmp, tok, strlen(tok));
-							tmp += sizeof(unsigned long);
-							tok = strtok(NULL, delimeter);
-						}
-					}
-					// now we have s s.t. stores 15 tokens
-					if(strcmp(s, pid_str) == 0){ // check if the pid matches
-						printf("system time: %s. ", s+sizeof(unsigned long)*14); // stime is at the 15th location
-						free(s);
-						fclose(fptr);
-						break;
-					}
-					else{
-						free(s);
-						fclose(fptr);
-						perror("processID and pid not match\n");
-						break;
-					}
+				if(strcmp(optarg, "-") == 0){ // turn off flag
+					S_flag = 0;
+					break;
+				}
+				if(optarg == NULL){ // turn on flag
+					S_flag = 1;
+					break;
 				}
 
 			case 'v': ; // we add ";" here to avoid the error: "a label can only be part of a statement and a declaration is not a statement"
