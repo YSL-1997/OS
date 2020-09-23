@@ -106,10 +106,12 @@ void s_info(long pid){
 			exit(1);
 	}
 	// next, create three vars to store info, only state is important
+	char buffer[800];
+	fgets(buffer, 800, fptr);
 	long processID; // if error happens, then change long to int
 	char filenameOfExecutable[1024];
 	char state;
-	fscanf(fptr, "%ld %s %c", &processID, filenameOfExecutable, &state);// if error happens, then change %ld to %d
+	sscanf(buffer, "%ld %s %c", &processID, filenameOfExecutable, &state);// if error happens, then change %ld to %d
 	if(processID == pid){ // check if the pid matches what we have read
 		fclose(fptr);
 		s_value = state; // return the state
@@ -256,24 +258,15 @@ void pid_list_by_current_user(){
 
 	// now, we read directory '/proc' successfully
 	while ((entry_in_proc = readdir(procDirectory)) != NULL){
-		char pid_path[50] = "./";
-		strncat(pid_path, entry_in_proc->d_name, strlen(entry_in_proc->d_name));
-		DIR* pidDirectory = opendir(pid_path); // open pid directory
-		if(pidDirectory == NULL){ // opendir returns NULL if couldn't open directory 
-			printf("Could not open directory: %s.\n", pid_path); 
-			continue; // read the next directory in /proc
-		}
-
-		// now, we open dir of one <pid> successfully (may not be pid dir)
-		// read status file
-		char* filename = "status";
-		FILE* fptr = fopen(filename, "r");
+		char pid_status_path[200] = "/proc/";
+		strcat(pid_status_path, entry_in_proc->d_name);
+		strcat(pid_status_path, "/status");
+		FILE* fptr = fopen(pid_status_path, "r");
 		if(fptr == NULL){ // meaning that status file is not in this directory
-			printf("Cannot open file: %s.\n", filename);
-			closedir(pidDirectory);
+			printf("Cannot open file in path: %s.\n", pid_status_path);
 			continue;
 		}
-
+		
 		// now, we have successfully opened a status file in a <pid> directory
 		// read the file line by line, Uid is on the 9th line, with 4 numbers listed, only need to get real uid, i.e. the first number
 		int bufferLength = 255;
@@ -294,6 +287,7 @@ void pid_list_by_current_user(){
 							//store in the pid_list
 							pid_list[pid_list_index] = str_to_long(entry_in_proc->d_name);
 							pid_list_index += 1;
+							
 							break;
 						}
 						// if we go here, meaning that this process does not belong to current user
@@ -307,9 +301,9 @@ void pid_list_by_current_user(){
 			count += 1;
 		}
 		fclose(fptr);
-		closedir(pidDirectory);
 	}
 	closedir(procDirectory);
+	
 	// now we have a list of pid's with info needs to be printed
 }		
 
