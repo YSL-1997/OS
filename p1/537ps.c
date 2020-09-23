@@ -87,7 +87,7 @@ long str_to_long(char* str){
 
 // convert long to string
 char* long_to_str(long num){
-	char* buffer;
+	char buffer[20] = "";
 	sprintf(buffer, "%ld", num);
 	return buffer;
 }
