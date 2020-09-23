@@ -296,18 +296,23 @@ void pid_list_by_current_user(){
 void produce_output(long pid, int s, int U, int S, int v, int c){
 	printf("PID: %ld, ", pid);
 	if(s == 1){
+		s_info(pid);
 		printf("STATE: %c, ", s_value);
 	}
 	if(U == 1){
+		U_info(pid);
 		printf("USER TIME: %s, ", U_value);
 	}
 	if(S == 1){
+		S_info(pid);
 		printf("SYS TIME: %s, ", S_value);
 	}
 	if(v == 1){
+		v_info(pid);
 		printf("VIRTUAL MEM: %ld, ", v_value);
 	}
 	if(c == 1){
+		c_info(pid);
 		printf("CMDLINE: %s", c_value);
 	}
 }
