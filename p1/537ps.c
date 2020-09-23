@@ -40,6 +40,7 @@ char c_value[300] = "";
 long pid_list[10000]; // list to store all pids of current user
 int pid_list_index = 0; // pointer that points to the first available index in pid_list
 char buffer_for_long_to_str[20] = "";
+//FILE* fptr = NULL;
 
 // readDirFile(char* path, char* filename) returns a file pointer if successfully directed to the directory specified by path, false o.w.
 // remember to call fclose(FILE*) to close the file, and closedir() to close the directory after producing the output
@@ -96,9 +97,14 @@ char* long_to_str(long num){
 // case 's': state info
 void s_info(long pid){
 	char path[100] = "/proc/";
-	char* filename = "stat";
-	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
-	FILE* fptr = readDirFile(path, filename);
+	char* filename = "/stat";
+	strncat(path, long_to_str(pid), strlen(long_to_str(pid)));
+	strncat(path, filename, strlen(filename));
+	FILE* fptr = fopen(path, "r");
+	if(fptr == NULL){ // failed to open the desired file
+			printf("Cannot open file: %s.\n", filename);
+			exit(1);
+	}
 	// next, create three vars to store info, only state is important
 	long processID; // if error happens, then change long to int
 	char filenameOfExecutable[1024];
@@ -118,9 +124,14 @@ void s_info(long pid){
 // case 'U': user time info
 void U_info(long pid){
 	char path[100] = "/proc/";
-	char* filename = "stat";
-	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
-	FILE* fptr = readDirFile(path, filename);
+	char* filename = "/stat";
+	strncat(path, long_to_str(pid), strlen(long_to_str(pid)));
+	strncat(path, filename, strlen(filename));
+	FILE* fptr = fopen(path, "r");
+	if(fptr == NULL){ // failed to open the desired file
+			printf("Cannot open file: %s.\n", filename);
+			exit(1);
+	}
 	// Since in this case, utime locates at the 14th (13th if starts from 0) position of stat file, we try a different way from case 's'.
 	// first need to use fgets() to get a string as input from the FILE* fptr
 	char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
@@ -152,9 +163,14 @@ void U_info(long pid){
 // case 'S': system time info
 void S_info(long pid){
 	char path[100] = "/proc/";
-	char* filename = "stat";
-	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
-	FILE* fptr = readDirFile(path, filename);
+	char* filename = "/stat";
+	strncat(path, long_to_str(pid), strlen(long_to_str(pid)));
+	strncat(path, filename, strlen(filename));
+	FILE* fptr = fopen(path, "r");
+	if(fptr == NULL){ // failed to open the desired file
+			printf("Cannot open file: %s.\n", filename);
+			exit(1);
+	}
 	// in this case, stime locates at the 15th (14th if starts from 0) position of stat file
 	// first need to use fgets() to get a string as input from the FILE* fptr
 	char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
@@ -187,9 +203,14 @@ void S_info(long pid){
 // case 'v': virtual memory info
 void v_info(long pid){
 	char path[100] = "/proc/";
-	char* filename = "statm";
-	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
-	FILE* fptr = readDirFile(path, filename);
+	char* filename = "/statm";
+	strncat(path, long_to_str(pid), strlen(long_to_str(pid)));
+	strncat(path, filename, strlen(filename));
+	FILE* fptr = fopen(path, "r");
+	if(fptr == NULL){ // failed to open the desired file
+			printf("Cannot open file: %s.\n", filename);
+			exit(1);
+	}
 	long size;
 	fscanf(fptr, "%ld", &size);
 	fclose(fptr);
