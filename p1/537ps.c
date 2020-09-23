@@ -39,6 +39,7 @@ long v_value = 0;
 char c_value[300] = "";
 long pid_list[10000]; // list to store all pids of current user
 int pid_list_index = 0; // pointer that points to the first available index in pid_list
+char buffer_for_long_to_str[20] = "";
 
 // readDirFile(char* path, char* filename) returns a file pointer if successfully directed to the directory specified by path, false o.w.
 // remember to call fclose(FILE*) to close the file, and closedir() to close the directory after producing the output
@@ -87,7 +88,7 @@ long str_to_long(char* str){
 
 // convert long to string
 char* long_to_str(long num){
-	char buffer[20] = "";
+	buffer_for_long_to_str[20] = "";
 	sprintf(buffer, "%ld", num);
 	return buffer;
 }
