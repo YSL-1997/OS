@@ -353,16 +353,11 @@ int main(int argc, char *argv[]){
 						// Note that the information that you read from the stat file is a character string. 
 						// This option defaults to be false, so if it is not present, do not display this information. 
 						// -s- is valid but has no effect.
-				if(strcmp(optarg, "-") != 0 && optarg != NULL){ // if this condition has an error, then try replacing NULL with ""
-					printf("Value of errno: %d\n", errno);
-					perror("argument after -s should be NULL or -\n");
-					exit(1);
-				}
-				if(strcmp(optarg, "-") == 0){ // -s- : turn off the s_flag
+				if(optarg != 0 && *optarg == '-'){ // -s- : turn off the s_flag
 					s_flag = 0;
 					break;
 				}
-				if(optarg == NULL){ // -s : turn on the s_flag
+				else { // -s : turn on the s_flag
 					s_flag = 1;
 				}
 				break;
@@ -370,16 +365,11 @@ int main(int argc, char *argv[]){
 			case 'U': // Display the amount of user time consumed by this process. In: stat file, "utime" field. 
 						// This option defaults to be true, so if it is not present, then this information is displayed. 
 						// -U- turns this option off.
-				if(strcmp(optarg, "-") != 0 && optarg != NULL){ // if this condition has an error, then try replacing NULL with ""
-					printf("Value of errno: %d\n", errno);
-					perror("argument after -U should be NULL or -");
-					exit(1);
-				}
-				if(strcmp(optarg, "-") == 0){ // turn off flag
+				if(optarg != 0 && *optarg == '-'){ // turn off flag
 					U_flag = 0;
 					break;
 				}
-				if(optarg == NULL){ // turn on flag
+				else { // turn on flag
 					U_flag = 1;
 					break;
 				}
@@ -387,16 +377,11 @@ int main(int argc, char *argv[]){
 			case 'S': // Display the amount of system time consumed so far by this process. In: stat file, "stime" field.
 					  // This option defaults to be false, so if it is not present, then this information is not displayed.
 					  // "-S-" is valid but has no effect.
-				if(strcmp(optarg, "-") != 0 && optarg != NULL){ // if this condition has an error, then try replacing NULL with ""
-					printf("Value of errno: %d\n", errno);
-					perror("argument after -S should be NULL or -");
-					exit(1);
-				}
-				if(strcmp(optarg, "-") == 0){ // turn off flag
+				if(optarg != 0 && *optarg == '-'){ // turn off flag
 					S_flag = 0;
 					break;
 				}
-				if(optarg == NULL){ // turn on flag
+				else { // turn on flag
 					S_flag = 1;
 					break;
 				}
@@ -406,17 +391,11 @@ int main(int argc, char *argv[]){
 						// In: statm file, first ("size") field. 
 						// This option defaults to be false, so if it is not present, then this information is not displayed. 
 						// -v- is valid but has no effect.
-				
-				if(strcmp(optarg, "-") != 0 && optarg != NULL){
-					printf("Value of errno: %d\n", errno);
-					perror("argument after -v should be NULL or -");
-					exit(1);
-				}
-				if(strcmp(optarg, "-") == 0){ // turn off flag
+				if(optarg != 0 && *optarg == '-'){ // turn off flag
 					v_flag = 0;
 					break;
 				}
-				if(optarg == NULL){ // turn on flag
+				else { // turn on flag
 					v_flag = 1;
 					break;
 				}
@@ -425,16 +404,11 @@ int main(int argc, char *argv[]){
 					  // Be careful on this one, because this file contains a list of null (zero byte) terminated strings. 
 					  // This option defaults to be true, so if it is not present, then this information is displayed. 
 					  // -c- turns this option off.
-				if(strcmp(optarg, "-") != 0 && optarg != NULL){
-					printf("Value of errno: %d\n", errno);
-					perror("argument after -c should be NULL or -");
-					exit(1);
-				}
-				if(strcmp(optarg, "-") == 0){ // turn off flag
+				if(optarg != 0 && *optarg == '-'){ // turn off flag
 					c_flag = 0;
 					break;
 				}
-				if(optarg == NULL){ // turn on flag
+				else { // turn on flag
 					c_flag = 1;
 					break;
 				}
