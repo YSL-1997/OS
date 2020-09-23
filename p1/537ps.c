@@ -312,7 +312,7 @@ void produce_output(long pid, int s, int U, int S, int v, int c){
 }
 
 int main(int argc, char *argv[]){
-	int p_occurs = 0;
+	//int p_occurs = 0;
 	int s_flag = 0; // defaults to be false
 	int U_flag = 1; // defaults to be true
 	int S_flag = 0; // defaults to be false
@@ -333,7 +333,7 @@ int main(int argc, char *argv[]){
 	while((c = getopt(argc, argv, "p:s::U::S::v::c::")) != -1){ // read the argument
 		switch(c){
 			case 'p':
-				p_occurs = 1;
+				//p_occurs = 1;
 				pid = str_to_long(optarg);
 				break;
 
