@@ -78,13 +78,41 @@ int hasPid(char* pid_str){
 }
 
 // convert str to int
-long str_to_int(char* str){
+long str_to_long(char* str){
 	char* ptr;
 	long ret;
 	return strtol(str, &ptr, 10);
 }
 
+// convert long to string
+char* long_to_str(long num){
+	char* buffer;
+	sprintf(buffer, "%ld", num);
+	return buffer;
+}
 
+// case 's': state info
+char s_info(long pid){
+	char* path = "/proc/";
+	char* filename = "stat";
+	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
+	FILE* fptr = readDirFile(path, filename);
+	// next, create three vars to store info, only state is important
+	long processID; // if error happens, then change long to int
+	char filenameOfExecutable[1024];
+	char state;
+	fscanf(fptr, "%ld %s %c", &processID, filenameOfExecutable, &state);// if error happens, then change %ld to %d
+	if(processID == pid){ // check if the pid matches what we have read
+		fclose(fptr);
+		// return the state
+		return state;
+	}
+	else{
+		fclose(fptr);
+		perror("PID does not match what we have read\n");
+		exit(1);
+	}
+}
 
 
 int main(int argc, char *argv[]){
@@ -149,11 +177,11 @@ int main(int argc, char *argv[]){
 					while(token != NULL){
 						if(count1 == 1){
 							// now, uid of this process is stored in token
-   							long ret = str_to_int(token);
+   							long ret = str_to_long(token);
 							if(ret == uid){// this process's info can be displayed
 										   //convert string entry_in_proc->d_name to int
 										   //store in the pid_list
-								pid_list[pid_list_index] = str_to_int(entry_in_proc->d_name);
+								pid_list[pid_list_index] = str_to_long(entry_in_proc->d_name);
 								pid_list_index += 1;
 							}
 							else{
@@ -173,6 +201,7 @@ int main(int argc, char *argv[]){
     	closedir(procDirectory);
 		//return 0;
 	}
+	
 	while((c = getopt(argc, argv, "p:s::U::S::v::c::")) != -1){ // read the argument
         switch(c){
 			case 'p':
@@ -213,42 +242,18 @@ int main(int argc, char *argv[]){
 						// Note that the information that you read from the stat file is a character string. 
 						// This option defaults to be false, so if it is not present, do not display this information. 
 						// -s- is valid but has no effect.
-				if(s_flag != 0){
-					break;
-				}
-				else {
-					s_flag = 1;
-				}
-				if(strcmp(optarg, "-") != 0 && optarg != NULL){
+				if(strcmp(optarg, "-") != 0 && optarg != NULL){ // optarg is not "-" and not NULL
 					printf("Value of errno: %d\n", errno);
 					perror("argument after -s should be NULL or -\n");
+					exit(1);
 				}
-				if(strcmp(optarg, "-") == 0 || optarg == NULL){
-					char* path = "/proc/";
-					strncat(path, pid_str, strlen(pid_str)); // path completed
-					char* filename = "stat";
-					FILE* fptr = readDirFile(path, filename);
-					int processID;
-					char filenameOfExecutable[1024];
-					char state;
-					fscanf(fptr, "%d %s %c", &processID, filenameOfExecutable, &state);
-					if(processID == pid){ // check if the pid matches
-						printf("state: %c. ", state);
-						fclose(fptr);
-						break;
-					}
-					else {
-						fclose(fptr);
-						perror("processID and pid not match\n");
-						break;
-					}
+				if(strcmp(optarg, "-") == 0){ // -s- : turn off the s_flag
+					s_flag = 0;
 				}
-
-
-
-
-
-
+				if(optarg == NULL){ // -s : turn on the s_flag
+					s_flag = 1;
+				}
+				break;
 
 			case 'U': // Display the amount of user time consumed by this process. In: stat file, "utime" field. 
 						// This option defaults to be true, so if it is not present, then this information is displayed. 
