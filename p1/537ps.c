@@ -31,6 +31,7 @@ Critical:
 #include <errno.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <ctype.h>
 
 char s_value = 0;
 char U_value[300] = "";
