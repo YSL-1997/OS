@@ -1,5 +1,6 @@
 /*
-Authors: Yusen Liu, Yingjia Gu
+Authors: Yusen Liu - NetID: liu797 - CS login: yusen , 
+	 Yingjia Gu - NetID: gu79 - CS login: yingjia
 Project #1 - a simple version of the ps command
 */
 
@@ -268,7 +269,6 @@ void pid_list_by_current_user(){
     	// now, the buffer stores: (e.g. "Uid:    2628    2628    2628    2628")
         // extract r_uid from the buffer
       if(count == 8){
-        printf("get the 8th line: %s\n", buffer);
         char u[10];
         int r_uid;
         sscanf(buffer, "%s %d", u, &r_uid);
