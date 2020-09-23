@@ -93,7 +93,7 @@ char* long_to_str(long num){
 
 // case 's': state info
 char s_info(long pid){
-	char* path = "/proc/";
+	char path[100] = "/proc/";
 	char* filename = "stat";
 	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
 	FILE* fptr = readDirFile(path, filename);
@@ -115,7 +115,7 @@ char s_info(long pid){
 
 // case 'U': user time info
 char* U_info(long pid){
-	char* path = "/proc/";
+	char path[100] = "/proc/";
 	char* filename = "stat";
 	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
 	FILE* fptr = readDirFile(path, filename);
@@ -149,7 +149,7 @@ char* U_info(long pid){
 
 // case 'S': system time info
 char* S_info(long pid){
-	char* path = "/proc/";
+	char path[100] = "/proc/";
 	char* filename = "stat";
 	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
 	FILE* fptr = readDirFile(path, filename);
@@ -184,7 +184,7 @@ char* S_info(long pid){
 
 // case 'v': virtual memory info
 long v_info(long pid){
-	char* path = "/proc/";
+	char path[100] = "/proc/";
 	char* filename = "statm";
 	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
 	FILE* fptr = readDirFile(path, filename);
@@ -194,6 +194,24 @@ long v_info(long pid){
 	return size;
 }
 
+
+// case 'c': cmdline info
+char* c_info(long pid){
+	char c[800];
+	char path[100] = "/proc/";
+	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
+	strcat(path,"/cmdline");
+	FILE* fptr = fopen(path,"r");
+	if(fptr == NULL){ // failed to open the desired file
+		printf("Cannot open file: %s.\n", path);
+		exit(1);
+	}
+	if(fscanf(fptr, "%s", c) < 0){
+		exit(1);
+	}
+	fclose(fptr);
+	return c;
+}
 
 
 // ** produce a list of pid's by current user
@@ -292,35 +310,7 @@ int main(int argc, char *argv[]){
 		switch(c){
 			case 'p':
 				p_occurs = 1;
-				char pid_str[32];
-				strncpy(pid_str, argv[optind-1], strlen(argv[optind-1]));
-				
-				
-				if(hasPid(optarg) == 0){ // pid from user input is incorrect
-					perror("error: process ID out of range");
-					exit(1);
-				}
-				
-				pid = atoi(optarg); // need to handle the PID provided by the user in optarg
-				if(pid == 0)
-				char pid_buffer[40]; // pid_buffer is a char array that stores
-				
-				sprintf(pid_str, "%ld", pid);// convert pid from int to string, stored in pid_str
-				//itoa(pid, pid_str, 10); 
-				int ruid = getuid(); // ruid is an int
-				DIR* myDirectory = opendir("/proc");// Upon successful completion, opendir() returns a pointer to an object of type DIR
-				if(myDirectory){ // read dir successfully, next, need to read the desired filename
-	
-				}
-			
-				return 0;
-				 // if the user does not provide pid, then display information for all processes of the "current" user
-				
-				// TO DO
-
-
-
-				// still need to manage the default for each case
+				pid = str_to_long(optarg);
 				break;
 
 			case 's': // Display the single-character state information about the process.In: stat file, third ("state") field. 
@@ -413,13 +403,6 @@ int main(int argc, char *argv[]){
 					break;
 				}
 				
-				use fread() function
-				// if -p pid, then print the cmd for pid
-				// else, print cmd for all process by current user
-				
-				
-
-				break;
 			case '?': // getopt() returns "?" when getopt finds an option character in argv that was not included in options
 					  // OR, a missing option argument(PID in this case)
 				if(optopt == 'p'){ // if after -p, argument is missed
