@@ -117,7 +117,7 @@ int main(int argc, char *argv[]){
 			return 0; 
 		}
 		// read dir /proc successfully
-    	while ((entry_in_proc = readdir(procDirectory)) != NULL){
+		while ((entry_in_proc = readdir(procDirectory)) != NULL){
 			char pid_path[50] = "./";
 			strncat(pid_path, entry_in_proc->d_name, strlen(entry_in_proc->d_name));
 			DIR* pidDirectory = opendir(pid_path);
