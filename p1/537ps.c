@@ -37,6 +37,8 @@ char U_value[300] = "";
 char S_value[300] = "";
 long v_value = 0;
 char c_value[300] = "";
+long pid_list[10000]; // list to store all pids of current user
+int pid_list_index = 0; // pointer that points to the first available index in pid_list
 
 // readDirFile(char* path, char* filename) returns a file pointer if successfully directed to the directory specified by path, false o.w.
 // remember to call fclose(FILE*) to close the file, and closedir() to close the directory after producing the output
@@ -80,7 +82,6 @@ int hasPid(char* pid_str){
 // convert str to int
 long str_to_long(char* str){
 	char* ptr;
-	long ret;
 	return strtol(str, &ptr, 10);
 }
 
@@ -136,7 +137,7 @@ void U_info(long pid){
 		if(strcmp(s, long_to_str(pid)) == 0){ // check if the pid matches
 			free(s);
 			fclose(fptr);
-			strncpy(U_value, s+sizeof(unsigned long)*13, strlen(s+sizeof(unsigned long)*13); // utime is at the 14th location
+			strncpy(U_value, s+sizeof(unsigned long)*13, strlen(s+sizeof(unsigned long)*13)); // utime is at the 14th location
 		}
 		else{
 			free(s);
@@ -170,7 +171,7 @@ void S_info(long pid){
 		if(strcmp(s, long_to_str(pid)) == 0){ // check if the pid matches
 			free(s);
 			fclose(fptr);
-			strncpy(S_value, s+sizeof(unsigned long)*14, strlen(s+sizeof(unsigned long)*14); // utime is at the 15th location
+			strncpy(S_value, s+sizeof(unsigned long)*14, strlen(s+sizeof(unsigned long)*14)); // utime is at the 15th location
 		}
 		else{
 			free(s);
@@ -221,10 +222,9 @@ void c_info(long pid){
 // 		if yes, then read status file, Uid is on the 9th line, with 4 numbers listed, only need to get real uid, i.e. the first number
 //			if the uid we read is equal to(use strcmp) uid, then (1)pid, (2)case 'U'(TIME), (3)case 'c'(cmd)
 //			else continue
-long* pid_list_by_current_user(){
+void pid_list_by_current_user(){
 	long uid = getuid();
-	long pid_list[10000]; // list to store all pids of current user
-	int pid_list_index = 0; // pointer that points to the first available index in pid_list
+	pid_list_index = 0; // pointer that points to the first available index in pid_list
 	DIR* procDirectory = opendir("/proc"); // Upon successful completion, opendir() returns a pointer to an object of type DIR
 	struct dirent *entry_in_proc; // Pointer for directory entry
 	if(procDirectory == NULL){ // opendir returns NULL if couldn't open directory 
@@ -289,7 +289,6 @@ long* pid_list_by_current_user(){
 	}
 	closedir(procDirectory);
 	// now we have a list of pid's with info needs to be printed
-	return pid_list;
 }		
 
 
@@ -323,7 +322,7 @@ int main(int argc, char *argv[]){
 	long pid = 0;
 	//long v_value = 0;
 	if(argc == 1){// 537ps is the only command
-		long pid_list[10000] = pid_list_by_current_user(); // PROBLEM!
+		pid_list_by_current_user();
 		for(int i = 0; i < sizeof(pid_list)/sizeof(long); i++){ 
 			long cur_pid = pid_list[i];
 			produce_output(cur_pid, s_flag, U_flag, S_flag, v_flag, c_flag);
