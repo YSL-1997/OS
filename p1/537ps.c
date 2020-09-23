@@ -3,18 +3,6 @@ Authors: Yusen Liu, Yingjia Gu
 Project #1 - a simple version of the ps command
 */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <string.h>
-#include <errno.h>
-#include <dirent.h>
-#include <unistd.h>
-
-
-#define BUFFER_SIZE (512)
-
 /*
 Notes:
   UNIX manual has many sections.
@@ -36,7 +24,19 @@ Critical:
     Most of the file in /proc are in text
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <string.h>
+#include <errno.h>
+#include <dirent.h>
+#include <unistd.h>
 
+char s_value = 0;
+char U_value[300] = "";
+char S_value[300] = "";
+long v_value = 0;
+char c_value[300] = "";
 
 // readDirFile(char* path, char* filename) returns a file pointer if successfully directed to the directory specified by path, false o.w.
 // remember to call fclose(FILE*) to close the file, and closedir() to close the directory after producing the output
@@ -92,7 +92,7 @@ char* long_to_str(long num){
 }
 
 // case 's': state info
-char s_info(long pid){
+void s_info(long pid){
 	char path[100] = "/proc/";
 	char* filename = "stat";
 	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
@@ -104,7 +104,7 @@ char s_info(long pid){
 	fscanf(fptr, "%ld %s %c", &processID, filenameOfExecutable, &state);// if error happens, then change %ld to %d
 	if(processID == pid){ // check if the pid matches what we have read
 		fclose(fptr);
-		return state; // return the state
+		s_value = state; // return the state
 	}
 	else{
 		fclose(fptr);
@@ -114,7 +114,7 @@ char s_info(long pid){
 }
 
 // case 'U': user time info
-char* U_info(long pid){
+void U_info(long pid){
 	char path[100] = "/proc/";
 	char* filename = "stat";
 	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
@@ -136,7 +136,7 @@ char* U_info(long pid){
 		if(strcmp(s, long_to_str(pid)) == 0){ // check if the pid matches
 			free(s);
 			fclose(fptr);
-			return s+sizeof(unsigned long)*13; // utime is at the 14th location
+			strncpy(U_value, s+sizeof(unsigned long)*13, strlen(s+sizeof(unsigned long)*13); // utime is at the 14th location
 		}
 		else{
 			free(s);
@@ -148,7 +148,7 @@ char* U_info(long pid){
 }
 
 // case 'S': system time info
-char* S_info(long pid){
+void S_info(long pid){
 	char path[100] = "/proc/";
 	char* filename = "stat";
 	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
@@ -170,7 +170,7 @@ char* S_info(long pid){
 		if(strcmp(s, long_to_str(pid)) == 0){ // check if the pid matches
 			free(s);
 			fclose(fptr);
-			return s+sizeof(unsigned long)*14; // utime is at the 15th location
+			strncpy(S_value, s+sizeof(unsigned long)*14, strlen(s+sizeof(unsigned long)*14); // utime is at the 15th location
 		}
 		else{
 			free(s);
@@ -183,7 +183,7 @@ char* S_info(long pid){
 
 
 // case 'v': virtual memory info
-long v_info(long pid){
+void v_info(long pid){
 	char path[100] = "/proc/";
 	char* filename = "statm";
 	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
@@ -191,12 +191,12 @@ long v_info(long pid){
 	long size;
 	fscanf(fptr, "%ld", &size);
 	fclose(fptr);
-	return size;
+	v_value = size;
 }
 
 
 // case 'c': cmdline info
-char* c_info(long pid){
+void c_info(long pid){
 	char c[800];
 	char path[100] = "/proc/";
 	strncat(path, long_to_str(pid), strlen(long_to_str(pid))); // path completed
@@ -210,7 +210,7 @@ char* c_info(long pid){
 		exit(1);
 	}
 	fclose(fptr);
-	return c;
+	strncpy(c_value, c, strlen(c));
 }
 
 
@@ -294,11 +294,6 @@ long* pid_list_by_current_user(){
 
 
 void produce_output(long pid, int s, int U, int S, int v, int c){
-	char s_value = s_info(pid);
-	char U_value[300] = U_info(pid);
-	char S_value[300] = S_info(pid);
-	long v_value = v_info(pid);
-	char c_value[300] = c_info(pid);
 	printf("PID: %ld, ", pid);
 	if(s == 1){
 		printf("STATE: %c, ", s_value);
@@ -328,8 +323,8 @@ int main(int argc, char *argv[]){
 	long pid = 0;
 	//long v_value = 0;
 	if(argc == 1){// 537ps is the only command
-		long pid_list[10000] = pid_list_by_current_user();
-		for(int i = 0; i < strlen(pid_list); i++){ // strlen ! caution
+		long pid_list[10000] = pid_list_by_current_user(); // PROBLEM!
+		for(int i = 0; i < sizeof(pid_list)/sizeof(long); i++){ 
 			long cur_pid = pid_list[i];
 			produce_output(cur_pid, s_flag, U_flag, S_flag, v_flag, c_flag);
 			printf("\n");
