@@ -38,8 +38,7 @@ Critical:
 
 
 
-// readDir(char* path) returns true if successfully directed to the directory specified by path, false o.w.
-// filename should start with "./"
+// readDirFile(char* path, char* filename) returns a file pointer if successfully directed to the directory specified by path, false o.w.
 // remember to call fclose(FILE*) to close the file, and closedir() to close the directory after producing the output
 FILE* readDirFile(char* path, char* filename){
 	DIR* myDirectory = opendir(path); // Upon successful completion, opendir() returns a pointer to an object of type DIR   
@@ -47,6 +46,7 @@ FILE* readDirFile(char* path, char* filename){
 		FILE* fptr = fopen(filename, "r");
 		if(fptr == NULL){ // failed to open the desired file
 			printf("Cannot open file: %s.\n", filename);
+			closedir(myDirectory);
 			exit(1);
 		}
 		else{
@@ -57,14 +57,6 @@ FILE* readDirFile(char* path, char* filename){
 	return NULL;
 }
 
-
-// ** produce the process info of all processes by current user
-// int uid = getuid()
-// readdir() to read /proc
-// foreach dir in /proc, read dir, check if status file exists, 
-// 		if yes, then read status file, Uid is on the 9th line, with 4 numbers listed, only need to get real uid, i.e. the first number
-//			if the uid we read is equal to(use strcmp) uid, then (1)pid, (2)case 'U'(TIME), (3)case 'c'(cmd)
-//			else continue
 
 // this function traverses all files in /proc, returns 1 if pid valid; 0 if pid not in /proc
 // be careful that pid_str is a char string
@@ -85,25 +77,103 @@ int hasPid(char* pid_str){
     return 0; // didn't find the entry whose name is pid_str
 }
 
+// convert str to int
+long str_to_int(char* str){
+	char* ptr;
+	long ret;
+	return strtol(str, &ptr, 10);
+}
 
 
 
 
 int main(int argc, char *argv[]){
-    int c = 0;
-	long int pid = 0;
+	int s_flag = 0; // defaults to be false
+	int U_flag = 0; // defaults to be true
+	int S_flag = 0; // defaults to be false
+	int v_flag = 0; // defaults to be false
+	int c_flag = 0; // defaults to be true
+	int c = 0;
+	long pid = 0;
 	char pid_str[32]
-    if(argc == 1){ // basically no other options listed(i.e. 537ps is the only thing that on the cmd), just display information for all processes of the current user
-        return 0;
-    }
-    while((c = getopt(argc, argv, "p:s::U::S::v::c::")) != -1){ // read the argument
-		// flags are used to handle duplicates
-		int s_flag = 0; // defaults to be false
-		int U_flag = 0; // defaults to be true
-		int S_flag = 0; // defaults to be false
-		int v_flag = 0; // defaults to be false
-		int c_flag = 0; // defaults to be true
+	if(argc == 1){ // basically no other options listed(i.e. 537ps is the only thing that on the cmd), 
+				   // just display information for all processes of the current user
+		// ** produce the process info of all processes by current user
+		// int uid = getuid()
+		// readdir() to read /proc
+		// foreach dir in /proc, read dir, check if status file exists, 
+		// 		if yes, then read status file, Uid is on the 9th line, with 4 numbers listed, only need to get real uid, i.e. the first number
+		//			if the uid we read is equal to(use strcmp) uid, then (1)pid, (2)case 'U'(TIME), (3)case 'c'(cmd)
+		//			else continue
 		
+		long uid = getuid();
+		long pid_list[10000]; // list to store all pids of current user
+		int pid_list_index = 0; // pointer that points to the first available index in pid_list
+		DIR* procDirectory = opendir("/proc"); // Upon successful completion, opendir() returns a pointer to an object of type DIR
+		struct dirent *entry_in_proc; // Pointer for directory entry
+		if(procDirectory == NULL)  // opendir returns NULL if couldn't open directory 
+		{ 
+			printf("Could not open directory /proc.\n" ); 
+			return 0; 
+		}
+		// read dir /proc successfully
+    	while ((entry_in_proc = readdir(procDirectory)) != NULL){
+			char pid_path[50] = "./";
+			strncat(pid_path, entry_in_proc->d_name, strlen(entry_in_proc->d_name));
+			DIR* pidDirectory = opendir(pid_path);
+			if(pidDirectory == NULL)  // opendir returns NULL if couldn't open directory 
+			{ 
+				printf("Could not open directory: %s.\n", pid_path); 
+				return 0; 
+			}
+			// open dir of pid successfully
+			// read status file
+			char* filename = "status";
+			FILE* fptr = fopen(filename, "r");
+			if(fptr == NULL){ // failed to open the desired file
+				printf("Cannot open file: %s.\n", filename);
+				closedir(pidDirectory);
+				exit(1);
+			}
+			// now we have fptr that points to status file
+			// read the file line by line, Uid is on the 9th line, with 4 numbers listed, only need to get real uid, i.e. the first number
+			int bufferLength = 255;
+			char buffer[bufferLength];
+			int count = 0; // track the # of lines read
+			while(fgets(buffer, bufferLength, fptr)) {
+    			if(count == 8){
+					// now the buffer stores: (e.g. "Uid:    2628    2628    2628    2628")
+					// extract r_uid from the buffer
+   					char* token = strtok(buffer, " "); // extract the first token
+					int count1 = 0;
+					while(token != NULL){
+						if(count1 == 1){
+							// now, uid of this process is stored in token
+   							long ret = str_to_int(token);
+							if(ret == uid){// this process's info can be displayed
+										   //convert string entry_in_proc->d_name to int
+										   //store in the pid_list
+								pid_list[pid_list_index] = str_to_int(entry_in_proc->d_name);
+								pid_list_index += 1;
+							}
+							else{
+								break;
+							}
+						}
+						token = strtok(NULL, " ");
+						count1 += 1;
+					}
+					break;
+				}
+				count += 1;
+			}
+			fclose(fptr);
+			closedir(pidDirectory);
+		}
+    	closedir(procDirectory);
+		//return 0;
+	}
+	while((c = getopt(argc, argv, "p:s::U::S::v::c::")) != -1){ // read the argument
         switch(c){
 			case 'p':
 				// TO DO
@@ -121,7 +191,8 @@ int main(int argc, char *argv[]){
 				if(pid == 0)
 				char pid_buffer[40]; // pid_buffer is a char array that stores
 				
-				itoa(pid, pid_str, 10); // convert pid from int to string, stored in pid_str
+				sprintf(pid_str, "%ld", pid);// convert pid from int to string, stored in pid_str
+				//itoa(pid, pid_str, 10); 
 				int ruid = getuid(); // ruid is an int
 				DIR* myDirectory = opendir("/proc");// Upon successful completion, opendir() returns a pointer to an object of type DIR
 				if(myDirectory){ // read dir successfully, next, need to read the desired filename
@@ -308,12 +379,7 @@ int main(int argc, char *argv[]){
 					  // Be careful on this one, because this file contains a list of null (zero byte) terminated strings. 
 					  // This option defaults to be true, so if it is not present, then this information is displayed. 
 					  // -c- turns this option off.
-				if(c_flag != 0){
-					break;
-				}
-				else {
-					c_flag = 1;
-				}
+				
 				use fread() function
 				// if -p pid, then print the cmd for pid
 				// else, print cmd for all process by current user
@@ -337,6 +403,7 @@ int main(int argc, char *argv[]){
 		}
 	}
 	if(argc > optind){ // the argument of the -p is invalid(has more than one arguments)
+					   // need to handle the case: 537ps -p 1 3
 		perror("the argument of the -p is invalid(has more than one arguments)");
 		exit(1);
 	}
