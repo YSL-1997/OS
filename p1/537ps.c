@@ -283,7 +283,7 @@ int main(int argc, char *argv[]){
 	}
 	
 	while((c = getopt(argc, argv, "p:s::U::S::v::c::")) != -1){ // read the argument
-        switch(c){
+		switch(c){
 			case 'p':
 				// TO DO
 				// need to handle the case: 537ps -p 1 3
