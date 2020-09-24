@@ -1,0 +1,18 @@
+Program requirement can be found on course website: http://pages.cs.wisc.edu/~bart/537/programs/program1.html
+
+Our program supports all the requirements given the options to be -p, -s, -U, -S, -v, -c, as well as truning them off.
+
+The program consists of 537ps.c, read_process_info.c, read_process_info.h.
+
+We searched through the internet as well as the man page of /proc and other functions to find out several possible ways of traversing the directories and reading the files.
+
+For the options -s and -v, since both requires little reading, we simply used fscanf() to read out the desired data.
+For the options -U and -S, since both requires reading more than 10 pieces of data, we implemented the function in another way, which is to store the information in a buffer with each block of size unsigned long which allows us to store even all the pieces of data in the /proc/[pid]/stat file.
+
+We implemented one function for each option, and use flags to keep track of the final output options.
+
+We also handled the case if we input the command line as: "./537ps -p <pid1> <pid2>" (duplicate arguments after -p option) by making use of optind and argc after all the input by the user has been processed.
+
+We also solved the extra credit problem #1, which allows multiple pids' information to be output.
+
+We divided the program in several modules, each is responsible for a typical case. Like s_info method, we master the case when typing in -s as an option,etc.
