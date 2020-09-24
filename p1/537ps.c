@@ -41,6 +41,7 @@ int pid_list[10000]; // list to store all pids of current user
 int pid_list_index = 0; // pointer that points to the first available index in pid_list
 int p_option_list[100];
 int p_option_list_index = 0;
+
 char* path_cat(char* path, int pid, char* filename){
   char pid_str[20];
   sprintf(pid_str, "%d", pid);
