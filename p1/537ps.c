@@ -110,6 +110,7 @@ void U_info(int pid){ // check condition: count=14
 		while(tok != NULL){
 			count += 1;
 			if(count == 14){
+				U_value[0] = '\0';
 				strcpy(U_value, tok);
 				break;
 			}
@@ -136,6 +137,7 @@ void S_info(int pid){ // check condition: count=15
 		while(tok != NULL){
 			count += 1;
 			if(count == 15){
+				S_value[0] = '\0';
 				strcpy(S_value, tok);
 				break;
 			}
@@ -171,6 +173,7 @@ void c_info(int pid){
 		exit(1);
 	}
 	fclose(fptr);
+	c_value[0] = '\0';
 	strncpy(c_value, c, strlen(c));
 }
 
