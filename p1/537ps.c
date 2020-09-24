@@ -10,14 +10,11 @@ Notes:
     Section 1: commands. E.g.ls, gcc, cat
     Section 2: UNIX system calls (calls directly to the UNIX kernel). e.g. fork, open, read (not used in this project)
     Section 3: UNIX library routines. E.g.atof(), strcpy()
-
 Methods needed:
   getopt() - handles command-line argument parsing
     "man 3 getopt" and see the given example to get started
-
   readdir() - a library function that reads the contents of a Linux directory(/proc)
     "man 3 readdir"
-
 Critical:
   Need to understand the format of the /proc file system (/procfs)
     "man 5 proc"
@@ -92,15 +89,20 @@ char* int_to_str(int num){
 	return buffer_for_int_to_str;
 }
 
+char* path_cat(char* path, int pid, char* filename){
+  char pid_str[20];
+  sprintf(pid_str, "%d", pid);
+  strcat(path, pid_str);
+  strcat(path, filename);
+  return path;
+}
+
 // case 's': state info
 void s_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/stat";
-	char str[20];
-	sprintf(str, "%d", pid); // str stores pid in string form
-	strcat(path, str);
-	strcat(path, filename);
-	FILE* fptr = fopen(path, "r");
+	char* read_path = path_cat(path, pid, filename);
+	FILE* fptr = fopen(read_path, "r");
 	if(fptr == NULL){ // failed to open the desired file
 			printf("Cannot open file with path: %s.\n", path);
 			exit(1);
@@ -127,11 +129,8 @@ void s_info(int pid){
 void U_info(int pid){ // check condition: count=14
 	char path[100] = "/proc/";
 	char* filename = "/stat";
-	char str[20];
-	sprintf(str, "%d", pid); // str stores pid in string form
-	strcat(path, str);
-	strcat(path, filename);
-	FILE* fptr = fopen(path, "r");
+	char* read_path = path_cat(path, pid, filename);
+	FILE* fptr = fopen(read_path, "r");
 	if(fptr == NULL){ // failed to open the desired file
 			printf("Cannot open file: %s.\n", filename);
 			exit(1);
@@ -160,11 +159,8 @@ void U_info(int pid){ // check condition: count=14
 void S_info(int pid){ // check condition: count=15
 	char path[100] = "/proc/";
 	char* filename = "/stat";
-	char str[20];
-	sprintf(str, "%d", pid); // str stores pid in string form
-	strcat(path, str);
-	strcat(path, filename);
-	FILE* fptr = fopen(path, "r");
+	char* read_path = path_cat(path, pid, filename);
+	FILE* fptr = fopen(read_path, "r");
 	if(fptr == NULL){ // failed to open the desired file
 			printf("Cannot open file: %s.\n", filename);
 			exit(1);
@@ -194,11 +190,8 @@ void S_info(int pid){ // check condition: count=15
 void v_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/statm";
-	char str[20];
-	sprintf(str, "%d", pid); // str stores pid in string form
-	strcat(path, str);
-	strcat(path, filename);
-	FILE* fptr = fopen(path, "r");
+	char* read_path = path_cat(path, pid, filename);
+	FILE* fptr = fopen(read_path, "r");
 	if(fptr == NULL){ // failed to open the desired file
 			printf("Cannot open file: %s.\n", filename);
 			exit(1);
@@ -214,11 +207,8 @@ void v_info(int pid){
 void c_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/cmdline";
-	char str[20];
-	sprintf(str, "%d", pid); // str stores pid in string form
-	strcat(path, str);
-	strcat(path, filename);
-	FILE* fptr = fopen(path, "r");
+	char* read_path = path_cat(path, pid, filename);
+	FILE* fptr = fopen(read_path, "r");
 	if(fptr == NULL){ // failed to open the desired file
 			printf("Cannot open file: %s.\n", filename);
 			exit(1);
