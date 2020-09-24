@@ -1,6 +1,7 @@
 /*
-Authors: Yusen Liu - NetID: liu797 - CS login: yusen , 
-	 Yingjia Gu - NetID: gu79 - CS login: yingjia
+Authors: 
+	Yusen Liu - NetID: liu797, CS login: yusen
+	Yingjia Gu - NetID: gu79 , CS login: yingjia
 Project #1 - a simple version of the ps command
 */
 
@@ -38,56 +39,6 @@ int v_value = 0;
 char c_value[300] = "";
 int pid_list[10000]; // list to store all pids of current user
 int pid_list_index = 0; // pointer that points to the first available index in pid_list
-char buffer_for_int_to_str[20] = "";
-//FILE* fptr = NULL;
-
-// readDirFile(char* path, char* filename) returns a file pointer if successfully directed to the directory specified by path, false o.w.
-// remember to call fclose(FILE*) to close the file, and closedir() to close the directory after producing the output
-FILE* readDirFile(char* path, char* filename){
-	DIR* myDirectory = opendir(path); // Upon successful completion, opendir() returns a pointer to an object of type DIR   
-	if(myDirectory){ // read dir successfully, next, need to read the desired filename
-		FILE* fptr = fopen(filename, "r");
-		if(fptr == NULL){ // failed to open the desired file
-			printf("Cannot open file: %s.\n", filename);
-			closedir(myDirectory);
-			exit(1);
-		}
-		else{
-			closedir(myDirectory);
-			return fptr;
-		}
-	}
-	return NULL;
-}
-
-
-// this function traverses all files in /proc, returns 1 if pid valid; 0 if pid not in /proc
-// be careful that pid_str is a char string
-int hasPid(char* pid_str){
-	DIR* myDirectory = opendir("/proc"); // Upon successful completion, opendir() returns a pointer to an object of type DIR
-	struct dirent *entry; // Pointer for directory entry
-	if(myDirectory == NULL)  // opendir returns NULL if couldn't open directory 
-	{ 
-		printf("Could not open directory /proc.\n" ); 
-		return 0; 
-	}
-    while ((entry = readdir(myDirectory)) != NULL){
-		if(strcmp(entry->d_name, pid_str) == 0){
-			return 1;
-		}
-	}
-    closedir(myDirectory);     
-    return 0; // didn't find the entry whose name is pid_str
-}
-
-
-
-// convert int to string
-char* int_to_str(int num){
-	strcpy(buffer_for_int_to_str, "");
-	sprintf(buffer_for_int_to_str, "%d", num);
-	return buffer_for_int_to_str;
-}
 
 char* path_cat(char* path, int pid, char* filename){
   char pid_str[20];
@@ -97,16 +48,21 @@ char* path_cat(char* path, int pid, char* filename){
   return path;
 }
 
+FILE* open_file(char* path){
+  FILE* fptr = fopen(path, "r");
+  if(fptr == NULL){
+    // printf("Cannot open file with path: %s\n", path);
+    exit(1);
+  }
+  return fptr;
+}
+
 // case 's': state info
 void s_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/stat";
 	char* read_path = path_cat(path, pid, filename);
-	FILE* fptr = fopen(read_path, "r");
-	if(fptr == NULL){ // failed to open the desired file
-			printf("Cannot open file with path: %s.\n", path);
-			exit(1);
-	}
+	FILE* fptr = open_file(read_path);
 	// next, create three vars to store info, only state is important
 	char buffer[800];
 	fgets(buffer, 800, fptr);
@@ -130,11 +86,7 @@ void U_info(int pid){ // check condition: count=14
 	char path[100] = "/proc/";
 	char* filename = "/stat";
 	char* read_path = path_cat(path, pid, filename);
-	FILE* fptr = fopen(read_path, "r");
-	if(fptr == NULL){ // failed to open the desired file
-			printf("Cannot open file: %s.\n", filename);
-			exit(1);
-	}
+	FILE* fptr = open_file(read_path);
 	// Since in this case, utime locates at the 14th (13th if starts from 0) position of stat file, we try a different way from case 's'.
 	// first need to use fgets() to get a string as input from the FILE* fptr
 	char line[sizeof(unsigned long)*15]; // stat file has only one line, so need a buffer of enough size for fgets()
@@ -160,11 +112,7 @@ void S_info(int pid){ // check condition: count=15
 	char path[100] = "/proc/";
 	char* filename = "/stat";
 	char* read_path = path_cat(path, pid, filename);
-	FILE* fptr = fopen(read_path, "r");
-	if(fptr == NULL){ // failed to open the desired file
-			printf("Cannot open file: %s.\n", filename);
-			exit(1);
-	}
+	FILE* fptr = open_file(read_path);
 	// in this case, stime locates at the 15th (14th if starts from 0) position of stat file
 	// first need to use fgets() to get a string as input from the FILE* fptr
 	char line[sizeof(unsigned long)*17]; // stat file has only one line, so need a buffer of enough size for fgets()
@@ -191,11 +139,7 @@ void v_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/statm";
 	char* read_path = path_cat(path, pid, filename);
-	FILE* fptr = fopen(read_path, "r");
-	if(fptr == NULL){ // failed to open the desired file
-			printf("Cannot open file: %s.\n", filename);
-			exit(1);
-	}
+	FILE* fptr = open_file(read_path);
 	int size;
 	fscanf(fptr, "%d", &size);
 	v_value = size;
@@ -208,11 +152,7 @@ void c_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/cmdline";
 	char* read_path = path_cat(path, pid, filename);
-	FILE* fptr = fopen(read_path, "r");
-	if(fptr == NULL){ // failed to open the desired file
-			printf("Cannot open file: %s.\n", filename);
-			exit(1);
-	}
+	FILE* fptr = open_file(read_path);
 	char c[200];
 	if(fscanf(fptr, "%s", c) < 0){
 		exit(1);
@@ -284,6 +224,13 @@ void produce_output(int pid, int s, int U, int S, int v, int c){
 	if(pid == 0){
 		return;
 	}
+	char path[100] = "/proc/";
+	char* filename = "/stat";
+	char* read_path = path_cat(path, pid, filename);
+	FILE* fptr = open_file(read_path);
+	if(fptr == NULL){
+		return;
+	}
 	printf("PID: %d, ", pid);
 	if(s == 1){
 		s_info(pid);
@@ -305,6 +252,7 @@ void produce_output(int pid, int s, int U, int S, int v, int c){
 		c_info(pid);
 		printf("CMDLINE: %s", c_value);
 	}
+	printf("\n");
 }
 
 int main(int argc, char *argv[]){
@@ -325,7 +273,6 @@ int main(int argc, char *argv[]){
 				continue;
 			}
 			produce_output(cur_pid, s_flag, U_flag, S_flag, v_flag, c_flag);
-			printf("\n");
 		}
 	}
 	
