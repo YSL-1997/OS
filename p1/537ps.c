@@ -39,7 +39,8 @@ int v_value = 0;
 char c_value[300] = "";
 int pid_list[10000]; // list to store all pids of current user
 int pid_list_index = 0; // pointer that points to the first available index in pid_list
-
+int p_option_list[100];
+int p_option_list_index = 0;
 char* path_cat(char* path, int pid, char* filename){
   char pid_str[20];
   sprintf(pid_str, "%d", pid);
@@ -255,6 +256,14 @@ void produce_output(int pid, int s, int U, int S, int v, int c){
 	printf("\n");
 }
 
+void output_by_p_option_list(int s, int U, int S, int v, int c){
+	for (int i = 0; i < p_option_list_index; i++)
+	{
+		int this_pid = p_option_list[i];
+		produce_output(this_pid, s, U, S, v, c);
+	}
+}
+
 int main(int argc, char *argv[]){
 	//int p_occurs = 0;
 	int s_flag = 0; // defaults to be false
@@ -279,7 +288,8 @@ int main(int argc, char *argv[]){
 	while((c = getopt(argc, argv, "p:s::U::S::v::c::")) != -1){ // read the argument
 		switch(c){
 			case 'p':
-				//p_occurs = 1;
+				p_option_list[p_option_list_index] = atoi(optarg);
+				p_option_list_index += 1;
 				pid = atoi(optarg);
 				break;
 
@@ -367,6 +377,10 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 	else {
+		if(p_option_list_index > 0){
+			output_by_p_option_list(s_flag, U_flag, S_flag, v_flag, c_flag);
+			return 0;
+		}
 		produce_output(pid, s_flag, U_flag, S_flag, v_flag, c_flag);
 		return 0;
 	}
