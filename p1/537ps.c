@@ -33,15 +33,25 @@ Critical:
 #include <ctype.h>
 
 char s_value = 0;
+// STATE info
 char U_value[300] = "";
+// USER TIME info
 char S_value[300] = "";
+// SYSTEM TIME info
 int v_value = 0;
+// VIRTUAL MEM info
 char c_value[300] = "";
-int pid_list[10000]; // list to store all pids of current user
-int pid_list_index = 0; // pointer that points to the first available index in pid_list
-int p_option_list[100];
-int p_option_list_index = 0;
+// CMDLINE info
+int pid_list[10000]; 
+// list to store all pids of current user
+int pid_list_index = 0; 
+// stores the first available index in pid_list
+int p_option_list[100]; 
+// stores all pids if there's more than one -p option
+int p_option_list_index = 0; 
+// stores the first available index in p_option_list 
 
+// concatenate the path(/proc) with pid and filename
 char* path_cat(char* path, int pid, char* filename){
   char pid_str[20];
   sprintf(pid_str, "%d", pid);
@@ -50,6 +60,7 @@ char* path_cat(char* path, int pid, char* filename){
   return path;
 }
 
+// open a file, returns the pointer to the file
 FILE* open_file(char* path){
   FILE* fptr = fopen(path, "r");
   if(fptr == NULL){
@@ -63,8 +74,8 @@ FILE* open_file(char* path){
 void s_info(int pid){
 	char path[100] = "/proc/";
 	char* filename = "/stat";
-	char* read_path = path_cat(path, pid, filename);
-	FILE* fptr = open_file(read_path);
+	char* read_path = path_cat(path, pid, filename); // get the path
+	FILE* fptr = open_file(read_path); // open the file
 	// next, create three vars to store info, only state is important
 	char buffer[800];
 	fgets(buffer, 800, fptr);
@@ -258,8 +269,7 @@ void produce_output(int pid, int s, int U, int S, int v, int c){
 }
 
 void output_by_p_option_list(int s, int U, int S, int v, int c){
-	for (int i = 0; i < p_option_list_index; i++)
-	{
+	for (int i = 0; i < p_option_list_index; i++){
 		int this_pid = p_option_list[i];
 		produce_output(this_pid, s, U, S, v, c);
 	}
