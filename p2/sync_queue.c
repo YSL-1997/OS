@@ -42,3 +42,16 @@ void PrintQueueStats(Queue *q){
 	
 }
 
+// Each Queue structure will also contain some extra fields for statistics-keeping. These fields will include:
+// enqueueCount
+// A count of the number of strings enqueued on this queue.
+
+// dequeueCount
+// A count of the number of strings dequeued on this queue. We would expect that when the program exits, the two count values are equal.
+
+// enqueueBlockCount
+// A count of the number of times that an enqueue was attempted but blocked.
+
+// dequeueBlockCount
+// A count of the number of times that a dequeue was attempted but blocked.
+
