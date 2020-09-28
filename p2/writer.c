@@ -1,4 +1,4 @@
 
 /*
-Writer will write the line to standard output.
+  Writer will write the line to standard output.
 */
