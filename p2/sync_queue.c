@@ -1,5 +1,11 @@
 /*
-  Yusen Liu, liu797@wis
+	Authors:
+	Yusen Liu - NetID: liu797, CS login: yusen
+	Yuting Yan - NetID: yan86 , CS login: yutingy
+	Project #2 - Shared Memory Producer/Consumer Program
+*/
+
+
 Since your program is reading in strings of characters and passing them from thread to thread, your queue will be a queue of pointers to strings (char *).
 Queues are dynamically created. So, for this assignment, you will need one between each pair of threads (so you'll need three queues).
 
