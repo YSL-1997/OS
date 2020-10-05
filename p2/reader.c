@@ -50,7 +50,7 @@ int Reader(){
 			    memcpy(subbuf, buf, MAX_LENGTH-1);
                 subbuf[MAX_LENGTH-1] = '\0'
                 buf = subbuf;
-                free(sunbuf)
+                free(subbuf)
         }
 	
 	}
