@@ -31,7 +31,7 @@ int main(){
       // continue;
     }
     
-    if(read_len == max_len){
+    if(read_len == MAX_LEN){
       // meaning that we've been reading a line that has
       // NOT yet met \n in the buffer
       // if yes, we cannot put what we've stored in buffer into queue
