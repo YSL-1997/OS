@@ -59,12 +59,30 @@ int main(int argc, char* argv[]){
   pthread_join(munch2_thread, &ret_val_m2);
   pthread_join(writer_thread, &ret_val_w);
 
+  
+  pthread_exit();
+  pthread_exit();
+  pthread_exit();
+  pthread_exit();
+  
   // print the queues' status
   PrintQueueStatus(q_reader_munch1);
   PrintQueueStatus(q_munch1_munch2);
   PrintQueueStatus(q_munch2_writer);
+
+  // free the strings that we've been processing
+  for(int i = 0; i < size; i++){
+    free(q_reader_munch1->stringQueue[i]);
+    free(q_munch1_munch2->stringQueue[i]);
+    free(q_munch2_writer->stringQueue[i]);
+  }
+
+  // free the stringQueue in each queue
+  free(q_reader_munch1->stringQueue);
+  free(q_munch1_munch2->stringQueue);
+  free(q_munch2_writer->stringQueue);
   
-  // free the queues after using
+  // free the queues at last
   free(q_reader_munch1);
   free(q_munch1_munch2);
   free(q_munch2_writer);
