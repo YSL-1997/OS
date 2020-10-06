@@ -59,12 +59,8 @@ struct Queue
 
   sem_t mutex;
   // mutex for critical section
-  //*** Can we allow enqueue and dequeue simultaneously?
-
-
-  
+  //*** Can we allow enqueue and dequeue simultaneously?  
 } Queue;
-
 
 
 int get_time()
