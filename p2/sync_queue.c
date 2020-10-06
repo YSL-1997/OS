@@ -59,7 +59,9 @@ struct Queue
 
   sem_t mutex;
   // mutex for critical section
-  //*** Can we allow enqueue and dequeue simultaneously?  
+  //*** Can we allow enqueue and dequeue simultaneously?
+  // Yes, I think so, because operations do not overlap and
+  // the only possibility that head == firstAvailable is when queue is empty
 } Queue;
 
 
@@ -110,7 +112,7 @@ void EnqueueString(Queue *q, char *string)
 
   // enter the critical section
   sem_wait(&mutex);
-  
+  // I think this critical section is not a must
   q->stringQueue[firstAvailable] = string;
   firstAvailable = (firstAvailable+1) % q->size;
   q->enqueueCount++;
@@ -135,7 +137,7 @@ char* DequeueString(Queue *q){
 
   // enter the critical section
   sem_wait(&mutex);
-
+  // This critical section is not a must, as far as I'm concerned.
   char* ret_ptr = q->stringQueue[head];
   q->head = (q->head + 1) % q->size;
   q->dequeueCount++;
