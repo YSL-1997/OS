@@ -123,7 +123,7 @@ void EnqueueString(Queue *q, char *string)
   sem_post(&q->sem_de);
 
   // int end_time = get_time();
-  q->enqueueTime = get_time() - start_time;
+  q->enqueueTime += get_time() - start_time;
 }
 
 // This function removes a pointer to a string from the beginning of queue q. 
@@ -147,7 +147,7 @@ char* DequeueString(Queue *q){
 
   sem_post(&q->sem_en);
 
-  q->dequeueTime = get_time() - start_time;
+  q->dequeueTime += get_time() - start_time;
   return ret_ptr;
 }
 
@@ -155,8 +155,8 @@ char* DequeueString(Queue *q){
 void PrintQueueStats(Queue *q){
   printf("The number of enqueues: %d\n", q->enqueueCount);
   printf("The number of dequeues: %d\n", q->dequeueCount);
-  printf("The time cost of the last enqueue: %d\n", q->enqueueTime);
-  printf("The time cost of the last dequeue: %d\n", q->dequeueTime);
+  printf("The total time cost of the enqueue: %d\n", q->enqueueTime);
+  printf("The total time cost of the dequeue: %d\n", q->dequeueTime);
   // head, firstAvailable not yet printed
 }
 
