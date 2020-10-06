@@ -27,6 +27,11 @@ int main(int argc, char* argv[]){
   pthread_t munch1_thread;
   pthread_t munch2_thread;
   pthread_t writer_thread;
+
+  void* ret_val_r;
+  void* ret_val_m1;
+  void* ret_val_m2;
+  void* ret_val_w;
   
   int size = 10;
   // size of the shared queues
@@ -41,6 +46,18 @@ int main(int argc, char* argv[]){
   pthread_create(&munch2_thread, NULL, &func_munch2, (void*)args);// args remains to be figured out
   pthread_create(&writer_thread, NULL, &func_writer, (void*)arg); // arg remains to be figured out
 
+  // join the threads
+  // probably needs handle_pthread_error(int err), see concurr1.c
+  pthread_join(reader_thread, &ret_val_r);
+  pthread_join(munch1_thread, &ret_val_m1);
+  pthread_join(munch2_thread, &ret_val_m2);
+  pthread_join(writer_thread, &ret_val_w);
+
+  // print the queues' status
+  PrintQueueStatus(q_reader_munch1);
+  PrintQueueStatus(q_munch1_munch2);
+  PrintQueueStatus(q_munch2_writer);
+  
   // free the queues after using
   free(q_reader_munch1);
   free(q_munch1_munch2);
