@@ -41,10 +41,10 @@ int main(int argc, char* argv[]){
   Queue* q_munch2_writer = CreateStringQueue(size);
   
   // probably needs handle_pthread_error(int err), see concurr1.c
-  pthread_create(&reader_thread, NULL, &func_reader, (void*)arg); // arg remains to be figured out
-  pthread_create(&munch1_thread, NULL, &func_munch1, (void*)args);// args remains to be figured out
-  pthread_create(&munch2_thread, NULL, &func_munch2, (void*)args);// args remains to be figured out
-  pthread_create(&writer_thread, NULL, &func_writer, (void*)arg); // arg remains to be figured out
+  pthread_create(&reader_thread, NULL, &func_reader, (void*)arg); // arg remains to be figured out,   q_reader_munch1
+  pthread_create(&munch1_thread, NULL, &func_munch1, (void*)args);// args remains to be figured out,  q_reader_munch1, q_munch1_munch2
+  pthread_create(&munch2_thread, NULL, &func_munch2, (void*)args);// args remains to be figured out,  q_munch1_munch2, q_munch2_writer
+  pthread_create(&writer_thread, NULL, &func_writer, (void*)arg); // arg remains to be figured out,   q_munch2_writer
 
   // join the threads
   // probably needs handle_pthread_error(int err), see concurr1.c
