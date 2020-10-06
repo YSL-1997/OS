@@ -12,3 +12,5 @@
   queue of character strings.
 */
 
+
+// use index()
