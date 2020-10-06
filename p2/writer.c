@@ -8,3 +8,6 @@
 /*
   Writer will write the line to standard output.
 */
+
+
+// remember to free after we write the string since the string is malloced

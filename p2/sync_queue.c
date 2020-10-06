@@ -15,92 +15,151 @@ Queues will be represented by a structure of type Queue.
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-
-// isBlocked probably needed to be blocked_by_en and blocked_by_de
-// stringArray implementation (consider firstAvailable and head) can be two
-// ways - circular array or linear array
-
+#include <sys/time.h>
+#include <semaphore.h>
 
 struct Queue
 {
-	int size;
-	//size of the queue
+  int size;
+  //size of the queue
+  
+  char** stringQueue;
+  // the char** array malloc'ed pointed to by Queue
 
-	char** stringArray;
-	// the char** array malloc'ed pointed to by Queue
+  int head;
+  // keep track of the first element to be removed from the queue
+  
+  int firstAvailable;
+  // keep track of the first available slot of the stringQueue that can store
+  
+  int enqueueCount;
+  // A count of the number of strings enqueued on this queue.
+  
+  int dequeueCount;
+  // A count of the number of strings dequeued on this queue. We would
+  // expect that when the program exits, the two count values are equal.
 
-	int firstAvailable;
-	// stores the position of the first available slot of the stringArray
+  int enqueueTime;
+  // use gettimeofday
+  // The amount of elapsed (wallclock) time that a thread spent trying to
+  // do an enqueue. You will record the time at the start of the
+  // EnqueueString function and again at the end of the function,
+  // then take the difference.
+  
+  int dequeueTime;
+  /*
+    The amount of elapsed (wallclock) time that a thread spent trying to do 
+    an dequeue. You will record the time at the start of the DequeueString 
+    function and again at the end of the function, then take the difference.
+   */
 
-	int isBlocked;
-	// 1 - blocked; 0 - not blocked
+  sem_t sem_en;
+  sem_t sem_de;
+  // semaphores
 
-	int enqueueCount;
-	// A count of the number of strings enqueued on this queue.
+  sem_t mutex;
+  // mutex for critical section
+  //*** Can we allow enqueue and dequeue simultaneously?
 
-	int dequeueCount;
-	// A count of the number of strings dequeued on this queue. We would
-        // expect that when the program exits, the two count values are equal.
 
-	int enqueueBlockCount;
-	// A count of the number of times that an enqueue was attempted but
-        // blocked.
+  
+} Queue;
 
-	int dequeueBlockCount;
-	// A count of the number of times that a dequeue was attempted but
-        // blocked.
-};
 
-// Dynamically allocate (malloc) a new Queue structure, initialize it with an array of character points of length size.
-// malloc the queue structure and then malloc the char ** array pointed to from that structure
-// remember to any state and synchronization variables used in this structure
-// The function returns a pointer to the new queue structure.
-// For testing purposes, create your Queue's with a size of 10.
-Queue *CreateStringQueue(int size){
-	Queue* returnQueue = (Queue*)malloc(sizeof(Queue));
-	returnQueue->size = size;
-	returnQueue->stringArray = (char**)malloc(sizeof(char**)*size);
-	returnQueue->firstAvailable = 0;
-	returnQueue->isBlocked = 0;
-	returnQueue->enqueueCount = 0;
-	returnQueue->dequeueCount = 0;
-	returnQueue->enqueueBlockCount = 0;
-	returnQueue->dequeueBlockCount = 0;
-	return returnQueue;
+
+int get_time()
+{
+  struct timeval cur_time;
+  gettimeofday(&cur_time, NULL);
+  return cur_time.tv_sec;
 }
 
+/* Dynamically allocate (malloc) a new Queue structure, initialize it with 
+   an array of character points of length size.
+   Malloc the queue structure and then malloc the char ** array pointed to 
+   from that structure
+   Remember to any state and synchronization variables used in this structure
+   The function returns a pointer to the new queue structure.
+   For testing purposes, create your Queue's with a size of 10.
+*/
+Queue *CreateStringQueue(int size)
+{
+  Queue* q = (Queue*)malloc(sizeof(Queue));
+
+  q->size = size;
+  q->stringQueue = (char**)malloc(sizeof(char*)*size);	
+  q->head = 0;
+  q->firstAvailable = 0;
+  q->enqueueCount = 0;
+  q->dequeueCount = 0;
+  q->enqueueTime = 0;
+  q->dequeueTime = 0;
+
+  sem_init(&q->sem_en, 0, size);
+  sem_init(&q->sem_de, 0, 0);
+  sem_init(&q->mutex, 0, 1);
+    
+  return q;
+}
 
 
 // This function places the pointer to the string at the end of queue q.
-// If the queue is full, then this function blocks until there is space available.
-void EnqueueString(Queue *q, char *string){
-	while(q->firstAvailable == 10){ // the queue is full
-		q->isBlocked = 1;
-		q->enqueueBlockCount++;
-		if(q->isBlocked == 0){ 
-			break;
-		}
-	}
-	// now the queue is not full
-	strncpy(q->stringArray[firstAvailable], string, strlen(string));
-	q->firstAvailable++;
-	q->enqueueCount++;
+// If the queue is full, then this function blocks until there is space
+// available.
+void EnqueueString(Queue *q, char *string)
+{
+  int start_time = get_time();
+  
+  sem_wait(&q->sem_en);
 
+  // enter the critical section
+  sem_wait(&mutex);
+  
+  q->stringQueue[firstAvailable] = string;
+  firstAvailable = (firstAvailable+1) % q->size;
+  q->enqueueCount++;
+
+  // leave the critical section
+  sem_post(&mutex);
+
+  sem_post(&q->sem_de);
+
+  // int end_time = get_time();
+  q->enqueueTime = get_time() - start_time;
 }
 
 // This function removes a pointer to a string from the beginning of queue q. 
-// If the queue is empty, then this function blocks until there is a string placed into the queue. 
+// If the queue is empty, then this function blocks until there is a string
+// placed into the queue. 
 // This function returns the pointer that was removed from the queue.
-char * DequeueString(Queue *q){
-	while(q->firstAvailable == 0){
-		q->isBlocked
-	}
+char* DequeueString(Queue *q){
+  int start_time = get_time();
+
+  sem_wait(&q->sem_de);
+
+  // enter the critical section
+  sem_wait(&mutex);
+
+  char* ret_ptr = q->stringQueue[head];
+  q->head = (q->head + 1) % q->size;
+  q->dequeueCount++;
+
+  // leave the critical section
+  sem_post(&mutex);
+
+  sem_post(&q->sem_en);
+
+  q->dequeueTime = get_time() - start_time;
+  return ret_ptr;
 }
 
 // This function prints the statistics for this queue
 void PrintQueueStats(Queue *q){
-	
+  printf("The number of enqueues: %d\n", q->enqueueCount);
+  printf("The number of dequeues: %d\n", q->dequeueCount);
+  printf("The time cost of the last enqueue: %d\n", q->enqueueTime);
+  printf("The time cost of the last dequeue: %d\n", q->dequeueTime);
+  // head, firstAvailable not yet printed
 }
 
 
