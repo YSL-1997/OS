@@ -6,8 +6,10 @@
 */
 
 /*
-Since your program is reading in strings of characters and passing them from thread to thread, your queue will be a queue of pointers to strings (char *).
-Queues are dynamically created. So, for this assignment, you will need one between each pair of threads (so you'll need three queues).
+Since your program is reading in strings of characters and passing them from 
+thread to thread, your queue will be a queue of pointers to strings (char *).
+Queues are dynamically created. So, for this assignment, you will need one 
+between each pair of threads (so you'll need three queues).
 Queues will be represented by a structure of type Queue.
 */
 #include <string.h>
@@ -16,7 +18,8 @@ Queues will be represented by a structure of type Queue.
 
 
 // isBlocked probably needed to be blocked_by_en and blocked_by_de
-// stringArray implementation (consider firstAvailable and head) can be two ways - circular array or linear array
+// stringArray implementation (consider firstAvailable and head) can be two
+// ways - circular array or linear array
 
 
 struct Queue
@@ -37,13 +40,16 @@ struct Queue
 	// A count of the number of strings enqueued on this queue.
 
 	int dequeueCount;
-	// A count of the number of strings dequeued on this queue. We would expect that when the program exits, the two count values are equal.
+	// A count of the number of strings dequeued on this queue. We would
+        // expect that when the program exits, the two count values are equal.
 
 	int enqueueBlockCount;
-	// A count of the number of times that an enqueue was attempted but blocked.
+	// A count of the number of times that an enqueue was attempted but
+        // blocked.
 
 	int dequeueBlockCount;
-	// A count of the number of times that a dequeue was attempted but blocked.
+	// A count of the number of times that a dequeue was attempted but
+        // blocked.
 };
 
 // Dynamically allocate (malloc) a new Queue structure, initialize it with an array of character points of length size.
