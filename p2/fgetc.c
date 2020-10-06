@@ -1,12 +1,14 @@
 #include <stdio.h>
+// #define MAX_LEN 4096
+
+const size_t MAX_LEN = 4096;
 
 int main(){
   FILE* fp = fopen("test.txt", "r");
 
   char c;
-  int max_len = 10;
   int read_len = 0;
-  char* buffer = (char*)malloc(4096);
+  char* buffer = (char*)malloc(MAX_LEN);
   //////////////////////////////////////// every read, buffer size=?
   
   if(fp == NULL){
