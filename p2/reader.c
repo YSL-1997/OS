@@ -23,10 +23,11 @@ void func_reader(void* arg){
   while(ch != EOF){
     ch = fgetc(fp);
 
-    can only store 4096 chars
+    /*can only store 4096 chars
       since the last one should be '\0', we can only store 4095(MAX_LEN-1)
       0 1 2 3 4 5 ... i (i max is 4095), so before \0, i can be at most (MAX_LEN-2)
       meaning that we
+      */
     
     if(read_len >= MAX_LEN){
       buffer[read_len-1] = '\0';
