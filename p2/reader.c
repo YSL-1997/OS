@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-#include "reader.h"
-
-=======
 /*
   Authors:
   Yusen Liu - NetID: liu797, CS login: yusen
@@ -9,11 +5,7 @@
   Project #2 - Shared Memory Producer/Consumer Program
 */
 
-#include <dirent.h>
-#include <ctype.h>
-#include <unistd.h>
-#include "Queue.h"
->>>>>>> 9800f41770a07748f2d3b165513a4ff50adf8d0c
+#include "reader.h"
 
 const size_t MAX_LEN = 4096;
 
