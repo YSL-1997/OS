@@ -10,7 +10,7 @@ const size_t MAX_LENGTH = 4096;
 void func_reader(void* arg){
   Queue* q = (Queue*)arg;
   
-  int i = 0; // index of current lenght
+  int i = 0; // index of current length
   int j = 0;
   FILE *fp;
   //int MAX_LENGTH = 4096;
