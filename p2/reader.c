@@ -24,36 +24,52 @@ void func_reader(void* arg){
   while(ch != EOF){
     ch = fgetc(fp);
 
-    /*can only store 4096 chars
-      since the last one should be '\0', we can only store 4095(MAX_LEN-1)
-      0 1 2 3 4 5 ... i (i max is 4095), so before \0, i can be at most (MAX_LEN-2)
-      meaning that we
-      */
-    
-    if(read_len >= MAX_LEN){
-      buffer[read_len-1] = '\0';
+    if(read_len == MAX_LEN-1){ // abort this line
       fprintf(stderr, "Input line too long.\n");
       
-      while(ch != '\n' && ch != EOF){
-	ch = getc(fp) ;   
+      while(1){
+	if(ch == '\n')
+	  break;
+	
+	if(ch == EOF){
+	  printf("The rest of the line ends with EOF, reader stop\n");
+	  exit(0);
+	}
+	ch = fgetc(fp);
       }
+
       read_len = 0; // reset i to be 0
       continue;
+    }
+    
+    if(ch == EOF){
+      if(read_len == 0){
+	printf("The only thing that we have read is EOF\n");
+	exit(0);
+      }
+      else{
+	buffer[read_len] = '\0';
+	// now, we have that buffer[0 ~ read_len+1] is valid
+	// need to put into a new malloc'ed str.
+	char* ret_str = malloc((read_len+1) * sizeof(char));
+	strncpy(ret_str, buffer, read_len+1); // store what's in buffer to ret_str
+	EnqueueString(q, ret_str);
+      }
+      break;
     }
     
     buffer[read_len] = (char)ch;
     read_len++;
     
-    if( ch == '\n' || ch == EOF){
+    if((char)ch == '\n'){
       buffer[read_len] = '\0';
-      // now, we have that buffer[0~i] is valid
+      // now, we have that buffer[0 ~ read_len+1] is valid
       // need to put into a new malloc'ed str.
       char* ret_str = malloc((read_len+1) * sizeof(char));
       strncpy(ret_str, buffer, read_len+1); // store what's in buffer to ret_str
       EnqueueString(q, ret_str);
-      read_len = 0;
-      if(ch == EOF)
-	break;
+      read_len = 0; // reset index
+      continue;
     }
   }
 
@@ -63,8 +79,5 @@ void func_reader(void* arg){
   
   fclose(fp);
   free(buffer);
-
-  // pthread_exit(0);
+  pthread_exit(0);
 }
-
-
