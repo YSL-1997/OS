@@ -43,7 +43,7 @@ void func_reader(void* arg){
       continue;
     }
     
-    if(ch == EOF){
+    if((char)ch == EOF){
       if(read_len == 0){
 	printf("The only thing that we have read is EOF\n");
 	exit(0);
