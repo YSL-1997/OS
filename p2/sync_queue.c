@@ -113,8 +113,8 @@ void EnqueueString(Queue *q, char *string)
   // enter the critical section
   sem_wait(&mutex);
   // I think this critical section is not a must
-  q->stringQueue[firstAvailable] = string;
-  firstAvailable = (firstAvailable+1) % q->size;
+  q->stringQueue[q->firstAvailable] = string;
+  q->firstAvailable = (firstAvailable+1) % q->size;
   q->enqueueCount++;
 
   // leave the critical section
