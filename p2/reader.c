@@ -5,45 +5,51 @@
 #include <unistd.h>
 #include <string.h>
 
-const size_t MAX_LENGTH = 4096;
+const size_t MAX_LEN = 4096;
 
 void func_reader(void* arg){
   Queue* q = (Queue*)arg;
-  
-  int i = 0; // index of current length
-  int j = 0;
   FILE *fp;
-  //int MAX_LENGTH = 4096;
-  char *buffer = malloc(MAX_LENGTH * sizeof(char));
-  char ch = 'a';
-  if((fp = fopen("bigfile.txt", "r") ) == NULL){
+  char ch = 'a'; // in order to enter the while loop
+  int read_len = 0; // index of current length
+
+  char *buffer = malloc(MAX_LEN * sizeof(char));
+  
+  if((fp = fopen("bigfile.txt", "r")) == NULL){
     perror("Could not get info from stdin");
     exit(EXIT_FAILURE);
   }
   
   while(ch != EOF){
     ch = fgetc(fp);
+
+    can only store 4096 chars
+      since the last one should be '\0', we can only store 4095(MAX_LEN-1)
+      0 1 2 3 4 5 ... i (i max is 4095), so before \0, i can be at most (MAX_LEN-2)
+      meaning that we
     
-    if(i >= MAX_LENGTH){
-      buffer[i-1] = '\0';
+    if(read_len >= MAX_LEN){
+      buffer[read_len-1] = '\0';
       fprintf(stderr, "Input line too long.\n");
-      j++;
-      printf("line id: %d, %s \n", j, buffer);
+      
       while(ch != '\n' && ch != EOF){
 	ch = getc(fp) ;   
       }
-      i = 0;
+      read_len = 0; // reset i to be 0
       continue;
     }
-    buffer[i] = (char)ch;
-    i++;
+    
+    buffer[read_len] = (char)ch;
+    read_len++;
+    
     if( ch == '\n' || ch == EOF){
-      buffer[i] = '\0'; // meaning that buffer[0~i] is valid
+      buffer[read_len] = '\0';
+      // now, we have that buffer[0~i] is valid
       // need to put into a new malloc'ed str.
-      char* ret_str = malloc((i+1) * sizeof(char));
-      strncpy(); // store what's in buffer to ret_str
+      char* ret_str = malloc((read_len+1) * sizeof(char));
+      strncpy(ret_str, buffer, read_len+1); // store what's in buffer to ret_str
       EnqueueString(q, ret_str);
-      i = 0;
+      read_len = 0;
       if(ch == EOF)
 	break;
     }
