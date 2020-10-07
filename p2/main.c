@@ -5,22 +5,10 @@
   Project #2 - Shared Memory Producer/Consumer Program
 */
 
-#include "reader.c"
-#include "munch1.c"
-#include "munch2.c"
-#include "writer.c"
-
-void* func_reader(Queue* p);
-  // this should be implemented in reader.c;
-
-void* func_munch1(Queue* p);
-  // this should be implemented in munch1.c
-
-void* func_munch2(Queue* p);
-  // this should be implemented in munch2.c
-
-void* func_writer(Queue* p);
-  // this should be implemented in writer.c
+#include "reader.h"
+#include "munch1.h"
+#include "munch2.h"
+#include "writer.h"
 
 int main(int argc, char* argv[]){
   pthread_t reader_thread;
