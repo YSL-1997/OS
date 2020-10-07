@@ -61,9 +61,8 @@ int main(int argc, char* argv[]){
   pthread_join(munch1_thread, &ret_val_m1);
   pthread_join(munch2_thread, &ret_val_m2);
   pthread_join(writer_thread, &ret_val_w);
-
+    
   
-  pthread_exit();
   pthread_exit();
   pthread_exit();
   pthread_exit();
@@ -95,6 +94,7 @@ int main(int argc, char* argv[]){
 void* func_reader(Queue* q){
   char* s = reader(.. parameters);
   EnqueueString(q, s);
+  pthread_exit();
 }
 
 void* func_munch1(Queue* q_from, Queue* q_to){
