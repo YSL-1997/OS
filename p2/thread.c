@@ -22,7 +22,7 @@ int pthread_create(pthread_t* thread, const pthread_attr_t* attr,
    4th parameter: arg
    arg is passed as the sole argument of start_routine().
 
-DESCRIPTION
+   DESCRIPTION
        The  pthread_create()  function starts a new thread in the calling process.
        The new thread starts execution by invoking start_routine(); arg is  passed
        as the sole argument of start_routine().
