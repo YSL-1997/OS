@@ -27,6 +27,7 @@ int main(){
     buffer[read_len] = c; // store into the buffer
     if(buffer[read_len] == '\n'){
       // add the buffer[0 to read_len] to the queue
+      // 
       // read_len = 0;
       // continue;
     }
@@ -51,6 +52,7 @@ int main(){
     
     // printf("%c", c);
   }
+  //free(buffer);
   fclose(fp);
   return 0;
 }
