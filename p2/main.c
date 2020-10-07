@@ -72,12 +72,8 @@ int main(int argc, char* argv[]){
   PrintQueueStatus(q_munch1_munch2);
   PrintQueueStatus(q_munch2_writer);
 
-  // free the strings that we've been processing
-  for(int i = 0; i < size; i++){
-    free(q_reader_munch1->stringQueue[i]);
-    free(q_munch1_munch2->stringQueue[i]);
-    free(q_munch2_writer->stringQueue[i]);
-  }
+  // free the strings that we've been processing in writer.c
+
 
   // free the stringQueue in each queue
   free(q_reader_munch1->stringQueue);
