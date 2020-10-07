@@ -1,9 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
+
+
 #include <dirent.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <string.h>
 #include "Queue.h"
 
 const size_t MAX_LEN = 4096;
