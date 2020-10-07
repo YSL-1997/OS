@@ -26,4 +26,6 @@ void* func_munch1(void** args)
   // TODO: manipulate the str
 
   EnqueueString(q_to, str);
+
+  //pthread_exit(0);
 }

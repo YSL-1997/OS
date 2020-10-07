@@ -24,4 +24,5 @@ void* func_writer(Queue* q){
   char* str = DequeueString(q);
   printf("Writer Output: %s\n", str);
   free(str);
+  // pthread_exit(0);
 }

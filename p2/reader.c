@@ -50,7 +50,8 @@ void func_reader(void* arg){
   }
   fclose(fp);
   free(buffer);
-  return 0;
+
+  // pthread_exit(0);
 }
 
 
