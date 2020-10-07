@@ -13,7 +13,6 @@
 */
 
 #include "Queue.h"
-#include <string.h>
 #include <pthread.h>
 // use index()
 
