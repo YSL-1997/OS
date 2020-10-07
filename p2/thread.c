@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-// This is an important file of thread implementations and definitions.
+ // This is an important file of thread implementations and definitions.
 
 // From the man page, pthread_create() is as follows:
 int pthread_create(pthread_t* thread, const pthread_attr_t* attr,
