@@ -10,5 +10,4 @@
 
 void func_reader(void* arg);
 
-
 #endif
