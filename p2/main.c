@@ -40,8 +40,8 @@ int main(int argc, char* argv[]){
   // ************************************************************
   // probably needs handle_pthread_error(int err), see concurr1.c
   pthread_create(&reader_thread, NULL, &func_reader, (void*)q_reader_munch1);
-  pthread_create(&munch1_thread, NULL, &func_munch1, (void*)munch1_args);
-  pthread_create(&munch2_thread, NULL, &func_munch2, (void*)munch2_args);
+  pthread_create(&munch1_thread, NULL, &func_munch1, (void**)munch1_args);
+  pthread_create(&munch2_thread, NULL, &func_munch2, (void**)munch2_args);
   pthread_create(&writer_thread, NULL, &func_writer, (void*)q_munch1_munch2);
 
   // ************************************************************
