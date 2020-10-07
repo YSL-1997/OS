@@ -49,6 +49,8 @@ int main(int argc, char* argv[]){
   // ************************************************************
 
   // wait until the thread is done its work
+  // so basically, the main thread is waiting for all the 4 threads done their
+  // work
   // On success, pthread_join() returns 0; on error, it returns an error number.
   pthread_join(reader_thread, NULL);
   pthread_join(munch1_thread, NULL);

@@ -31,8 +31,6 @@ void func_reader(void* arg){
 	ch = getc(fp) ;   
       }
       i = 0;
-      //free(buffer);
-      //buffer = malloc(MAX_LENGTH * sizeof(char));
       continue;
     }
     buffer[i] = (char)ch;
@@ -48,6 +46,10 @@ void func_reader(void* arg){
 	break;
     }
   }
+
+  // read finished, enqueue a null char
+  EnqueueString(q, '\n');// not sure if this will work since it's a char not char*
+  
   fclose(fp);
   free(buffer);
 

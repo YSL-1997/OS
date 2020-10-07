@@ -17,10 +17,14 @@ void* func_munch2(void** args)
   Queue* q_from = (Queue*)args[0];
   Queue* q_to = (Queue*)args[1];
 
-  char* str = DequeueString(q_from);
-  // TODO: manipulate the str
+  while(1){
+    char* str = DequeueString(q_from);
+    if(str[0] == '\0'){
+      break;
+    }
+    // TODO: manipulate the str
+    EnqueueString(q_to, str);
+  }
 
-  EnqueueString(q_to, str);
-
-  //pthread_exit(0);
+  pthread_exit(NULL);
 }

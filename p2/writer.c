@@ -20,9 +20,14 @@ void* func_writer(void* q){
 }
 */
 
-void* func_writer(Queue* q){
-  char* str = DequeueString(q);
-  printf("Writer Output: %s\n", str);
-  free(str);
-  // pthread_exit(0);
+void* func_writer(void* q){
+  Queue* x = (Queue*)q;
+
+  while(1){
+    char* str = DequeueString(x);
+    printf("%s\n", str);
+    free(str);
+  }
+ 
+  pthread_exit(NULL);
 }
