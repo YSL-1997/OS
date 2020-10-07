@@ -34,7 +34,11 @@ void func_reader(void* arg){
 	
 	if(ch == EOF){
 	  printf("The rest of the line ends with EOF, reader stop\n");
-	  exit(0);
+          EnqueueString(q, "\0");
+          // not sure if this will work, if not, try replacing \0 with NULL.
+          fclose(fp);
+          free(buffer);
+          pthread_exit(0);
 	}
 	ch = fgetc(fp);
       }
@@ -46,7 +50,11 @@ void func_reader(void* arg){
     if((char)ch == EOF){
       if(read_len == 0){
 	printf("The only thing that we have read is EOF\n");
-	exit(0);
+        EnqueueString(q, "\0");
+        // not sure if this will work, if not, try replacing \0 with NULL.
+        fclose(fp);
+        free(buffer);
+        pthread_exit(0);
       }
       else{
 	buffer[read_len] = '\0';
