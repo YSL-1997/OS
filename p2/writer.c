@@ -20,9 +20,7 @@ void* func_writer(Queue* q){
 }
 */
 
-#include "Queue.h"
-#include <stdio.h>
-#include <pthread.h>
+#include "writer.h"
 
 void* func_writer(void* q){
   Queue* x = (Queue*)q;

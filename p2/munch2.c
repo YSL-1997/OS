@@ -12,9 +12,8 @@
   queue of character strings.
 */
 
-#include "Queue.h"
-#include <string.h>
-#include <pthread.h>
+#include "munch2.h"
+
 
 void* func_munch2(void** args)
 {
