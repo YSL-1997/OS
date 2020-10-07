@@ -5,13 +5,15 @@
 #include <unistd.h>
 #include <string.h>
 
+const size_t MAX_LENGTH = 4096;
+
 void func_reader(void* arg){
   Queue* q = (Queue*)arg;
   
   int i = 0; // index of current lenght
   int j = 0;
   FILE *fp;
-  int MAX_LENGTH = 4096;
+  //int MAX_LENGTH = 4096;
   char *buffer = malloc(MAX_LENGTH * sizeof(char));
   char ch = 'a';
   if((fp = fopen("bigfile.txt", "r") ) == NULL){
