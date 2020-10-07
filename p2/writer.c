@@ -7,7 +7,21 @@
 
 /*
   Writer will write the line to standard output.
+  Remember to free after we write the string since
+  the string is malloced.
 */
 
+/*
+void* func_writer(void* q){
+  Queue* x = (Queue*)q;
+  char* str = DequeueString(q);
+  printf("Writer Output: %s\n", str);
+  free(str);
+}
+*/
 
-// remember to free after we write the string since the string is malloced
+void* func_writer(Queue* q){
+  char* str = DequeueString(q);
+  printf("Writer Output: %s\n", str);
+  free(str);
+}
