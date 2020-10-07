@@ -12,8 +12,8 @@
 */
 
 /*
-void* func_writer(void* q){
-  Queue* x = (Queue*)q;
+
+void* func_writer(Queue* q){
   char* str = DequeueString(q);
   printf("Writer Output: %s\n", str);
   free(str);
