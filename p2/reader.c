@@ -48,7 +48,8 @@ void func_reader(void* arg){
   }
 
   // read finished, enqueue a null char
-  EnqueueString(q, '\n');// not sure if this will work since it's a char not char*
+  EnqueueString(q, "\0");
+  // not sure if this will work, if not, try replacing \0 with NULL.
   
   fclose(fp);
   free(buffer);
