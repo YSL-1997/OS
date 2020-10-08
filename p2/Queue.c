@@ -111,11 +111,10 @@ char* DequeueString(Queue *q){
 
 // This function prints the statistics for this queue
 void PrintQueueStats(Queue *q){
-  printf("The number of enqueues: %d\n", q->enqueueCount);
-  printf("The number of dequeues: %d\n", q->dequeueCount);
-  printf("The total time cost of the enqueue: %d\n", q->enqueueTime);
-  printf("The total time cost of the dequeue: %d\n", q->dequeueTime);
-  // head, firstAvailable not yet printed
+  fprintf(stderr, "The number of enqueues: %d\n", q->enqueueCount);
+  fprintf(stderr, "The number of dequeues: %d\n", q->dequeueCount);
+  fprintf(stderr, "The total time cost of the enqueue: %d\n", q->enqueueTime);
+  fprintf(stderr, "The total time cost of the dequeue: %d\n", q->dequeueTime);
 }
 
 

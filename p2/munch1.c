@@ -29,6 +29,12 @@ void* func_munch1(void** args)
     if(str[0] == '\0'){
       break;
     }
+    for(int i = 0; i < strlen(str); i++){
+      if(str[i] == ' '){
+	str[i] = '*';
+      }
+    }
+    
     // TODO: manipulate the str
     EnqueueString(q_to, str);
   }
