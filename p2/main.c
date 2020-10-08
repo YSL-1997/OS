@@ -56,6 +56,18 @@ int main(int argc, char* argv[]){
   free(q_reader_munch1->stringQueue);
   free(q_munch1_munch2->stringQueue);
   free(q_munch2_writer->stringQueue);
+
+  // free the semaphores
+  free(&q_reader_munch1->sem_en);
+  free(&q_reader_munch1->sem_de);
+  free(&q_reader_munch1->mutex);
+  free(&q_munch1_munch2->sem_en);
+  free(&q_munch1_munch2->sem_de);
+  free(&q_munch1_munch2->mutex);
+  free(&q_munch2_writer->sem_en);
+  free(&q_munch2_writer->sem_de);
+  free(&q_munch2_writer->mutex);
+
   
   // free the queues at last
   free(q_reader_munch1);
