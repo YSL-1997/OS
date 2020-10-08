@@ -34,7 +34,7 @@ void func_reader(void* arg){
 	
 	if(ch == EOF){
 	  printf("The rest of the line ends with EOF, reader stop\n");
-          EnqueueString(q, "\0");
+          EnqueueString(q, '\0');
           // not sure if this will work, if not, try replacing \0 with NULL.
           fclose(fp);
           free(buffer);
@@ -50,7 +50,7 @@ void func_reader(void* arg){
     if((char)ch == EOF){
       if(read_len == 0){
 	printf("The only thing that we have read is EOF\n");
-        EnqueueString(q, "\0");
+        EnqueueString(q, '\0');
         // not sure if this will work, if not, try replacing \0 with NULL.
         fclose(fp);
         free(buffer);

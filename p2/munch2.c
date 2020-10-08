@@ -25,6 +25,11 @@ void* func_munch2(void** args)
     if(str[0] == '\0'){
       break;
     }
+    for(int i = 0; i < strlen(str); i++){
+      if(islower(str[i])){
+	str[i] = toupper(str[i]);
+      }
+    }
     // TODO: manipulate the str
     EnqueueString(q_to, str);
   }

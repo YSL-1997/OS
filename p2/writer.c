@@ -27,6 +27,7 @@ void* func_writer(void* q){
 
   while(1){
     char* str = DequeueString(x);
+    if(str[0] == '\0') break;
     printf("%s\n", str);
     free(str);
   }
