@@ -15,6 +15,13 @@ Queues will be represented by a structure of type Queue.
 
 #include "Queue.h"
 
+static Queue myQueues[3];
+
+// static sem_t sem_en[3];
+// static sem_t sem_en2[3];
+// static sem_t sem_en3[3];
+
+
 
 int get_time()
 {
