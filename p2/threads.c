@@ -15,7 +15,7 @@ void* func_reader(void* arg){
   Queue* q = (Queue*)arg;
   FILE *fp;
   char ch = 'a'; // in order to enter the while loop
-  int read_len = 0; // index of current length
+  int read_len = 0; // current available index
 
   char* buffer = (char*)malloc(MAX_LEN * sizeof(char));
 
@@ -27,10 +27,9 @@ void* func_reader(void* arg){
 
   while(ch != EOF){
     ch = fgetc(fp);
-    // printf("Now we get a char: %c\n", ch);
+    
     if(read_len == MAX_LEN){ // abort this line
       fprintf(stderr, "Input line too long.\n");
-      // printf("%s \n", buffer);
 
       while(1){
 	if(ch == '\n')
@@ -43,24 +42,20 @@ void* func_reader(void* arg){
 	  EnqueueString(q, "");                                                 // modified (q, '\0')
 	  printf("1_ reader: enqueued null\n");
 	  pthread_exit(NULL);/////////////////////////////////////////////
-	  
 	}
 	ch = fgetc(fp);
-	      
       }
-
-      read_len = 0; // reset i to be 0
+      read_len = 0; // reset the first available to 0
       continue;
     }
 
     if(ch != '\n' && ch != EOF){
       buffer[read_len] = (char)ch;
       read_len++;
-          
     }
     else{ // ch == '\n' or ch == EOF
       if(ch == EOF && q->enqueueCount == 0){
-	printf("We have reached EOF\n");
+	printf("We have read nothing but EOF\n");
 	EnqueueString(q, "");                                                 // modified 本来是没有的
 	printf("2_ reader: enqueued null\n");
 	free(buffer);
@@ -74,7 +69,8 @@ void* func_reader(void* arg){
       buffer[read_len] = '\0';
       // now, we have that buffer[0 ~ read_len] is valid
       // need to put into a new malloc'ed str.
-      if(read_len != 0){
+      if(read_len != 0){ // the reason we check here is because if read_len==0, then it must be the case that we read a '\n', which should be replaced by '\0'
+	      // Hence, read_len == 0 implies that we cannot Enqueue that string, just ignore that.
 	char* ret_str = malloc((read_len+1) * sizeof(char));
 	strncpy(ret_str, buffer, read_len+1);
 	// store what's in buffer to ret_str
@@ -85,25 +81,18 @@ void* func_reader(void* arg){
       if(ch == '\n'){
 	read_len = 0;
 	continue;
-	      
       }
       else{ //ch == EOF
 	break;
       }
     }
-      
   }
-
-
   // read finished, enqueue a null char
   EnqueueString(q, "");                                                   // modified (q, str)
   printf("4_ reader: enqueued null\n");
-  // not sure if this will work, if not, try replacing \0 with NULL.
-
   fclose(fp);
   free(buffer);
   pthread_exit(NULL);
-  
 }
 
 
@@ -130,28 +119,21 @@ void* func_munch1(void* args)
     if(str[0] == '\0'){
       printf("munch1 enqueued string: %s\n", str);
       EnqueueString(q_to, "");                                             // modified EnqueueString(q, str);
-      
       break;
-          
     }
     for(int i = 0; i < (int)strlen(str); i++){
       if(str[i] == ' '){
 	str[i] = '*';
-	      
       }
-          
     }
 
     EnqueueString(q_to, str);
     printf("munch1 enqueued string: %s\n", str);
-      
   }
   printf("munch1 ...........exit\n");
   pthread_exit(NULL);
   // what passed inside the arg of pthread_exit() is returned by the function
-  
 }
-
 
 void* func_munch2(void* args)
 {
@@ -166,24 +148,18 @@ void* func_munch2(void* args)
     if(str[0] == '\0'){
       printf("munch2 enqueued string: %s\n", str);
       EnqueueString(q_to, "");                                                 // modified EnqueueString(q, str);
-      
       break;
-          
     }
     for(int i = 0; i < (int)strlen(str); i++){
       if(islower(str[i])){
 	str[i] = toupper(str[i]);
-	      
       }
-          
     }
     EnqueueString(q_to, str);
     printf("munch2 enqueued string: %s\n", str);
-      
   }
   printf("munch2 ...........exit\n");
   pthread_exit(NULL);
-  
 }
 
 
@@ -198,17 +174,15 @@ void* func_writer(void* q){
       break;
     printf("%s\n", str);
     free(str);
-      
   }
   printf("writer ...........exit\n");
   pthread_exit(NULL);
-  
 }
 
+// Used for passing multi args to pthread_create() 
 Multi_args* CreateMultiArgs(void* q1, void* q2){
   Multi_args* ret = (Multi_args*)malloc(sizeof(Multi_args));
   ret->arg1 = (Queue*)q1;
   ret->arg2 = (Queue*)q2;
   return ret;
-  
 }
