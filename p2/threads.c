@@ -17,7 +17,7 @@ void* func_reader(void* arg){
   char ch = 'a'; // in order to enter the while loop
   int read_len = 0; // index of current length
 
-  char *buffer = malloc(MAX_LEN * sizeof(char));
+  char* buffer = (char*)malloc(MAX_LEN * sizeof(char));
   
   if((fp = fopen("text1.txt", "r")) == NULL){
     perror("Could not get info from stdin");
@@ -26,7 +26,7 @@ void* func_reader(void* arg){
   
   while(ch != EOF){
     ch = fgetc(fp);
-
+    // printf("Now we get a char: %c\n", ch);
     if(read_len == MAX_LEN){ // abort this line
       fprintf(stderr, "Input line too long.\n");
       // printf("%s \n", buffer);
@@ -39,7 +39,8 @@ void* func_reader(void* arg){
 	  printf("The rest of the line ends with EOF, reader stop\n");
 	  fclose(fp);
           free(buffer);
-	  //   pthread_exit(0);
+	  EnqueueString(q, '\0');
+	  pthread_exit(0);/////////////////////////////////////////////
 	}
 	ch = fgetc(fp);
       }
@@ -48,16 +49,16 @@ void* func_reader(void* arg){
       continue;
     }
   
-    if( ch != '\n' && ch != EOF){
+    if(ch != '\n' && ch != EOF){
       buffer[read_len] = (char)ch;
       read_len++;
     }
     else{ // ch == '\n' or ch == EOF
       if(ch == EOF && read_len == 0){
-        printf("The only thing that we have read is EOF\n");
+        printf("We have reached EOF\n");
 	free(buffer);
 	fclose(fp);
-	exit(0);
+	pthread_exit(0);
 	// have to check whether there will be multi-files in stdin,
 	// if so, exit can't be used.
       }
@@ -69,14 +70,13 @@ void* func_reader(void* arg){
       strncpy(ret_str, buffer, read_len+1);
       // store what's in buffer to ret_str
       EnqueueString(q, ret_str);
+      printf("Enqueued string: %s\n", ret_str);
       
       if(ch == '\n'){
 	read_len = 0;
 	continue;
       }
       else{ //ch == EOF
-	fclose(fp);
-	free(buffer);
 	break;
       }
     }
@@ -84,7 +84,7 @@ void* func_reader(void* arg){
 
   
   // read finished, enqueue a null char
-  EnqueueString(q, "\0");
+  EnqueueString(q, '\0');
   // not sure if this will work, if not, try replacing \0 with NULL.
   
   fclose(fp);
@@ -112,7 +112,8 @@ void* func_munch1(void* args)
 
   while(1){
     char* str = DequeueString(q_from);
-    if(str[0] == '\0'){
+    printf("munch1 dnqueued string: %s\n", str);
+    if(strlen(str) == 0){
       break;
     }
     for(int i = 0; i < (int)strlen(str); i++){
@@ -123,8 +124,9 @@ void* func_munch1(void* args)
     
     // TODO: manipulate the str
     EnqueueString(q_to, str);
+    printf("munch1 enqueued string: %s\n", str);
   }
-  
+  printf("munch1 ...........exit");
   pthread_exit(NULL);
   // what passed inside the arg of pthread_exit() is returned by the function
 }
@@ -139,7 +141,8 @@ void* func_munch2(void* args)
 
   while(1){
     char* str = DequeueString(q_from);
-    if(str[0] == '\0'){
+    printf("munch2 dnqueued string: %s\n", str);
+    if(strlen(str) == 0){
       break;
     }
     for(int i = 0; i < (int)strlen(str); i++){
@@ -149,8 +152,9 @@ void* func_munch2(void* args)
     }
     // TODO: manipulate the str
     EnqueueString(q_to, str);
+    printf("munch2 enqueued string: %s\n", str);
   }
-
+  printf("munch2 ...........exit");
   pthread_exit(NULL);
 }
 
@@ -161,11 +165,13 @@ void* func_writer(void* q){
 
   while(1){
     char* str = DequeueString(x);
-    if(str[0] == '\0') break;
+    printf("writer dnqueued string: %s\n", str);
+    if(strlen(str) == 0)
+      break;
     printf("%s\n", str);
     free(str);
   }
- 
+   printf("writer ...........exit");
   pthread_exit(NULL);
 }
 
