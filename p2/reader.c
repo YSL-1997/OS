@@ -5,11 +5,14 @@
   Project #2 - Shared Memory Producer/Consumer Program
 */
 
-#include "reader.h"
+#include <dirent.h>
+#include <ctype.h>
+#include <unistd.h>
+#include "Queue.h"
 
 const size_t MAX_LEN = 4096;
 
-void* func_reader(void* arg){
+void func_reader(void* arg){
   Queue* q = (Queue*)arg;
   FILE *fp;
   char ch = 'a'; // in order to enter the while loop
@@ -25,7 +28,7 @@ void* func_reader(void* arg){
   while(ch != EOF){
     ch = fgetc(fp);
 
-    if(read_len == (int)MAX_LEN-1){ // abort this line
+    if(read_len == MAX_LEN-1){ // abort this line
       fprintf(stderr, "Input line too long.\n");
       
       while(1){
@@ -34,11 +37,7 @@ void* func_reader(void* arg){
 	
 	if(ch == EOF){
 	  printf("The rest of the line ends with EOF, reader stop\n");
-          EnqueueString(q, '\0');
-          // not sure if this will work, if not, try replacing \0 with NULL.
-          fclose(fp);
-          free(buffer);
-          pthread_exit(0);
+	  exit(0);
 	}
 	ch = fgetc(fp);
       }
@@ -47,14 +46,10 @@ void* func_reader(void* arg){
       continue;
     }
     
-    if((char)ch == EOF){
+    if(ch == EOF){
       if(read_len == 0){
 	printf("The only thing that we have read is EOF\n");
-        EnqueueString(q, '\0');
-        // not sure if this will work, if not, try replacing \0 with NULL.
-        fclose(fp);
-        free(buffer);
-        pthread_exit(0);
+	exit(0);
       }
       else{
 	buffer[read_len] = '\0';
