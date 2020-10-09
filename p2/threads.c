@@ -112,8 +112,10 @@ void* func_munch1(void* args)
 
   while(1){
     char* str = DequeueString(q_from);
-    printf("munch1 dnqueued string: %s\n", str);
+    printf("munch1 dequeued string: %s\n", str);
     if(strlen(str) == 0){
+      EnqueueString(q_to, str);
+      printf("munch1 enqueued string: %s\n", str);
       break;
     }
     for(int i = 0; i < (int)strlen(str); i++){
@@ -126,7 +128,7 @@ void* func_munch1(void* args)
     EnqueueString(q_to, str);
     printf("munch1 enqueued string: %s\n", str);
   }
-  printf("munch1 ...........exit");
+  printf("munch1 ...........exit\n");
   pthread_exit(NULL);
   // what passed inside the arg of pthread_exit() is returned by the function
 }
@@ -141,8 +143,10 @@ void* func_munch2(void* args)
 
   while(1){
     char* str = DequeueString(q_from);
-    printf("munch2 dnqueued string: %s\n", str);
+    printf("munch2 dequeued string: %s\n", str);
     if(strlen(str) == 0){
+      EnqueueString(q_to, str);
+      printf("munch2 enqueued string: %s\n", str);
       break;
     }
     for(int i = 0; i < (int)strlen(str); i++){
@@ -154,7 +158,7 @@ void* func_munch2(void* args)
     EnqueueString(q_to, str);
     printf("munch2 enqueued string: %s\n", str);
   }
-  printf("munch2 ...........exit");
+  printf("munch2 ...........exit\n");
   pthread_exit(NULL);
 }
 
@@ -165,13 +169,13 @@ void* func_writer(void* q){
 
   while(1){
     char* str = DequeueString(x);
-    printf("writer dnqueued string: %s\n", str);
+    printf("writer dequeued string: %s\n", str);
     if(strlen(str) == 0)
       break;
     printf("%s\n", str);
     free(str);
   }
-   printf("writer ...........exit");
+   printf("writer ...........exit\n");
   pthread_exit(NULL);
 }
 
