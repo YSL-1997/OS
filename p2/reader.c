@@ -25,7 +25,7 @@ void* func_reader(void* arg){
   while(ch != EOF){
     ch = fgetc(fp);
 
-    if(read_len == MAX_LEN-1){ // abort this line
+    if(read_len == (int)MAX_LEN-1){ // abort this line
       fprintf(stderr, "Input line too long.\n");
       
       while(1){
