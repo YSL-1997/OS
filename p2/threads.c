@@ -18,52 +18,54 @@ void* func_reader(void* arg){
   int read_len = 0; // index of current length
 
   char* buffer = (char*)malloc(MAX_LEN * sizeof(char));
-  
-  if((fp = fopen("text2.txt", "r")) == NULL){
+
+  if((fp = fopen("text1.txt", "r")) == NULL){
     perror("Could not get info from stdin");
     exit(EXIT_FAILURE);
+      
   }
-  
+
   while(ch != EOF){
     ch = fgetc(fp);
     // printf("Now we get a char: %c\n", ch);
     if(read_len == MAX_LEN){ // abort this line
       fprintf(stderr, "Input line too long.\n");
       // printf("%s \n", buffer);
-      
+
       while(1){
-        if(ch == '\n')
+	if(ch == '\n')
 	  break;
-	
+
 	if(ch == EOF){
 	  printf("The rest of the line ends with EOF, reader stop\n");
 	  fclose(fp);
-          free(buffer);
+	  free(buffer);
 	  EnqueueString(q, '\0');
-	  printf("1reader: Enqueued null\n");
 	  pthread_exit(0);/////////////////////////////////////////////
+	  
 	}
 	ch = fgetc(fp);
+	      
       }
-      
+
       read_len = 0; // reset i to be 0
       continue;
     }
-  
+
     if(ch != '\n' && ch != EOF){
       buffer[read_len] = (char)ch;
       read_len++;
+          
     }
     else{ // ch == '\n' or ch == EOF
       if(ch == EOF && read_len == 0){
-        printf("We have reached EOF\n");
-	EnqueueString(q, '\0');
-	printf("2reader: Enqueued null\n");
+	printf("We have reached EOF\n");
 	free(buffer);
 	fclose(fp);
 	pthread_exit(0);
 	// have to check whether there will be multi-files in stdin,
 	// if so, exit can't be used.
+	      
       }
 
       buffer[read_len] = '\0';
@@ -74,26 +76,28 @@ void* func_reader(void* arg){
       // store what's in buffer to ret_str
       EnqueueString(q, ret_str);
       printf("Enqueued string: %s\n", ret_str);
-      
+
       if(ch == '\n'){
 	read_len = 0;
 	continue;
+	      
       }
       else{ //ch == EOF
 	break;
       }
     }
+      
   }
 
-  
+
   // read finished, enqueue a null char
   EnqueueString(q, '\0');
-  printf("3reader: Enqueued null\n");
   // not sure if this will work, if not, try replacing \0 with NULL.
-  
+
   fclose(fp);
   free(buffer);
   pthread_exit(0);
+  
 }
 
 
@@ -110,7 +114,7 @@ void* func_reader(void* arg){
 void* func_munch1(void* args)
 {
   Multi_args* x = (Multi_args*)args;
-  
+
   Queue* q_from = x->arg1;
   Queue* q_to = x->arg2;
 
@@ -121,27 +125,32 @@ void* func_munch1(void* args)
       EnqueueString(q_to, str);
       printf("munch1 enqueued string: %s\n", str);
       break;
+          
     }
     for(int i = 0; i < (int)strlen(str); i++){
       if(str[i] == ' '){
 	str[i] = '*';
+	      
       }
+          
     }
-    
+
     // TODO: manipulate the str
     EnqueueString(q_to, str);
     printf("munch1 enqueued string: %s\n", str);
+      
   }
   printf("munch1 ...........exit\n");
   pthread_exit(NULL);
   // what passed inside the arg of pthread_exit() is returned by the function
+  
 }
 
 
 void* func_munch2(void* args)
 {
   Multi_args* x = (Multi_args*)args;
-  
+
   Queue* q_from = x->arg1;
   Queue* q_to = x->arg2;
 
@@ -152,18 +161,23 @@ void* func_munch2(void* args)
       EnqueueString(q_to, str);
       printf("munch2 enqueued string: %s\n", str);
       break;
+          
     }
     for(int i = 0; i < (int)strlen(str); i++){
       if(islower(str[i])){
 	str[i] = toupper(str[i]);
+	      
       }
+          
     }
     // TODO: manipulate the str
     EnqueueString(q_to, str);
     printf("munch2 enqueued string: %s\n", str);
+      
   }
   printf("munch2 ...........exit\n");
   pthread_exit(NULL);
+  
 }
 
 
@@ -178,9 +192,11 @@ void* func_writer(void* q){
       break;
     printf("%s\n", str);
     free(str);
+      
   }
-   printf("writer ...........exit\n");
+  printf("writer ...........exit\n");
   pthread_exit(NULL);
+  
 }
 
 Multi_args* CreateMultiArgs(void* q1, void* q2){
@@ -188,4 +204,5 @@ Multi_args* CreateMultiArgs(void* q1, void* q2){
   ret->arg1 = (Queue*)q1;
   ret->arg2 = (Queue*)q2;
   return ret;
+  
 }
