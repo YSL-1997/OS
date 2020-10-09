@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include "Queue.h"
 
-const size_t MAX_LEN = 4096;
+const int MAX_LEN = 4096;
 
 void func_reader(void* arg){
   Queue* q = (Queue*)arg;
@@ -20,7 +20,7 @@ void func_reader(void* arg){
 
   char *buffer = malloc(MAX_LEN * sizeof(char));
   
-  if((fp = fopen("bigfile.txt", "r")) == NULL){
+  if((fp = fopen("bigfile2.txt", "r")) == NULL){
     perror("Could not get info from stdin");
     exit(EXIT_FAILURE);
   }
@@ -28,54 +28,52 @@ void func_reader(void* arg){
   while(ch != EOF){
     ch = fgetc(fp);
 
-    if(read_len == MAX_LEN-1){ // abort this line
+    if(read_len == MAX_LEN){ // abort this line
       fprintf(stderr, "Input line too long.\n");
-      
+      // printf("%s \n", buffer);
+    
       while(1){
-	if(ch == '\n')
-	  break;
+        if(ch == '\n')
+	        break;
 	
-	if(ch == EOF){
-	  printf("The rest of the line ends with EOF, reader stop\n");
-	  exit(0);
-	}
-	ch = fgetc(fp);
+	      if(ch == EOF){
+	        printf("The rest of the line ends with EOF, reader stop\n");
+	        fclose(fp);
+          free(buffer);
+        //   pthread_exit(0);
+	      }
+	      ch = fgetc(fp);
       }
 
       read_len = 0; // reset i to be 0
       continue;
     }
-    
-    if(ch == EOF){
-      if(read_len == 0){
-	printf("The only thing that we have read is EOF\n");
-	exit(0);
-      }
-      else{
-	buffer[read_len] = '\0';
-	// now, we have that buffer[0 ~ read_len+1] is valid
-	// need to put into a new malloc'ed str.
-	char* ret_str = malloc((read_len+1) * sizeof(char));
-	strncpy(ret_str, buffer, read_len+1); // store what's in buffer to ret_str
-	EnqueueString(q, ret_str);
-      }
-      break;
+  
+    if( ch != '\n' && ch != EOF){
+      buffer[read_len] = (char)ch;
+      read_len++;
     }
-    
-    buffer[read_len] = (char)ch;
-    read_len++;
-    
-    if((char)ch == '\n'){
+    else{
+      
+      if(ch == EOF && read_len == 0){
+        printf("The only thing that we have read is EOF\n");
+	      exit(0); //have to check whether there will be multi-files in stdin, if so, exit can't be used.
+      }
+
       buffer[read_len] = '\0';
       // now, we have that buffer[0 ~ read_len+1] is valid
       // need to put into a new malloc'ed str.
       char* ret_str = malloc((read_len+1) * sizeof(char));
       strncpy(ret_str, buffer, read_len+1); // store what's in buffer to ret_str
-      EnqueueString(q, ret_str);
-      read_len = 0; // reset index
-      continue;
+    //   EnqueueString(q, ret_str);
+      if(ch == '\n')
+        continue;
+      else if(ch == EOF)
+        break;
+      
     }
   }
+
 
   // read finished, enqueue a null char
   EnqueueString(q, "\0");
