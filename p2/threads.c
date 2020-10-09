@@ -19,7 +19,7 @@ void* func_reader(void* arg){
 
   char* buffer = (char*)malloc(MAX_LEN * sizeof(char));
   
-  if((fp = fopen("text1.txt", "r")) == NULL){
+  if((fp = fopen("text2.txt", "r")) == NULL){
     perror("Could not get info from stdin");
     exit(EXIT_FAILURE);
   }
@@ -40,6 +40,7 @@ void* func_reader(void* arg){
 	  fclose(fp);
           free(buffer);
 	  EnqueueString(q, '\0');
+	  printf("1reader: Enqueued null\n");
 	  pthread_exit(0);/////////////////////////////////////////////
 	}
 	ch = fgetc(fp);
@@ -56,6 +57,8 @@ void* func_reader(void* arg){
     else{ // ch == '\n' or ch == EOF
       if(ch == EOF && read_len == 0){
         printf("We have reached EOF\n");
+	EnqueueString(q, '\0');
+	printf("2reader: Enqueued null\n");
 	free(buffer);
 	fclose(fp);
 	pthread_exit(0);
@@ -85,6 +88,7 @@ void* func_reader(void* arg){
   
   // read finished, enqueue a null char
   EnqueueString(q, '\0');
+  printf("3reader: Enqueued null\n");
   // not sure if this will work, if not, try replacing \0 with NULL.
   
   fclose(fp);
