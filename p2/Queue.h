@@ -7,7 +7,7 @@
 #include <sys/time.h>
 #include <semaphore.h>
 
-struct Queue
+typedef struct Queue
 {
   int size;
   //size of the queue

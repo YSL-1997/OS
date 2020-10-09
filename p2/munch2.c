@@ -14,6 +14,7 @@
 
 
 #include "munch2.h"
+#include <ctype.h>
 
 void* func_munch2(void** args)
 {
