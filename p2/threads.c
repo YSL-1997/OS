@@ -19,7 +19,7 @@ void* func_reader(void* arg){
 
   char* buffer = (char*)malloc(MAX_LEN * sizeof(char));
 
-  if((fp = fopen("test3.txt", "r")) == NULL){
+  if((fp = fopen("test1.txt", "r")) == NULL){
     perror("Could not get info from stdin");
     exit(EXIT_FAILURE);
       
@@ -39,7 +39,7 @@ void* func_reader(void* arg){
 	  printf("The rest of the line ends with EOF, reader stop\n");
 	  fclose(fp);
 	  free(buffer);
-	  EnqueueString(q, "");                                                 // modified (q, '\0')
+	  EnqueueString(q, NULL);                                                 // modified (q, '\0')
 	  printf("1_ reader: enqueued null\n");
 	  pthread_exit(NULL);/////////////////////////////////////////////
 	}
@@ -56,7 +56,7 @@ void* func_reader(void* arg){
     else{ // ch == '\n' or ch == EOF
       if(ch == EOF && q->enqueueCount == 0){
 	printf("We have read nothing but EOF\n");
-	EnqueueString(q, "");                                                 // modified 本来是没有的
+	EnqueueString(q, NULL);                                                 // modified 本来是没有的
 	printf("2_ reader: enqueued null\n");
 	free(buffer);
 	fclose(fp);
@@ -69,15 +69,13 @@ void* func_reader(void* arg){
       buffer[read_len] = '\0';
       // now, we have that buffer[0 ~ read_len] is valid
       // need to put into a new malloc'ed str.
-      if(read_len != 0){ // the reason we check here is because if read_len==0, then it must be the case that we read a '\n', which should be replaced by '\0'
-	      // Hence, read_len == 0 implies that we cannot Enqueue that string, just ignore that.
-	char* ret_str = malloc((read_len+1) * sizeof(char));
-	strncpy(ret_str, buffer, read_len+1);
-	// store what's in buffer to ret_str
-	EnqueueString(q, ret_str);
-	printf("3_ reader: Enqueued string: %s\n", ret_str);
-      }
       
+      char* ret_str = malloc((read_len+1) * sizeof(char));
+      strncpy(ret_str, buffer, read_len+1);
+      // store what's in buffer to ret_str
+      EnqueueString(q, ret_str);
+      printf("3_ reader: Enqueued string: %s\n", ret_str);
+  
       if(ch == '\n'){
 	read_len = 0;
 	continue;
@@ -88,7 +86,7 @@ void* func_reader(void* arg){
     }
   }
   // read finished, enqueue a null char
-  EnqueueString(q, "");                                                   // modified (q, str)
+  EnqueueString(q, NULL);                                                   // modified (q, str)
   printf("4_ reader: enqueued null\n");
   fclose(fp);
   free(buffer);
@@ -116,9 +114,9 @@ void* func_munch1(void* args)
   while(1){
     char* str = DequeueString(q_from);
     printf("munch1 dequeued string: %s\n", str);
-    if(str[0] == '\0'){
+    if(str == NULL){
       printf("munch1 enqueued string: %s\n", str);
-      EnqueueString(q_to, "");                                             // modified EnqueueString(q, str);
+      EnqueueString(q_to, NULL);                                             // modified EnqueueString(q, str);
       break;
     }
     for(int i = 0; i < (int)strlen(str); i++){
@@ -145,9 +143,9 @@ void* func_munch2(void* args)
   while(1){
     char* str = DequeueString(q_from);
     printf("munch2 dequeued string: %s\n", str);
-    if(str[0] == '\0'){
+    if(str == NULL){
       printf("munch2 enqueued string: %s\n", str);
-      EnqueueString(q_to, "");                                                 // modified EnqueueString(q, str);
+      EnqueueString(q_to, NULL);                                                 // modified EnqueueString(q, str);
       break;
     }
     for(int i = 0; i < (int)strlen(str); i++){
@@ -170,7 +168,7 @@ void* func_writer(void* q){
   while(1){
     char* str = DequeueString(x);
     printf("writer dequeued string: %s\n", str);
-    if(str[0] == '\0')
+    if(str == NULL)
       break;
     printf("%s\n", str);
     free(str);
