@@ -28,13 +28,13 @@ int main(int argc, char* argv[]){
   // probably needs handle_pthread_error(int err), see concurr1.c
   
   pthread_create(&reader_thread, NULL, &func_reader, (void*)q_reader_munch1);
-  printf("reader created... finished\n");
+  printf("reader created...\n");
   pthread_create(&munch1_thread, NULL, &func_munch1, (void*)munch1_args);
-  printf("munch1 created... finished\n");
+  printf("munch1 created...\n");
   pthread_create(&munch2_thread, NULL, &func_munch2, (void*)munch2_args);
-  printf("munch2 created... finished\n");
+  printf("munch2 created...\n");
   pthread_create(&writer_thread, NULL, &func_writer, (void*)q_munch2_writer);
-  printf("writer created... finished\n");
+  printf("writer created...\n");
   
   // ************************************************************
   // probably needs handle_pthread_error(int err), see concurr1.c
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]){
   // free the strings that we've been processing in writer.c
 
   // free the stringQueue in each queue
-  free(*(q_reader_munch1->stringQueue));  
+  free(q_reader_munch1->stringQueue);  
   free(q_munch1_munch2->stringQueue);
   free(q_munch2_writer->stringQueue);
     
