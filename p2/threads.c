@@ -19,7 +19,7 @@ void* func_reader(void* arg){
 
   char *buffer = malloc(MAX_LEN * sizeof(char));
   
-  if((fp = fopen("bigfile2.txt", "r")) == NULL){
+  if((fp = fopen("text1.txt", "r")) == NULL){
     perror("Could not get info from stdin");
     exit(EXIT_FAILURE);
   }
@@ -52,28 +52,37 @@ void* func_reader(void* arg){
       buffer[read_len] = (char)ch;
       read_len++;
     }
-    else{
+    else{ // ch == '\n' or ch == EOF
       if(ch == EOF && read_len == 0){
         printf("The only thing that we have read is EOF\n");
-	      exit(0);
-	      // have to check whether there will be multi-files in stdin,
-	      // if so, exit can't be used.
+	free(buffer);
+	fclose(fp);
+	exit(0);
+	// have to check whether there will be multi-files in stdin,
+	// if so, exit can't be used.
       }
 
       buffer[read_len] = '\0';
-      // now, we have that buffer[0 ~ read_len+1] is valid
+      // now, we have that buffer[0 ~ read_len] is valid
       // need to put into a new malloc'ed str.
       char* ret_str = malloc((read_len+1) * sizeof(char));
-      strncpy(ret_str, buffer, read_len+1); // store what's in buffer to ret_str
-      //   EnqueueString(q, ret_str);
-      if(ch == '\n')
-        continue;
-      else if(ch == EOF)
-        break; 
+      strncpy(ret_str, buffer, read_len+1);
+      // store what's in buffer to ret_str
+      EnqueueString(q, ret_str);
+      
+      if(ch == '\n'){
+	read_len = 0;
+	continue;
+      }
+      else{ //ch == EOF
+	fclose(fp);
+	free(buffer);
+	break;
+      }
     }
   }
 
-
+  
   // read finished, enqueue a null char
   EnqueueString(q, "\0");
   // not sure if this will work, if not, try replacing \0 with NULL.
