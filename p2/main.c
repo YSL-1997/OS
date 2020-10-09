@@ -23,13 +23,18 @@ int main(int argc, char* argv[]){
   Queue* q_munch1_munch2 = CreateStringQueue(size);
   Queue* q_munch2_writer = CreateStringQueue(size);
   
-  Queue** munch1_args = {q_reader_munch1, q_munch1_munch2};
-  Queue** munch2_args = {q_munch1_munch2, q_munch2_writer};
+
+  Multi_args* munch1_args = CreateMultiArgs(q_reader_munch1, q_munch1_munch2);
+  Multi_args* munch2_args = CreateMultiArgs(q_munch1_munch2, q_munch2_writer);
+  // const Queue* munch1_args[] = {q_reader_munch1, q_munch1_munch2};
+  // const Queue* munch2_args[] = {q_munch1_munch2, q_munch2_writer};
+
+  
   // ************************************************************
   // probably needs handle_pthread_error(int err), see concurr1.c
   pthread_create(&reader_thread, NULL, &func_reader, (void*)q_reader_munch1);
-  pthread_create(&munch1_thread, NULL, &func_munch1, (void**)munch1_args);
-  pthread_create(&munch2_thread, NULL, &func_munch2, (void**)munch2_args);
+  pthread_create(&munch1_thread, NULL, &func_munch1, (void*)munch1_args);
+  pthread_create(&munch2_thread, NULL, &func_munch2, (void*)munch2_args);
   pthread_create(&writer_thread, NULL, &func_writer, (void*)q_munch1_munch2);
 
   // ************************************************************
@@ -46,9 +51,9 @@ int main(int argc, char* argv[]){
   pthread_join(writer_thread, NULL);
   
   // print the queues' status
-  PrintQueueStatus(q_reader_munch1);
-  PrintQueueStatus(q_munch1_munch2);
-  PrintQueueStatus(q_munch2_writer);
+  PrintQueueStats(q_reader_munch1);
+  PrintQueueStats(q_munch1_munch2);
+  PrintQueueStats(q_munch2_writer);
 
   // free the strings that we've been processing in writer.c
 
@@ -68,7 +73,8 @@ int main(int argc, char* argv[]){
   free(&q_munch2_writer->sem_de);
   free(&q_munch2_writer->mutex);
 
-  
+  free(munch1_args);
+  free(munch2_args);
   // free the queues at last
   free(q_reader_munch1);
   free(q_munch1_munch2);

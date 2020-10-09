@@ -7,6 +7,6 @@
 #include "Queue.h"
 #include <pthread.h>
 
-void func_reader(void* arg);
+void* func_reader(void* arg);
 
 #endif

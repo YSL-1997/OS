@@ -9,7 +9,7 @@
 
 const size_t MAX_LEN = 4096;
 
-void func_reader(void* arg){
+void* func_reader(void* arg){
   Queue* q = (Queue*)arg;
   FILE *fp;
   char ch = 'a'; // in order to enter the while loop

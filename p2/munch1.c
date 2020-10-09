@@ -19,10 +19,12 @@
 
 // 记得测试一下，假如，s是一个pointer，指向一个malloc'ed的string，然后修改s[0],s[1]...看是否在malloc'ed的string中也会被修改
 
-void* func_munch1(void** args)
+void* func_munch1(void* args)
 {
-  Queue* q_from = (Queue*)args[0];
-  Queue* q_to = (Queue*)args[1];
+  Multi_args* x = (Multi_args*)args;
+  
+  Queue* q_from = x->arg1;
+  Queue* q_to = x->arg2;
 
   while(1){
     char* str = DequeueString(q_from);
