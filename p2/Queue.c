@@ -56,14 +56,14 @@ void EnqueueString(Queue* q, char* string)
   sem_wait(&q->sem_en);
 
   // enter the critical section
-  sem_wait(&mutex);
+  sem_wait(&q->mutex);
   // I think this critical section is not a must
   q->stringQueue[q->firstAvailable] = string;
-  q->firstAvailable = (firstAvailable+1) % q->size;
+  q->firstAvailable = (q->firstAvailable+1) % q->size;
   q->enqueueCount++;
 
   // leave the critical section
-  sem_post(&mutex);
+  sem_post(&q->mutex);
 
   sem_post(&q->sem_de);
 
@@ -82,14 +82,14 @@ char* DequeueString(Queue* q){
   sem_wait(&q->sem_de);
 
   // enter the critical section
-  sem_wait(&mutex);
+  sem_wait(&q->mutex);
   // This critical section is not a must, as far as I'm concerned.
-  char* ret_ptr = q->stringQueue[head];
+  char* ret_ptr = q->stringQueue[q->head];
   q->head = (q->head + 1) % q->size;
   q->dequeueCount++;
 
   // leave the critical section
-  sem_post(&mutex);
+  sem_post(&q->mutex);
 
   sem_post(&q->sem_en);
 
