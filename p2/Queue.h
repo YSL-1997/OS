@@ -54,16 +54,12 @@ typedef struct Queue
   
 } Queue;
 
-typedef struct Multi_args{
-  Queue* arg1;
-  Queue* arg2;
-} Multi_args;
 
 int get_time();
 Queue *CreateStringQueue(int size);
 void EnqueueString(Queue *q, char *string);
 char* DequeueString(Queue *q);
 void PrintQueueStats(Queue *q);
-Multi_args* CreateMultiArgs(Queue* q1, Queue* q2);
+
 
 #endif
