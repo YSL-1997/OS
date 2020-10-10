@@ -13,66 +13,58 @@ const int MAX_LEN = 100;
 
 void* func_reader(void* arg){
   Queue* q = (Queue*)arg;
-  FILE *fp;
   char ch = 'a'; // in order to enter the while loop
   int read_len = 0; // current available index
-
   char* buffer = (char*)malloc(MAX_LEN * sizeof(char));
-
-  if((fp = fopen("test1.txt", "r")) == NULL){
-    perror("Could not get info from stdin");
-    exit(EXIT_FAILURE);
-      
-  }
-
+  handle_malloc_error(buffer); // error handling
+  
   while(ch != EOF){
-    ch = fgetc(fp);
+    ch = fgetc(stdin);
     
     if(read_len == MAX_LEN){ // abort this line
       fprintf(stderr, "Input line too long.\n");
-
-      while(1){
+      
+      while(1){ // keep reading the rest and abort them
 	if(ch == '\n')
 	  break;
-
-	if(ch == EOF){
+	
+	if(ch == EOF){ // over MAX_LEN and ends with EOF
 	  printf("The rest of the line ends with EOF, reader stop\n");
-	  fclose(fp);
 	  free(buffer);
-	  EnqueueString(q, NULL);                                                 // modified (q, '\0')
+	  EnqueueString(q, NULL);
 	  printf("1_ reader: enqueued null\n");
-	  pthread_exit(NULL);/////////////////////////////////////////////
+	  pthread_exit(NULL);
 	}
-	ch = fgetc(fp);
+	ch = fgetc(stdin);
       }
-      read_len = 0; // reset the first available to 0
+      
+      read_len = 0; // reset the current available to 0
       continue;
-    }
+    }// end if
 
-    if(ch != '\n' && ch != EOF){
+    if(ch != '\n' && ch != EOF){ // store into buffer
       buffer[read_len] = (char)ch;
       read_len++;
     }
     else{ // ch == '\n' or ch == EOF
-      if(ch == EOF && q->enqueueCount == 0){
+      if(ch == EOF && q->statistics->enqueueCount == 0){
+	// we have read nothing but EOF
 	printf("We have read nothing but EOF\n");
-	EnqueueString(q, NULL);                                                 // modified 本来是没有的
+	EnqueueString(q, NULL);
 	printf("2_ reader: enqueued null\n");
 	free(buffer);
-	fclose(fp);
-	pthread_exit(NULL);
-	// have to check whether there will be multi-files in stdin,
-	// if so, exit can't be used.
-	      
+	pthread_exit(NULL);	      
       }
 
       buffer[read_len] = '\0';
-      // now, we have that buffer[0 ~ read_len] is valid
-      // need to put into a new malloc'ed str.
+      // buffer[0 ~ read_len] is valid, store it.
       
-      char* ret_str = malloc((read_len+1) * sizeof(char));
+      char* ret_str = malloc((read_len+2) * sizeof(char));
+      // malloc'ed size is one more than required
+      handle_malloc_error(ret_str); // error handling
+      
       strncpy(ret_str, buffer, read_len+1);
-      // store what's in buffer to ret_str
+      // only copy the valid characters
       EnqueueString(q, ret_str);
       printf("3_ reader: Enqueued string: %s\n", ret_str);
   
@@ -80,15 +72,14 @@ void* func_reader(void* arg){
 	read_len = 0;
 	continue;
       }
-      else{ //ch == EOF
+      else{ //ch == EOF && enqueueCount > 0
 	break;
       }
     }
   }
   // read finished, enqueue a null char
-  EnqueueString(q, NULL);                                                   // modified (q, str)
+  EnqueueString(q, NULL);
   printf("4_ reader: enqueued null\n");
-  fclose(fp);
   free(buffer);
   pthread_exit(NULL);
 }
@@ -116,7 +107,7 @@ void* func_munch1(void* args)
     printf("munch1 dequeued string: %s\n", str);
     if(str == NULL){
       printf("munch1 enqueued string: %s\n", str);
-      EnqueueString(q_to, NULL);                                             // modified EnqueueString(q, str);
+      EnqueueString(q_to, NULL);
       break;
     }
     for(int i = 0; i < (int)strlen(str); i++){
@@ -133,6 +124,7 @@ void* func_munch1(void* args)
   // what passed inside the arg of pthread_exit() is returned by the function
 }
 
+
 void* func_munch2(void* args)
 {
   Multi_args* x = (Multi_args*)args;
@@ -145,7 +137,7 @@ void* func_munch2(void* args)
     printf("munch2 dequeued string: %s\n", str);
     if(str == NULL){
       printf("munch2 enqueued string: %s\n", str);
-      EnqueueString(q_to, NULL);                                                 // modified EnqueueString(q, str);
+      EnqueueString(q_to, NULL);
       break;
     }
     for(int i = 0; i < (int)strlen(str); i++){
@@ -167,7 +159,7 @@ void* func_writer(void* q){
 
   while(1){
     char* str = DequeueString(x);
-    printf("writer dequeued string: %s\n", str);
+    printf("writer dequeued string: '%s' \n", str);
     if(str == NULL)
       break;
     printf("%s\n", str);
@@ -180,6 +172,7 @@ void* func_writer(void* q){
 // Used for passing multi args to pthread_create() 
 Multi_args* CreateMultiArgs(void* q1, void* q2){
   Multi_args* ret = (Multi_args*)malloc(sizeof(Multi_args));
+  handle_malloc_error(ret); // error handling
   ret->arg1 = (Queue*)q1;
   ret->arg2 = (Queue*)q2;
   return ret;

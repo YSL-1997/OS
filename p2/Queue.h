@@ -1,11 +1,9 @@
 #ifndef QUEUE_H_
 #define QUEUE_H_
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/time.h>
+
 #include <semaphore.h>
+#include "stats.h"
 
 typedef struct Queue
 {
@@ -21,27 +19,9 @@ typedef struct Queue
   int firstAvailable;
   // keep track of the first available slot of the stringQueue that can store
 
-  int enqueueCount;
-  // A count of the number of strings enqueued on this queue.
-
-  int dequeueCount;
-  // A count of the number of strings dequeued on this queue. We would
-  // expect that when the program exits, the two count values are equal.
-
-  int enqueueTime;
-  // use gettimeofday
-  // The amount of elapsed (wallclock) time that a thread spent trying to
-  // do an enqueue. You will record the time at the start of the
-  // EnqueueString function and again at the end of the function,
-  // then take the difference.
-
-  int dequeueTime;
-  /*
-    The amount of elapsed (wallclock) time that a thread spent trying to do 
-    an dequeue. You will record the time at the start of the DequeueString 
-    function and again at the end of the function, then take the difference.
-  */
-
+  stats* statistics;
+  // pointer to a statistics structure
+  
   sem_t sem_en;
   sem_t sem_de;
   // semaphores
@@ -55,7 +35,6 @@ typedef struct Queue
 } Queue;
 
 
-int get_time();
 Queue *CreateStringQueue(int size);
 void EnqueueString(Queue *q, char *string);
 char* DequeueString(Queue *q);

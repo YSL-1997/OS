@@ -1,18 +1,30 @@
 CC      = gcc
-CFLAGS  = -Wall -Wextra -pedantic -pthread
-OBJECTS = prodcom.o threads.o Queue.o
+WARNING_FLAGS  = -Wall -Wextra -Werror
+OPTS = -pthread
+EXE = prodcom
+SCAN_BUILD_DIR = scan-build-out
+OBJECTS = main.o threads.o Queue.o errorHandling.o stats.o
+
+
 
 prodcom: $(OBJECTS)
-	$(CC) $(CFLAGS) -o prodcom $(OBJECTS)
+	$(CC) $(OPTS) $(WARNING_FLAGS) -o $(EXE) $(OBJECTS)
 
-prodcom.o: prodcom.c threads.h Queue.h
-	$(CC) $(CFLAGS) -c prodcom.c
+main.o: main.c threads.h
+	$(CC) $(OPTS) $(WARNING_FLAGS) -c main.c
 
 threads.o: threads.c threads.h Queue.h
-	$(CC) $(CFLAGS) -c threads.c
+	$(CC) $(OPTS) $(WARNING_FLAGS) -c threads.c
 
-Queue.o: Queue.c Queue.h
-	$(CC) $(CFLAGS) -c Queue.c
+Queue.o: Queue.c Queue.h errorHandling.h stats.h
+	$(CC) $(OPTS) $(WARNING_FLAGS) -c Queue.c
+
+errorHandling.o: errorHandling.c errorHandling.h
+	$(CC) $(OPTS) $(WARNING_FLAGS) -c errorHandling.c
+
+stats.o: stats.c stats.h
+	$(CC) $(OPTS) $(WARNING_FLAGS) -c stats.c
 
 clean:
-	rm -f $(OBJECTS) prodcom
+	rm -f $(EXE) *.o
+	rm -rf $(SCAN_BUILD_DIR)
