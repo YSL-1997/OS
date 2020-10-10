@@ -46,15 +46,15 @@ Queue* CreateStringQueue(int size)
 void EnqueueString(Queue* q, char* string)
 {
   enq_start(q->statistics);
-  sem_wait(&q->sem_en);
+  handle_sem_wait_error(sem_wait(&q->sem_en));
   
-  sem_wait(&q->mutex); // I think this critical section is not a must
+  handle_sem_wait_error(sem_wait(&q->mutex)); 
   q->stringQueue[q->firstAvailable] = string; // store the string
   q->firstAvailable = (q->firstAvailable+1) % q->size; // update index
   enq_inc(q->statistics); // update enqueueCount
-  sem_post(&q->mutex);
+  handle_sem_post_error(sem_post(&q->mutex));
 
-  sem_post(&q->sem_de);
+  handle_sem_post_error(sem_post(&q->sem_de));
   enq_end(q->statistics); // update enqueueTime
 }
 
@@ -65,15 +65,15 @@ void EnqueueString(Queue* q, char* string)
 char* DequeueString(Queue* q)
 {
   deq_start(q->statistics);
-  sem_wait(&q->sem_de);
+  handle_sem_wait_error(sem_wait(&q->sem_de));
 
-  sem_wait(&q->mutex); // I think this critical section is not a must
+  handle_sem_wait_error(sem_wait(&q->mutex));
   char* ret_ptr = q->stringQueue[q->head]; // get the string
   q->head = (q->head + 1) % q->size; // update index
   deq_inc(q->statistics); // update dequeueCount
-  sem_post(&q->mutex);
+  handle_sem_post_error(sem_post(&q->mutex));
 
-  sem_post(&q->sem_en);
+  handle_sem_post_error(sem_post(&q->sem_en));
   deq_end(q->statistics); // update dequeueTime
 
   return ret_ptr;

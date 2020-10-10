@@ -9,7 +9,7 @@
 
 
 void* func_reader(void* arg){
-  const int MAX_LEN = 100;
+  const int MAX_LEN = 4096;
   Queue* q = (Queue*)arg;
   char ch = 'a'; // in order to enter the while loop
   int read_len = 0; // current available index

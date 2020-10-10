@@ -12,9 +12,13 @@
 // on error, NULL is returned
 void handle_malloc_error(void* ptr);
 
-// on success, sem_init() returns 0;
+// on success, sem_init(), sem_wait(), sem_post() return 0;
 // -1 is returned on error, errno is set to indicate the error
 void handle_sem_init_error(int err);
+
+void handle_sem_wait_error(int err);
+
+void handle_sem_post_error(int err);
 
 // on success, pthread_create() returns 0
 void handle_pthread_create_error(int err);
