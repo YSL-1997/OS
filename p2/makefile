@@ -34,4 +34,4 @@ scan-build: clean
 
 # view the one scan available using chrome
 scan-view: scan-build
-	chrome -new-window $(SCAN_BUILD_DIR)/*/index.html
+	firefox -new-window $(SCAN_BUILD_DIR)/*/index.html
