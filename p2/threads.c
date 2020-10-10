@@ -8,10 +8,8 @@
 #include "threads.h"
 
 
-const int MAX_LEN = 100;
-
-
 void* func_reader(void* arg){
+  const int MAX_LEN = 100;
   Queue* q = (Queue*)arg;
   char ch = 'a'; // in order to enter the while loop
   int read_len = 0; // current available index
@@ -20,7 +18,10 @@ void* func_reader(void* arg){
   
   while(ch != EOF){
     ch = fgetc(stdin);
-    
+    if(ch != EOF)
+      printf("ch = %c\n", ch);
+    else
+      printf("ch = EOF\n");
     if(read_len == MAX_LEN){ // abort this line
       fprintf(stderr, "Input line too long.\n");
       
@@ -47,9 +48,7 @@ void* func_reader(void* arg){
       read_len++;
     }
     else{ // ch == '\n' or ch == EOF
-      if(ch == EOF && q->statistics->enqueueCount == 0){
-	// we have read nothing but EOF
-	fprintf(stderr, "We have read nothing but EOF\n");
+      if(ch == EOF && read_len == 0){	
 	EnqueueString(q, NULL);
 	printf("2_ reader: enqueued null\n");
 	free(buffer);
@@ -58,13 +57,14 @@ void* func_reader(void* arg){
 
       buffer[read_len] = '\0';
       // buffer[0 ~ read_len] is valid, store it.
-
+      
       // malloc'ed size is one more than required
       char* ret_str = malloc((read_len+2) * sizeof(char));
       handle_malloc_error(ret_str); // error handling
-
+      printf("************************inside buffer is : %s\n", buffer);
       // only copy the valid characters
       strncpy(ret_str, buffer, read_len+1);
+
       EnqueueString(q, ret_str);
       printf("3_ reader: Enqueued string: %s\n", ret_str);
   
@@ -77,6 +77,7 @@ void* func_reader(void* arg){
       }
     }
   }
+  
   // read finished, enqueue a null string
   EnqueueString(q, NULL);
   printf("4_ reader: enqueued null\n");
@@ -156,15 +157,17 @@ void* func_munch2(void* args)
 
 void* func_writer(void* q){
   Queue* x = (Queue*)q;
-
+  int count = 0;
   while(1){
     char* str = DequeueString(x);
     printf("writer dequeued string: '%s' \n", str);
     if(str == NULL)
       break;
     printf("%s\n", str);
+    count++;
     free(str);
   }
+  printf("The total number of strings processed to stdout is: %d\n", count);
   printf("writer ...........exit\n");
   pthread_exit(NULL);
 }
