@@ -5,8 +5,6 @@ EXE = prodcom
 SCAN_BUILD_DIR = scan-build-out
 OBJECTS = main.o threads.o Queue.o errorHandling.o stats.o
 
-
-
 prodcom: $(OBJECTS)
 	$(CC) $(OPTS) $(WARNING_FLAGS) -o $(EXE) $(OBJECTS)
 
@@ -28,3 +26,12 @@ stats.o: stats.c stats.h
 clean:
 	rm -f $(EXE) *.o
 	rm -rf $(SCAN_BUILD_DIR)
+
+# run the Clang Static Analyzer
+
+scan-build: clean
+	scan-build -o $(SCAN_BUILD_DIR) make
+
+# view the one scan available using chrome
+scan-view: scan-build
+	chrome -new-window $(SCAN_BUILD_DIR)/*/index.html
