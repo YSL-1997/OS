@@ -58,8 +58,8 @@ void deq_end(stats* s)
 
 // print Queue status
 void print_stats(stats* s){
-  fprintf(stderr, "The number of enqueues: %d\n", s->enqueueCount);
-  fprintf(stderr, "The number of dequeues: %d\n", s->dequeueCount);
-  fprintf(stderr, "The total time cost of the enqueue: %d\n", s->enqueueTime);
-  fprintf(stderr, "The total time cost of the dequeue: %d\n", s->dequeueTime);
+  fprintf(stderr, "    The number of enqueues: %d\n", s->enqueueCount);
+  fprintf(stderr, "    The number of dequeues: %d\n", s->dequeueCount);
+  fprintf(stderr, "    The total time cost of the enqueue: %d\n", s->enqueueTime);
+  fprintf(stderr, "    The total time cost of the dequeue: %d\n", s->dequeueTime);
 }

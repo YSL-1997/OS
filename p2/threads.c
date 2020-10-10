@@ -29,7 +29,7 @@ void* func_reader(void* arg){
 	  break;
 	
 	if(ch == EOF){ // over MAX_LEN and ends with EOF
-	  printf("The rest of the line ends with EOF, reader stop\n");
+	  fprintf(stderr, "The rest of the line ends with EOF, reader stop\n");
 	  free(buffer);
 	  EnqueueString(q, NULL);
 	  printf("1_ reader: enqueued null\n");
@@ -49,7 +49,7 @@ void* func_reader(void* arg){
     else{ // ch == '\n' or ch == EOF
       if(ch == EOF && q->statistics->enqueueCount == 0){
 	// we have read nothing but EOF
-	printf("We have read nothing but EOF\n");
+	fprintf(stderr, "We have read nothing but EOF\n");
 	EnqueueString(q, NULL);
 	printf("2_ reader: enqueued null\n");
 	free(buffer);
@@ -58,13 +58,13 @@ void* func_reader(void* arg){
 
       buffer[read_len] = '\0';
       // buffer[0 ~ read_len] is valid, store it.
-      
-      char* ret_str = malloc((read_len+2) * sizeof(char));
+
       // malloc'ed size is one more than required
+      char* ret_str = malloc((read_len+2) * sizeof(char));
       handle_malloc_error(ret_str); // error handling
-      
-      strncpy(ret_str, buffer, read_len+1);
+
       // only copy the valid characters
+      strncpy(ret_str, buffer, read_len+1);
       EnqueueString(q, ret_str);
       printf("3_ reader: Enqueued string: %s\n", ret_str);
   
@@ -77,7 +77,7 @@ void* func_reader(void* arg){
       }
     }
   }
-  // read finished, enqueue a null char
+  // read finished, enqueue a null string
   EnqueueString(q, NULL);
   printf("4_ reader: enqueued null\n");
   free(buffer);
