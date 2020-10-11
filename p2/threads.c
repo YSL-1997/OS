@@ -8,8 +8,10 @@
 #include "threads.h"
 
 
-void* func_reader(void* arg){
-  const int MAX_LEN = 4096;
+static const int MAX_LEN = 6;
+
+void* func_reader(void* arg)
+{
   Queue* q = (Queue*)arg;
   char ch = 'a'; // in order to enter the while loop
   int read_len = 0; // current available index
@@ -97,7 +99,7 @@ void* func_munch1(void* args)
       EnqueueString(q_to, NULL);
       break;
     }
-    for(int i = 0; i < (int)strlen(str); i++){
+    for(int i = 0; i < (int)strnlen(str, MAX_LEN-1); i++){
       if(str[i] == ' '){
 	str[i] = '*';
       }
@@ -107,7 +109,6 @@ void* func_munch1(void* args)
   }
 
   pthread_exit(NULL);
-  // what passed inside the arg of pthread_exit() is returned by the function
 }
 
 
@@ -125,7 +126,7 @@ void* func_munch2(void* args)
       EnqueueString(q_to, NULL);
       break;
     }
-    for(int i = 0; i < (int)strlen(str); i++){
+    for(int i = 0; i < (int)strnlen(str, MAX_LEN-1); i++){
       if(islower(str[i])){
 	str[i] = toupper(str[i]);
       }
@@ -150,7 +151,9 @@ void* func_writer(void* q){
     count++;
     free(str);
   }
-  printf("The total number of strings processed to stdout is: %d\n", count);
+  fprintf(stdout,
+	  "The total number of strings processed to stdout is: %d\n", count);
+  
   pthread_exit(NULL);
 }
 
