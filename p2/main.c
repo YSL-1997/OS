@@ -15,15 +15,15 @@ int main(){
   
   int size = 10;
   // size of the shared queues
-  
+
+  // error handling implemented in CreateStringQueue()
   Queue* q_reader_munch1 = CreateStringQueue(size);
   Queue* q_munch1_munch2 = CreateStringQueue(size);
   Queue* q_munch2_writer = CreateStringQueue(size);
-  // error handling implemented in CreateStringQueue()
-
+  
+  // error handling implemented in CreteMultiArgs()
   Multi_args* munch1_args = CreateMultiArgs(q_reader_munch1, q_munch1_munch2);
   Multi_args* munch2_args = CreateMultiArgs(q_munch1_munch2, q_munch2_writer);
-  // error handling implemented in CreteMultiArgs()
   
   // create threads, with error-handling
   handle_pthread_create_error(pthread_create(&reader_thread, NULL,
@@ -52,26 +52,15 @@ int main(){
   printf("Statistics for q_munch2_writer:\n");
   PrintQueueStats(q_munch2_writer);
 
-  // free the strings that we've been processing in writer.c
+  /*
+    free() is not required in this case. Below is the order of free():
 
-  // free the stringQueue in each queue
-  free(q_reader_munch1->stringQueue);  
-  free(q_munch1_munch2->stringQueue);
-  free(q_munch2_writer->stringQueue);
-
-  // free the statistics module
-  free(q_reader_munch1->statistics);
-  free(q_munch1_munch2->statistics);
-  free(q_munch2_writer->statistics);
-
-  // free the args
-  free(munch1_args);
-  free(munch2_args);
-  
-  // free the queues at last
-  free(q_reader_munch1);
-  free(q_munch1_munch2);
-  free(q_munch2_writer);
+    free the strings that we've been processing in writer.c
+    free the stringQueue in each queue
+    free the statistics module
+    free the args
+    free the queues at last
+  */
   
   return 0;
 }
