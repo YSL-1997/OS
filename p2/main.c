@@ -28,16 +28,15 @@ int main(){
   // create threads, with error-handling
   handle_pthread_create_error(pthread_create(&reader_thread, NULL,
 				      &func_reader, (void*)q_reader_munch1));
-  printf("reader created...\n");
+
   handle_pthread_create_error(pthread_create(&munch1_thread, NULL,
 				      &func_munch1, (void*)munch1_args));
-  printf("munch1 created...\n");
+
   handle_pthread_create_error(pthread_create(&munch2_thread, NULL,
 				      &func_munch2, (void*)munch2_args));
-  printf("munch2 created...\n");
+
   handle_pthread_create_error(pthread_create(&writer_thread, NULL,
 				      &func_writer, (void*)q_munch2_writer));
-  printf("writer created...\n");
   
   // the main thread waits for all the 4 threads done their work
   handle_pthread_join_error(pthread_join(reader_thread, NULL));

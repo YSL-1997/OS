@@ -8,23 +8,14 @@
 #include "Queue.h"
 
 
-/* Dynamically allocate (malloc) a new Queue structure, initialize it with 
-   an array of character points of length size.
-   Malloc the queue structure and then malloc the char ** array pointed to 
-   from that structure
-   Remember to any state and synchronization variables used in this structure
-   The function returns a pointer to the new queue structure.
-   For testing purposes, create your Queue's with a size of 10.
-*/
-
 // Queue initialization with error handling
 Queue* CreateStringQueue(int size)
 {
   Queue* q = (Queue*)malloc(sizeof(Queue));
-  handle_malloc_error(q);
+  handle_malloc_error(q); // error handling
 
   q->stringQueue = (char**)malloc(sizeof(char*)*size);
-  handle_malloc_error(q->stringQueue);
+  handle_malloc_error(q->stringQueue); // error handling
 
   q->size = size;
   q->head = 0;
@@ -35,18 +26,20 @@ Queue* CreateStringQueue(int size)
   handle_sem_init_error(sem_init(&q->sem_en, 0, size));
   handle_sem_init_error(sem_init(&q->sem_de, 0, 0));
   handle_sem_init_error(sem_init(&q->mutex, 0, 1));
-
+  // error handling for sem_init()
+  
   return q;
 }
 
 
-// This function places the pointer to the string at the end of queue q.
-// If the queue is full, then this function blocks until there is space
-// available.
+/*
+  Functionality: places the pointer to the string at the end of queue.
+  queue full => this function blocks until there is space available.
+*/
 void EnqueueString(Queue* q, char* string)
 {
-  enq_start(q->statistics);
-  handle_sem_wait_error(sem_wait(&q->sem_en));
+  enq_start(q->statistics); // store the start_enq time
+  handle_sem_wait_error(sem_wait(&q->sem_en)); // error handling
   
   handle_sem_wait_error(sem_wait(&q->mutex)); 
   q->stringQueue[q->firstAvailable] = string; // store the string
@@ -58,14 +51,16 @@ void EnqueueString(Queue* q, char* string)
   enq_end(q->statistics); // update enqueueTime
 }
 
-// This function removes a pointer to a string from the beginning of queue q.
-// If the queue is empty, then this function blocks until there is a string
-// placed into the queue.
-// This function returns the pointer that was removed from the queue.
+
+/*
+  Functionality: removes a pointer to a string from beginning of queue q.
+  queue empty => blocked until there is a string placed into the queue.
+  Return value: the pointer that was removed from the queue.
+*/
 char* DequeueString(Queue* q)
 {
-  deq_start(q->statistics);
-  handle_sem_wait_error(sem_wait(&q->sem_de));
+  deq_start(q->statistics); // store the start_deq time
+  handle_sem_wait_error(sem_wait(&q->sem_de)); // error handling
 
   handle_sem_wait_error(sem_wait(&q->mutex));
   char* ret_ptr = q->stringQueue[q->head]; // get the string
@@ -78,6 +73,7 @@ char* DequeueString(Queue* q)
 
   return ret_ptr;
 }
+
 
 // This function prints the statistics for this queue
 void PrintQueueStats(Queue* q)

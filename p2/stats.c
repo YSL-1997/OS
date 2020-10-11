@@ -2,7 +2,7 @@
 
 stats* stats_init(){
   stats* s = (stats*)malloc(sizeof(stats));
-  handle_malloc_error(s);
+  handle_malloc_error(s); // error handling
 
   s->enqueueCount = 0;
   s->dequeueCount = 0;
@@ -16,7 +16,9 @@ stats* stats_init(){
 int get_time()
 {
   struct timeval cur_time;
-  gettimeofday(&cur_time, NULL);
+  handle_gettime_error(gettimeofday(&cur_time, NULL));
+  // error handling
+  
   return cur_time.tv_sec; 
 }
 
@@ -58,8 +60,14 @@ void deq_end(stats* s)
 
 // print Queue status
 void print_stats(stats* s){
-  fprintf(stderr, "    The number of enqueues: %d\n", s->enqueueCount);
-  fprintf(stderr, "    The number of dequeues: %d\n", s->dequeueCount);
-  fprintf(stderr, "    The total time cost of the enqueue: %d\n", s->enqueueTime);
-  fprintf(stderr, "    The total time cost of the dequeue: %d\n", s->dequeueTime);
+  // the while spaces are for readability
+  fprintf(stderr,
+	  "    The number of enqueues: %d\n",s->enqueueCount);
+  fprintf(stderr,
+	  "    The number of dequeues: %d\n", s->dequeueCount);
+  fprintf(stderr,
+	  "    The total time cost of the enqueue: %d\n", s->enqueueTime);
+  fprintf(stderr,
+	  "    The total time cost of the dequeue: %d\n", s->dequeueTime);
+  fprintf(stderr, "\n");
 }

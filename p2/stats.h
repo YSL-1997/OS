@@ -7,32 +7,25 @@
 
 typedef struct stats{
   int enq_start_time;
-  // keep track of each enq_operation's start time
+  // Keep track of each enq_operation's start time.
 
   int deq_start_time;
-  // keep track of each deq_operation's start time
+  // Keep track of each deq_operation's start time.
 
   int enqueueCount;
   // A count of the number of strings enqueued on this queue.
 
   int dequeueCount;
-  // A count of the number of strings dequeued on this queue. We would
-  // expect that when the program exits, the two count values are equal.
+  // A count of the number of strings dequeued on this queue.
 
   int enqueueTime;
-  // use gettimeofday
-  // The amount of elapsed (wallclock) time that a thread spent trying to
-  // do an enqueue. You will record the time at the start of the
-  // EnqueueString function and again at the end of the function,
-  // then take the difference.
+  // The amount of time that a thread spent trying to do an enqueue. 
 
   int dequeueTime;
-  /*
-      The amount of elapsed (wallclock) time that a thread spent trying to do
-      an dequeue. You will record the time at the start of the DequeueString
-      function and again at the end of the function, then take the difference.
-  */
+  // The amount of time that a thread spent trying to do an dequeue. 
+  
 }stats;
+
 
 // stats module initialization
 stats* stats_init();
@@ -58,6 +51,7 @@ void enq_end(stats* s);
 // update dequeueTime
 void deq_end(stats* s);
 
+// print the statistics
 void print_stats(stats* s);
 
 #endif

@@ -28,10 +28,8 @@ typedef struct Queue
 
   sem_t mutex;
   // mutex for critical section
-  //*** Can we allow enqueue and dequeue simultaneously?
-  // Yes, I think so, because operations do not overlap and
-  // the only possibility that head == firstAvailable is when queue is empty
-  
+  // *** Can we allow enqueue and dequeue simultaneously?
+  // Yes, I think so, because operations do not overlap
 } Queue;
 
 
