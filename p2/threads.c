@@ -8,7 +8,7 @@
 #include "threads.h"
 
 
-static const int MAX_LEN = 6;
+static const int MAX_LEN = 4096;
 
 void* func_reader(void* arg)
 {
