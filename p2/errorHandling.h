@@ -12,7 +12,7 @@
 // on error, NULL is returned
 void handle_malloc_error(void* ptr);
 
-// this function is called by the rest
+// this function is called by the rest of the functions
 void check_and_print(int err, char* function_name);
 
 // on success, gettimeofday() returns 0;

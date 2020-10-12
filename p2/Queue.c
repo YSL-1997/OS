@@ -33,8 +33,8 @@ Queue* CreateStringQueue(int size)
 
 
 /*
-  Functionality: places the pointer to the string at the end of queue.
-  queue full => this function blocks until there is space available.
+  Places the pointer to the string at the end of queue.
+  queue full => this function blocks until space is available.
 */
 void EnqueueString(Queue* q, char* string)
 {
@@ -43,18 +43,18 @@ void EnqueueString(Queue* q, char* string)
   
   handle_sem_wait_error(sem_wait(&q->mutex)); 
   q->stringQueue[q->firstAvailable] = string; // store the string
-  q->firstAvailable = (q->firstAvailable+1) % q->size; // update index
+  q->firstAvailable = (q->firstAvailable+1) % q->size;
   enq_inc(q->statistics); // update enqueueCount
   handle_sem_post_error(sem_post(&q->mutex));
-
+  
   handle_sem_post_error(sem_post(&q->sem_de));
   enq_end(q->statistics); // update enqueueTime
 }
 
 
 /*
-  Functionality: removes a pointer to a string from beginning of queue q.
-  queue empty => blocked until there is a string placed into the queue.
+  Removes a pointer to a string from beginning of queue q.
+  queue empty => blocked until a string is enq'ed to the queue.
   Return value: the pointer that was removed from the queue.
 */
 char* DequeueString(Queue* q)

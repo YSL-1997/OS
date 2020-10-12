@@ -17,7 +17,7 @@ typedef struct Queue
   // keep track of the first element to be removed from the queue
 
   int firstAvailable;
-  // keep track of the first available slot of the stringQueue that can store
+  // keep track of the first available slot of the stringQueue to enq
 
   stats* statistics;
   // pointer to a statistics structure

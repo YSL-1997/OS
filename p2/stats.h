@@ -19,10 +19,10 @@ typedef struct stats{
   // A count of the number of strings dequeued on this queue.
 
   int enqueueTime;
-  // The amount of time that a thread spent trying to do an enqueue. 
+  // Amount of time - a thread spent trying to do an enqueue. 
 
   int dequeueTime;
-  // The amount of time that a thread spent trying to do an dequeue. 
+  // Amount of time - a thread spent trying to do an dequeue. 
   
 }stats;
 

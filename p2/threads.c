@@ -29,7 +29,6 @@ void* func_reader(void* arg)
 	  break;
 	
 	if(ch == EOF){ // over MAX_LEN and ends with EOF
-	  fprintf(stderr, "The rest of the line ends with EOF, reader stop\n");
 	  free(buffer);
 	  EnqueueString(q, NULL);
 	  pthread_exit(NULL);
@@ -39,7 +38,7 @@ void* func_reader(void* arg)
       
       read_len = 0; // reset the current available to 0
       continue;
-    }// end if
+    }
 
     if(ch != '\n' && ch != EOF){ // store into buffer
       buffer[read_len] = (char)ch;
@@ -89,6 +88,7 @@ void* func_munch1(void* args)
 {
   Multi_args* x = (Multi_args*)args;
 
+  // get the arguments
   Queue* q_from = x->arg1;
   Queue* q_to = x->arg2;
 
@@ -99,12 +99,15 @@ void* func_munch1(void* args)
       EnqueueString(q_to, NULL);
       break;
     }
+    
+    // process the string
     for(int i = 0; i < (int)strnlen(str, MAX_LEN-1); i++){
       if(str[i] == ' '){
 	str[i] = '*';
       }
     }
 
+    // enqueue the string when finished
     EnqueueString(q_to, str);
   }
 
@@ -116,6 +119,7 @@ void* func_munch2(void* args)
 {
   Multi_args* x = (Multi_args*)args;
 
+  // get the arguments
   Queue* q_from = x->arg1;
   Queue* q_to = x->arg2;
 
@@ -126,11 +130,15 @@ void* func_munch2(void* args)
       EnqueueString(q_to, NULL);
       break;
     }
+
+    // process the string
     for(int i = 0; i < (int)strnlen(str, MAX_LEN-1); i++){
       if(islower(str[i])){
 	str[i] = toupper(str[i]);
       }
     }
+
+    // enqueue the string when finished
     EnqueueString(q_to, str);
   }
 
@@ -139,9 +147,11 @@ void* func_munch2(void* args)
 
 
 
-void* func_writer(void* q){
+void* func_writer(void* q)
+{
   Queue* x = (Queue*)q;
-  int count = 0;
+  int count = 0; // stores the # of outputs
+
   while(1){
     char* str = DequeueString(x);
 
@@ -152,16 +162,20 @@ void* func_writer(void* q){
     free(str);
   }
   fprintf(stdout,
-	  "The total number of strings processed to stdout is: %d\n", count);
+	  "The total number of strings processed to stdout is: %d\n",
+	  count);
   
   pthread_exit(NULL);
 }
 
 // Used for passing multi args to pthread_create() 
-Multi_args* CreateMultiArgs(void* q1, void* q2){
+Multi_args* CreateMultiArgs(void* q1, void* q2)
+{
   Multi_args* ret = (Multi_args*)malloc(sizeof(Multi_args));
   handle_malloc_error(ret); // error handling
+
   ret->arg1 = (Queue*)q1;
   ret->arg2 = (Queue*)q2;
+
   return ret;
 }
