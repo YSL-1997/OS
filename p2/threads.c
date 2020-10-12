@@ -157,7 +157,7 @@ void* func_writer(void* q)
 
     if(str == NULL)
       break;
-    printf("%s\n", str);
+    fprintf(stdout, "%s\n", str);
     count++;
     free(str);
   }
