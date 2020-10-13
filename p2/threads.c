@@ -12,16 +12,6 @@ static int MAX_LEN = 4096;
 
 
 /*
-  struct of the arguments
-  aim to pass as argument to pthread_create()
-*/
-typedef struct Multi_args{
-  Queue* arg1;
-  Queue* arg2;
-} Multi_args;
-
-
-/*
   Used for passing multi args to pthread_create()
   Arguments: q1 - dequeue_from, q2 - enqueue_to
   Return Value: a pointer to a Multi_args struct
