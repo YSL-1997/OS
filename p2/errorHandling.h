@@ -10,6 +10,7 @@
 
 
 // functions on errorHandling
+void handle_fgetc_error(FILE* ptr);
 void handle_malloc_error(void* ptr);
 void check_and_print(int err, char* function_name);
 void handle_gettime_error(int err);

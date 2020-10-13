@@ -8,6 +8,17 @@
 
 #include "errorHandling.h"
 
+// use ferror() to handle the error
+void handle_fgetc_error(FILE* ptr)
+{
+  if(ferror(ptr)){
+    fprintf(stderr, "fgetc error: %s\n", strerror(errno));
+    fprintf(stderr, "exiting...\n");
+    exit(EXIT_FAILURE);
+  }
+}
+
+
 // on success, malloc returns a pointer to allocated memory
 void handle_malloc_error(void* ptr)
 {

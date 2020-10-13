@@ -43,13 +43,7 @@ void* func_reader(void* arg)
   
   while(ch != EOF){
     ch = fgetc(stdin);
-
-    // errorHandling for fgetc()
-    if(ferror(stdin)){
-      fprintf(stderr, "fgetc error: %s\n", strerror(errno));
-      fprintf(stderr, "exiting...\n");
-      exit(EXIT_FAILURE);
-    }
+    handle_fgetc_error(stdin); // error handling
     
     if(read_len == MAX_LEN){ // abort this line
       fprintf(stderr, "Input line too long.\n");
