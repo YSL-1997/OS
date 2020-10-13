@@ -189,7 +189,7 @@ void* func_writer(void* q)
   }
   // print to stdout
   fprintf(stdout,
-	  "The total number of strings processed to stdout is: %d\n",
+	  "\nThe total number of strings processed to stdout is: %d\n\n",
 	  count);
   
   pthread_exit(NULL);
