@@ -11,6 +11,7 @@ stats* stats_init(){
   stats* s = (stats*)malloc(sizeof(stats));
   handle_malloc_error(s); // error handling
 
+  s->enq_start_time = 0;
   s->enqueueCount = 0;
   s->dequeueCount = 0;
   s->enqueueTime = 0;
@@ -26,8 +27,10 @@ double get_time()
   struct timeval cur_time;
   handle_gettime_error(gettimeofday(&cur_time, NULL));
   // error handling
-  double time = cur_time.tv_usec;
-  return time/1000000; 
+  double sec = cur_time.tv_sec;
+  double microsec = cur_time.tv_usec;
+  
+  return sec + microsec/1000000; 
 }
 
 // increment enqueueCount by 1
@@ -49,33 +52,33 @@ void deq_inc(stats* s)
 // record the enqueue start time
 void enq_start(stats* s)
 {
-  
+  handle_sem_wait_error(sem_wait(&s->mutex));
   s->enq_start_time = get_time();
-  
+  handle_sem_post_error(sem_post(&s->mutex));
 }
 
 // record the dequeue start time
 void deq_start(stats* s)
 {
-  
+  handle_sem_wait_error(sem_wait(&s->mutex));
   s->deq_start_time = get_time();
-  
+  handle_sem_post_error(sem_post(&s->mutex));
 }
 
 // update enqueueTime
 void enq_end(stats* s)
 {
-  
+  handle_sem_wait_error(sem_wait(&s->mutex));
   s->enqueueTime += get_time() - s->enq_start_time;
-  
+  handle_sem_post_error(sem_post(&s->mutex));
 }
 
 // update dequeueTime
 void deq_end(stats* s)
 {
-  
+  handle_sem_wait_error(sem_wait(&s->mutex));
   s->dequeueTime += get_time() - s->deq_start_time;
-  
+  handle_sem_post_error(sem_post(&s->mutex));
 }
 
 // print Queue status
@@ -86,8 +89,8 @@ void print_stats(stats* s){
   fprintf(stderr,
 	  "    The number of dequeues: %d\n", s->dequeueCount);
   fprintf(stderr,
-	  "    The total time cost of the enqueue: %f\n", s->enqueueTime);
+	  "    The total time cost of the enqueue: %Lf\n", s->enqueueTime);
   fprintf(stderr,
-	  "    The total time cost of the dequeue: %f\n", s->dequeueTime);
+	  "    The total time cost of the dequeue: %Lf\n", s->dequeueTime);
   fprintf(stderr, "\n");
 }

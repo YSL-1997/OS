@@ -7,10 +7,10 @@
 #include "errorHandling.h"
 
 typedef struct stats{
-  double enq_start_time;
+  long double enq_start_time;
   // Keep track of each enq_operation's start time.
 
-  double deq_start_time;
+  long double deq_start_time;
   // Keep track of each deq_operation's start time.
 
   int enqueueCount;
@@ -19,10 +19,10 @@ typedef struct stats{
   int dequeueCount;
   // A count of the number of strings dequeued on this queue.
 
-  double enqueueTime;
+  long double enqueueTime;
   // Amount of time - a thread spent trying to do an enqueue. 
 
-  double dequeueTime;
+  long double dequeueTime;
   // Amount of time - a thread spent trying to do an dequeue.
 
   sem_t mutex;
