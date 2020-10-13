@@ -56,11 +56,11 @@ int main(){
   handle_pthread_join_error(pthread_join(writer_thread, NULL));
   
   // print the queues' status
-  printf("Statistics for q_reader_munch1:\n");
+  fprintf(stderr, "Statistics for q_reader_munch1:\n");
   PrintQueueStats(q_reader_munch1);
-  printf("Statistics for q_munch1_munch2:\n");
+  fprintf(stderr, "Statistics for q_munch1_munch2:\n");
   PrintQueueStats(q_munch1_munch2);
-  printf("Statistics for q_munch2_writer:\n");
+  fprintf(stderr, "Statistics for q_munch2_writer:\n");
   PrintQueueStats(q_munch2_writer);
   
   return 0;
