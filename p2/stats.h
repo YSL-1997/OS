@@ -3,13 +3,14 @@
 
 
 #include <sys/time.h>
+#include <semaphore.h>
 #include "errorHandling.h"
 
 typedef struct stats{
-  int enq_start_time;
+  double enq_start_time;
   // Keep track of each enq_operation's start time.
 
-  int deq_start_time;
+  double deq_start_time;
   // Keep track of each deq_operation's start time.
 
   int enqueueCount;
@@ -18,11 +19,14 @@ typedef struct stats{
   int dequeueCount;
   // A count of the number of strings dequeued on this queue.
 
-  int enqueueTime;
+  double enqueueTime;
   // Amount of time - a thread spent trying to do an enqueue. 
 
-  int dequeueTime;
-  // Amount of time - a thread spent trying to do an dequeue. 
+  double dequeueTime;
+  // Amount of time - a thread spent trying to do an dequeue.
+
+  sem_t mutex;
+  // semaphore used when updating
   
 }stats;
 
@@ -31,7 +35,7 @@ typedef struct stats{
 stats* stats_init();
 
 // get the current time
-int get_time();
+double get_time();
 
 // increment enqueueCount by 1
 void enq_inc(stats* s);

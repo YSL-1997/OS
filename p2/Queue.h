@@ -2,7 +2,6 @@
 #define QUEUE_H_
 
 
-#include <semaphore.h>
 #include "stats.h"
 
 typedef struct Queue
