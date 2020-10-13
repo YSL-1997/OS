@@ -21,6 +21,8 @@ void* func_reader(void* arg);
 void* func_munch1(void* args);
 void* func_munch2(void* args);
 void* func_writer(void* arg);
+
+// the function that creates a Multi_args containing two args
 Multi_args* CreateMultiArgs(void* q1, void* q2);
 
 

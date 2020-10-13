@@ -27,10 +27,16 @@ typedef struct Queue
  
 } Queue;
 
-
+// Queue initialization
 Queue *CreateStringQueue(int size);
+
+// Places the pointer to the string at the end of queue.
 void EnqueueString(Queue *q, char *string);
+
+// Removes a pointer to a string from beginning of queue q.
 char* DequeueString(Queue *q);
+
+// call print_stats() in stats module
 void PrintQueueStats(Queue *q);
 
 

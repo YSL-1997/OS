@@ -43,6 +43,13 @@ void* func_reader(void* arg)
   
   while(ch != EOF){
     ch = fgetc(stdin);
+
+    // errorHandling for fgetc()
+    if(ferror(stdin)){
+      fprintf(stderr, "fgetc error: %s\n", strerror(errno));
+      fprintf(stderr, "exiting...\n");
+      exit(EXIT_FAILURE);
+    }
     
     if(read_len == MAX_LEN){ // abort this line
       fprintf(stderr, "Input line too long.\n");
@@ -189,7 +196,7 @@ void* func_writer(void* q)
   }
   // print to stdout
   fprintf(stdout,
-	  "\nThe total number of strings processed to stdout is: %d\n\n",
+	  "The total number of strings processed to stdout is: %d\n",
 	  count);
   
   pthread_exit(NULL);
