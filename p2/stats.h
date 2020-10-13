@@ -31,31 +31,14 @@ typedef struct stats{
 }stats;
 
 
-// stats module initialization
 stats* stats_init();
-
-// get the current time
 double get_time();
-
-// increment enqueueCount by 1
 void enq_inc(stats* s);
-
-// increment dequeueCount by 1
 void deq_inc(stats* s);
-
-// record the enqueue start time
 void enq_start(stats* s);
-
-// record the dequeue start time
 void deq_start(stats* s);
-
-// update enqueueTime
 void enq_end(stats* s);
-
-// update dequeueTime
 void deq_end(stats* s);
-
-// print the statistics
 void print_stats(stats* s);
 
 #endif

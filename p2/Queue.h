@@ -23,12 +23,8 @@ typedef struct Queue
   
   sem_t sem_en;
   sem_t sem_de;
-  // semaphores
-
   sem_t mutex;
-  // mutex for critical section
-  // *** Can we allow enqueue and dequeue simultaneously?
-  // Yes, I think so, because operations do not overlap
+ 
 } Queue;
 
 

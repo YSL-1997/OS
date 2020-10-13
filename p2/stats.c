@@ -85,12 +85,12 @@ void deq_end(stats* s)
 void print_stats(stats* s){
   // the while spaces are for readability
   fprintf(stderr,
-	  "    The number of enqueues: %d\n",s->enqueueCount);
+	  "  The number of enqueues: %d\n",s->enqueueCount);
   fprintf(stderr,
-	  "    The number of dequeues: %d\n", s->dequeueCount);
+	  "  The number of dequeues: %d\n", s->dequeueCount);
   fprintf(stderr,
-	  "    The total time cost of the enqueue: %Lf\n", s->enqueueTime);
+	  "  The total time cost of the enqueue: %Lf\n", s->enqueueTime);
   fprintf(stderr,
-	  "    The total time cost of the dequeue: %Lf\n", s->dequeueTime);
+	  "  The total time cost of the dequeue: %Lf\n", s->dequeueTime);
   fprintf(stderr, "\n");
 }

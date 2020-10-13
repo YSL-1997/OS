@@ -7,14 +7,15 @@
 
 #include "threads.h"
 
+
+// create 4 threads and wait for them to terminate
 int main(){
   pthread_t reader_thread;
   pthread_t munch1_thread;
   pthread_t munch2_thread;
   pthread_t writer_thread;
   
-  int size = 10;
-  // size of the shared queues
+  int size = 10; // size of the shared queues
 
   // error handling implemented in CreateStringQueue()
   Queue* q_reader_munch1 = CreateStringQueue(size);
@@ -61,15 +62,6 @@ int main(){
   PrintQueueStats(q_munch1_munch2);
   printf("Statistics for q_munch2_writer:\n");
   PrintQueueStats(q_munch2_writer);
-
-  /*
-    free() is not required in this case. Below is the order of free():
-    free the strings that we've been processing in writer.c
-    free the stringQueue in each queue
-    free the statistics module
-    free the args
-    free the queues at last
-  */
   
   return 0;
 }

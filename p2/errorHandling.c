@@ -18,6 +18,7 @@ void handle_malloc_error(void* ptr)
   }
 }
 
+// this function will be called by the following functions
 void check_and_print(int err, char* function_name)
 {
   if(err != 0){
