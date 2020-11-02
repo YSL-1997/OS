@@ -8,7 +8,8 @@ OBJECTS = main.o threads.o Queue.o errorHandling.o stats.o
 prodcom: $(OBJECTS)
 	$(CC) $(OPTS) $(WARNING_FLAGS) -o $(EXE) $(OBJECTS)
 
-main.o: main.c threads.h
+
+main.o :main.c threads.h
 	$(CC) $(OPTS) $(WARNING_FLAGS) -c main.c
 
 threads.o: threads.c threads.h Queue.h
@@ -22,6 +23,8 @@ errorHandling.o: errorHandling.c errorHandling.h
 
 stats.o: stats.c stats.h
 	$(CC) $(OPTS) $(WARNING_FLAGS) -c stats.c
+
+
 
 clean:
 	rm -f $(EXE) *.o
