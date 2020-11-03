@@ -14,52 +14,6 @@
 
 
 /*
-  before executing the cmdline for each target,
-  need to check if the target's dependencies are newer than target
-  if(at least one of dependencies is newer than target), execute
-  if(all dependencies is NOT newer than target), NOT execute
-  if(no dependency, but has cmdlines), execute
-  input: a target node
-  return: true if need to exec, false otherwise
-*/
-bool need_exec_cmd(node* target_node)
-{
-  if(target_node->dependencies != NULL){
-    // compare last modification time of all dependencies with target
-
-    // create a stat list that stores target+dependencies stat info
-    struct stat* stat_list = malloc((target_node->dependency_num + 2)
-				    * sizeof(struct stat));
-    handle_malloc_error(stat_list);
-
-    // the first is the target stat info
-    handle_stat_error(stat(target_node->target, &stat_list[0]));
-
-    // the rest are dependencies info
-    for(int i = 0; i < target_node->dependency_num; i++){
-      handle_stat_error(stat(target_node->dependencies[i], &stat_list[i+1]));
-    }
-
-    // compare stat_list[0] and stat_list[1:]
-    for(int i = 1; i < target_node->dependency_num + 1; i++){
-      if(stat_list[i].st_mtime > stat_list[0].st_mtime)
-	return true;
-    }
-
-    return false;
-  }
-  
-  else{ // means no dependency for this target
-    // this corresponds to the case like: clean
-    if(target_node->cmd_lines_num > 0){
-      return true;
-    }
-    return false;
-  }
-}
-
-
-/*
   check if the user input includes -f
   input: string of user input, f_index
   return: true if includes -f, false otherwise
