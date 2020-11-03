@@ -32,8 +32,14 @@ bool need_exec_cmd(node* target_node)
     struct stat* stat_list = malloc((target_node->dependency_num + 2)
 				    * sizeof(struct stat));
     handle_malloc_error(stat_list);
-
+    
     // the first is the target stat info
+    // need to check if the target already exists or not
+    if(access(target_node->target, F_OK) == -1){
+      // target not exist
+      return true;
+    }
+    
     handle_stat_error(stat(target_node->target, &stat_list[0]));
 
     // the rest are dependencies info
