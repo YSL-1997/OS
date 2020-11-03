@@ -1,6 +1,7 @@
 #include "graph.h"
 #include "parsing.h"
 
+
 int main(int argc, char* argv[]){
   node** node_array;
   int target_nodes_num;
