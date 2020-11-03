@@ -8,9 +8,6 @@
 #include "process_exec.h"
 #include "parsing.h"
 
-// check if target_node needs to execute its cmdlines
-bool need_exec_cmd(node* target_node);
-
 // check if the user input includes -f
 bool has_f(int argc, char** argv, int* f_index);
 
