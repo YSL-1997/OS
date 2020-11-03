@@ -7,7 +7,8 @@
 
 #include "graph.h"
 #include "errorHandling.h"
-
+#include "process_exec.h"
+#include "build_spec_rep.h"
 
 static int MAX_LEN = 4096;
 
@@ -298,6 +299,14 @@ void postorder(node** node_array, int all_nodes_num, node* root)
     postorder(node_array, all_nodes_num, temp);
       
   }
-  printf("%s -> ", root->target);
-  // execute(root);
+
+  //if a target has cmd line, check the modification and then execute the cmd
+  if(root->cmd_lines_num != 0){
+    if(need_exec_cmd(root)){
+      for(int i = 0; i < root->cmd_lines_num; i++){
+	execute_cmdline(root->cmdArray[i]->cmdWord_num,
+			root->cmdArray[i]->cmdWord);
+      }
+    }
+  }
 }

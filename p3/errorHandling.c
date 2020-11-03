@@ -29,48 +29,12 @@ void handle_malloc_error(void* ptr)
   }
 }
 
-// this function will be called by the following functions
-void check_and_print(int err, char* function_name)
+// on success, stat returns 0; on error, -1 is returned
+void handle_stat_error(int err)
 {
-  if(err != 0){
-    fprintf(stderr, "%s error: %s\n", function_name, strerror(err));
+  if(err !=0){
+    fprintf(stderr, "stat error: %s\n", strerror(errno));
     fprintf(stderr, "exiting...\n");
-    exit(EXIT_FAILURE);   
+    exit(EXIT_FAILURE);
   }
-}
-
-// on success, gettimeofday() returns 0
-void handle_gettime_error(int err)
-{
-  check_and_print(err, "gettimeofday()");
-}
-
-// on success, sem_init() returns 0
-void handle_sem_init_error(int err)
-{
-  check_and_print(err, "sem_init()");
-}
-
-// on success, sem_wait() returns 0
-void handle_sem_wait_error(int err)
-{
-  check_and_print(err, "sem_wait()");
-}
-
-// on success sem_post() returns 0
-void handle_sem_post_error(int err)
-{
-  check_and_print(err, "sem_post()");
-}
-
-// on success, pthread_create() returns 0
-void handle_pthread_create_error(int err)
-{
-  check_and_print(err, "pthread_create()");
-}
-
-// on success, pthread_join() returns 0
-void handle_pthread_join_error(int err)
-{
-  check_and_print(err, "pthread_join()"); 
 }
