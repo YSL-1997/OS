@@ -247,6 +247,7 @@ node** basic_exec_option(char* target_name)
 
 void read_user_input(int argc, char** argv)
 {
+  // if the following are in basic_exec_option, i.e. three flags all false
   if(argc == 1 && strcmp(argv[0], "537make") == 0){
     // in terminal: 537make
     basic_exec_option(NULL);
@@ -254,5 +255,9 @@ void read_user_input(int argc, char** argv)
   else if(argc == 2 && strcmp(argv[0], "537make") == 0){
     // in terminal: 537make target_name
     basic_exec_option(argv[1]);
+  }
+  else{
+    fprintf(stderr, "invalid input\n");
+    exit(1);
   }
 }
