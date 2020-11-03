@@ -6,6 +6,9 @@
 #include <sys/wait.h>
 #include "graph.h"
 
+// check if needs to execute cmd
+bool need_exec_cmd(node* target_node);
+
 // execute a cmd line
 void execute_cmdline(int cmdWord_num, char** cmdWord);
 
