@@ -285,28 +285,4 @@ char** getRoot(node** n, int t_num, int* root_num)
   return root_array;  
 }
 
-/* 
-   post-order traversal
-   input: all nodes, num of all nodes, a pointer to a root node
-*/
-void postorder(node** node_array, int all_nodes_num, node* root)
-{
 
-  for(int i = 0; i < root->dependency_num; i++){
-    struct node* temp;
-    temp = getNode(node_array, all_nodes_num, root->dependencies[i]);
-    postorder(node_array, all_nodes_num, temp);
-      
-  }
-  printf("%s -> ", root->target);
-  //if a target has cmd line, check the modification and then execute the cmd
-  if(root->cmd_lines_num != 0){
-    if(need_exec_cmd(root)){
-      for(int i = 0; i < root->cmd_lines_num; i++){
-        execute_cmdline(root->cmdArray[i]->cmdWord_num,
-			root->cmdArray[i]->cmdWord);
-      }
-    }
-  }
-  // execute(root);
-}
