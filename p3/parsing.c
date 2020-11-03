@@ -169,7 +169,7 @@ bool duplicate_target(node** node_array, int node_num, char* target)
    input: a pointer to a var that stores the number of nodes 
    return: target node list, with nodes_num updated
 */ 
-node** parsing(int* nodes_num, FILE* path)
+node** parsing(int* nodes_num, FILE* fp)
 {
   // buffer used to store the line string
   char* buffer = (char*)malloc((MAX_LEN) * sizeof(char));
