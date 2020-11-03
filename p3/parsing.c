@@ -5,7 +5,7 @@
   Project #3 - 537make
 */
 
-
+#include "parsing.h"
 
 /* 
    given a line string, split it into string array
