@@ -170,10 +170,8 @@ bool duplicate_target(node** node_array, int node_num, char* target)
    input: a pointer to a var that stores the number of nodes 
    return: target node list, with nodes_num updated
 */ 
-node** parsing(int* nodes_num)
+node** parsing(int* nodes_num, FILE* path)
 {
-  FILE *fp;
-  
   // buffer used to store the line string
   char* buffer = (char*)malloc((MAX_LEN) * sizeof(char));
   handle_malloc_error(buffer);
@@ -191,14 +189,7 @@ node** parsing(int* nodes_num)
   char** string_arr; //point to the splited string array
   int cmd_node_index = 0; //cmd index for each target
   cmdLine_num_init = 5;
-
-  //read file的时候，要先看有没有makefile，如果没有，就看有没有Makefile，如果都没有，就报错***************
-  
-  fp = fopen("basic_cycle", "r");
-  if(fp == NULL){
-    fprintf(stderr, "failed to open file.\n");
-  }
-  
+    
   while(ch != EOF){
     ch = fgetc(fp);
     

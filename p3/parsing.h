@@ -19,7 +19,6 @@ bool duplicate_target(node** node_array, int node_num, char* target);
    split it to string array. Distinguish whether the splited line is target line
    or cmd. If cmd, set fileds of cmd_node, otherwise, set fields of node.
 */
-node** parsing(int* nodes_num);
-
+node** parsing(int* nodes_num, FILE* path);
 
 #endif
