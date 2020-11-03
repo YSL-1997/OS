@@ -108,12 +108,6 @@ bool start_correct(argv)
 
 */
 
-/*
-  according to what is passed to the cmdline from the user
-  determine the build specification
-  input: int argc, char* argv[]
-*/
-
 
 // -f needs an argument. If there's no argument after -f, that's an error.''
 // 537make -f filename target
@@ -202,6 +196,11 @@ void basic_exec_option(char* target_name)
 }
 
 
+/*
+  according to what is passed to the cmdline from the user
+  determine the build specification
+  input: int argc, char* argv[]
+*/
 void read_user_input(int argc, char** argv)
 {
   int f_index = 0; // index for -f
@@ -228,7 +227,15 @@ void read_user_input(int argc, char** argv)
       exit(1);
     }
   }
+  else{
+    if(f_flag == true){      
+      // if there's no argument after -f, that's an error.
+      // 537make -f filename target AND/OR 537make target -f filename
+      // 537make -f filename
 
+      
+    }
+  }
   /*
   if(argc == 1 && strcmp(argv[0], "537make") == 0){
     // in terminal: 537make

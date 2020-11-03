@@ -353,22 +353,23 @@ node** parsing(int* nodes_num, FILE* fp)
   fclose(fp);
 
   // for debugging:
-  /*
+  
   for(int i = 0; i< node_index; i++){
     printf("target: %s   ", node_array[i] -> target);
     for(int j = 0; j<node_array[i]->dependency_num; j++){
       printf(" dependencies: %s ", (node_array[i]->dependencies)[j]);
     }
     printf("\n");
+    printf("cmd line: \n");
     for(int k = 0; k < node_array[i] -> cmd_lines_num; k++){
       for(int m = 0; m<(node_array[i]->cmdArray)[k] -> cmdWord_num; m++){
 	// printf("%s**", (node_array[i]->cmdArray)[k] -> cmd_string);
-	printf("%s**", ((node_array[i]->cmdArray)[k] -> cmdWord)[m]);
+	printf("%s ", ((node_array[i]->cmdArray)[k] -> cmdWord)[m]);
       }
       printf("\n"); 
     }
   }
-  */
+  
   return node_array;
 }
 

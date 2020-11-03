@@ -43,6 +43,14 @@ bool need_exec_cmd(node* target_node)
     handle_stat_error(stat(target_node->target, &stat_list[0]));
 
     // the rest are dependencies info
+    // need to check if the dependencies already exist or not
+    for(int i = 0; i < target_node->dependency_num; i++){
+      if(access(target_node->dependencies[i], F_OK) == -1){
+	// dependency not exist
+	return true;
+      }
+    }
+    
     for(int i = 0; i < target_node->dependency_num; i++){
       handle_stat_error(stat(target_node->dependencies[i], &stat_list[i+1]));
     }
@@ -97,12 +105,6 @@ void execute_cmdline(int cmdWord_num, char** cmdWord)
       fprintf(stderr, "cmd execution failed.\n");
       exit(1);
     }
-    else{
-      printf("execute: ");
-      for(int i = 0; i < cmdWord_num; i++){
-	printf("%s ",cmdWord[i]);
-      }
-    }
   }
   else{ // this is the parent process
     while(wait(&status) != pid); // wait for child to complete
@@ -128,13 +130,14 @@ void postorder(node** node_array, int all_nodes_num, node* root)
   if(root->cmd_lines_num != 0){
     if(need_exec_cmd(root)){
       for(int i = 0; i < root->cmd_lines_num; i++){
-	//printf("execute: %s\n", root->cmdArray[i]->cmd_string);
-	
+	printf("execute: ");
+	for(int j = 0; j < root->cmdArray[i]->cmdWord_num; j++){
+	  printf("%s ",root->cmdArray[i]->cmdWord[j]);
+	}
+	printf("\n");
         execute_cmdline(root->cmdArray[i]->cmdWord_num,
 			root->cmdArray[i]->cmdWord);
       }
     }
   }
- 
-  
 }
