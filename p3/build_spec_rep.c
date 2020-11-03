@@ -204,8 +204,32 @@ void basic_exec_option(char* target_name)
 
 void read_user_input(int argc, char** argv)
 {
+  int f_index = 0; // index for -f
+  int less_index = 0; // index for <
+  int less_inside_index = 0; // inside index for <
+  int great_index = 0; // index for >
+  int great_inside_index = 0; // inside index for >
 
-  // if the following are in basic_exec_option, i.e. three flags all false
+  // flags for -f, < and >
+  bool f_flag = has_f(argc, argv, &f_index);
+  bool less_flag = has_less(argc, argv, &less_index, &less_inside_index);
+  bool great_flag = has_great(argc, argv, &great_index, &great_inside_index);
+
+  // if in basic_exec_option, i.e. three flags all false
+  if(!f_flag && !less_flag && !great_flag){
+    if(argc == 1){
+      basic_exec_option(NULL);
+    }
+    else if(argc == 2){
+      basic_exec_option(argv[1]);
+    }
+    else{
+      fprintf(stderr, "invalid input\n");
+      exit(1);
+    }
+  }
+
+  /*
   if(argc == 1 && strcmp(argv[0], "537make") == 0){
     // in terminal: 537make
     basic_exec_option(NULL);
@@ -218,4 +242,6 @@ void read_user_input(int argc, char** argv)
     fprintf(stderr, "invalid input\n");
     exit(1);
   }
+
+  */
 }

@@ -175,7 +175,7 @@ node** parsing(int* nodes_num, FILE* fp)
   char* buffer = (char*)malloc((MAX_LEN) * sizeof(char));
   handle_malloc_error(buffer);
   
-  int line_index = 0;// index of line
+  int line_index = 1;// index of line
   int read_len = 0;// index of character of each line
   int null_flag = 0; //flag represent whether there is '\0'
   char ch ='a';

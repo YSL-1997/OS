@@ -60,7 +60,7 @@ bool need_exec_cmd(node* target_node)
 }
 
 /*
-  execute a cmd line
+  execute one single cmd line
   input: num of words, words list
   note that: before calling this function, need to check stat()
 */
