@@ -89,7 +89,4 @@ bool include(char** str_array, int str_num, char* str);
 /* get the root node list */
 char** getRoot(node** n, int t_num, int* root_num);
 
-/* post-order traversal */
-void postorder(node** node_array, int all_nodes_num, node* root);
-
 #endif
