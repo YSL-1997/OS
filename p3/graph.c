@@ -7,10 +7,11 @@
 
 #include "graph.h"
 #include "errorHandling.h"
-#include "process_exec.h"
-#include "build_spec_rep.h"
+
 
 static int MAX_LEN = 4096;
+static int MAX_LEN_STR = 100;
+static int MAX_NUM_DEPENDENCY = 1000;
 
 /* 
    initialize a cmd node struct
@@ -27,7 +28,7 @@ cmd_node* CreateCmdNode(int cmd_size, int line_index)
   c->cmd_index = line_index;
 
   // malloc spaces for cmdWord and cmd_string
-  c->cmdWord = (char**)malloc(sizeof(char*)*1000);
+  c->cmdWord = (char**)malloc(sizeof(char*)*MAX_NUM_DEPENDENCY);
   handle_malloc_error(c->cmdWord);
   
   c->cmd_string = (char*) malloc(sizeof(char)* MAX_LEN);
@@ -49,10 +50,10 @@ node* CreateNode(int depen_size, int line_index, int cmdLine_num_init)
   node* n = (node*)malloc(sizeof(struct node));
   handle_malloc_error(n);
   
-  n->target = (char*) malloc(sizeof(char)*MAX_LEN);
+  n->target = (char*) malloc(sizeof(char)*MAX_LEN_STR);
   handle_malloc_error(n->target);
   
-  n->dependencies = (char**)malloc(sizeof(char*)*1000);
+  n->dependencies = (char**)malloc(sizeof(char*)*MAX_NUM_DEPENDENCY);
   handle_malloc_error(n->dependencies);
 
   n->target_line_string = (char*) malloc(sizeof(char)*MAX_LEN);
@@ -80,8 +81,7 @@ int in_nodes_list(char* dep_str, node** nodes_list, int nodes_list_len)
 {
   for(int i = 0; i < nodes_list_len; i++){
     
-    if(strncmp(dep_str, nodes_list[i]->target,
-	       strnlen(dep_str, MAX_LEN)) == 0){
+    if(strncmp(dep_str, nodes_list[i]->target, MAX_LEN_STR) == 0){
       // meaning that to-be-added dependency already exists
       return 1;     
     }
@@ -136,8 +136,7 @@ node** get_all_nodes_list(node** target_nodes_list, int target_list_len,
 	node* new_node = CreateNode(0, -1, 0);// new_node has no dependency
 
 	// update the attribute - new_node->target
-	strncpy(new_node->target, target_nodes_list[i]->dependencies[j],
-		MAX_LEN);
+	strncpy(new_node->target, target_nodes_list[i]->dependencies[j],MAX_LEN_STR);
 	// strnlen(target_nodes_list[i]->dependencies[j], 100)-----------------------------------------
 
 	// set dependencies to be NULL
@@ -171,7 +170,7 @@ node* getNode(node** node_array, int all_nodes_num, char* target)
 {
   for(int i = 0; i < all_nodes_num; i++){
 
-    if(!strncmp(node_array[i] -> target, target, MAX_LEN)){
+    if(!strncmp(node_array[i] -> target, target, MAX_LEN_STR)){
       return node_array[i];        
     }
   }
@@ -239,7 +238,7 @@ bool check_cycle(node* t, node** all_nodes_list, int all_nodes_list_len)
 bool include(char** str_array, int str_num, char* str)
 {
   for(int i = 0; i < str_num; i++){
-    if(!strncmp(str_array[i], str, MAX_LEN)){
+    if(!strncmp(str_array[i], str, MAX_LEN_STR)){
       return true;
     }      
   }
@@ -259,7 +258,6 @@ char** getRoot(node** n, int t_num, int* root_num)
   int index = 0;
   int root_num_init = 10;
   // mallocate memory for the array to store target and dependency string
-  //需要realloc 吗
   char** root_array = (char**)malloc(sizeof(char*)*root_num_init);
   handle_malloc_error(root_array);
   
@@ -275,9 +273,9 @@ char** getRoot(node** n, int t_num, int* root_num)
     
     //if root number, store in an array
     if(!flag){
-      root_array[index] = (char*)malloc(sizeof(char)*MAX_LEN);
+      root_array[index] = (char*)malloc(sizeof(char)*MAX_LEN_STR);
       //  handle_malloc_error(targets_name[i])
-      strncpy(root_array[index], n[i]->target, MAX_LEN);
+      strncpy(root_array[index], n[i]->target, MAX_LEN_STR);
       index++;
     }
     flag = false;
@@ -299,14 +297,14 @@ void postorder(node** node_array, int all_nodes_num, node* root)
     postorder(node_array, all_nodes_num, temp);
       
   }
-
-  //if a target has cmd line, check the modification and then execute the cmd
+  printf("%s -> ", root->target);
+  //if a target there is cmd line, check the modification and then execute the cmd
   if(root->cmd_lines_num != 0){
     if(need_exec_cmd(root)){
       for(int i = 0; i < root->cmd_lines_num; i++){
-	execute_cmdline(root->cmdArray[i]->cmdWord_num,
-			root->cmdArray[i]->cmdWord);
+        execute_cmdline(root->cmdArray[i]->cmdWord_num, root->cmdArray[i]->cmdWord);
       }
     }
   }
+  // execute(root);
 }

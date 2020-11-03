@@ -8,6 +8,8 @@
 #include "parsing.h"
 
 static int MAX_LEN = 4096;
+static int MAX_LEN_STR = 100;
+
 /* 
    given a line string, split it into string array
    input: line string, line number, length of the array
@@ -17,7 +19,7 @@ char** split(char* string, int line_index, int* array_len)
 {
   char ch = 'a'; //initialize character variable
   int col_num = 1000; // set the max length of string array
-  int len = MAX_LEN; //set the max length of each string
+  int len = MAX_LEN_STR; //set the max length of each string
   int col_index = 0; //initialize the index of array
   int str_index = 0; //initialize the index of each string
   int read_len = 0; //initialize the index of line string
@@ -180,7 +182,7 @@ node** parsing(int* nodes_num)
   int read_len = 0;// index of character of each line
   int null_flag = 0; //flag represent whether there is '\0'
   char ch ='a';
-  int array_num = 0; //# of strings for each line
+  int word_num = 0; //# of strings for each line
   int nodes_num_init = 5; // initialize the length of node array
   node** node_array = malloc(nodes_num_init * sizeof(struct node*));
   handle_malloc_error(node_array);
@@ -188,6 +190,7 @@ node** parsing(int* nodes_num)
   int cmdLine_num_init;//initialize # of cmd line for each target
   char** string_arr; //point to the splited string array
   int cmd_node_index = 0; //cmd index for each target
+  cmdLine_num_init = 5;
 
   //read file的时候，要先看有没有makefile，如果没有，就看有没有Makefile，如果都没有，就报错***************
   
@@ -243,47 +246,46 @@ node** parsing(int* nodes_num)
 	continue;
       }
       
-      string_arr = split(buffer, line_index, &array_num);
-      // for(int i = 0; i<array_num; i++){
+      string_arr = split(buffer, line_index, &word_num);
+      // for(int i = 0; i<word_num; i++){
       //     printf("%s**", string_arr[i]);
       // }
       
       //  if it's a (target + dependency) line, update the fields of node
       if(strcmp(string_arr[0], "\t")){
-	cmdLine_num_init = 5;
+	
 	
 	//if the current node number reach the initial value, reallocate
 	if(node_index == nodes_num_init){
 	  printf("need realloc\n");
 	  int addition_nodes_num = 5;
-
 	  // realloc more spaces
 	  node_array = realloc(node_array,
 			       (nodes_num_init + addition_nodes_num)
 			       * sizeof(node*));
-	  handle_malloc_error(node_array[node_index-1]->cmdArray);
+	  handle_malloc_error(node_array);
 	  
 	  nodes_num_init = nodes_num_init + addition_nodes_num;
 	}
 
 	// create node
-	node_array[node_index] = CreateNode(array_num - 1, line_index,
+	node_array[node_index] = CreateNode(word_num - 1, line_index,
 					    cmdLine_num_init);
-	strncpy(node_array[node_index]->target, string_arr[0], MAX_LEN);
+	strncpy(node_array[node_index]->target, string_arr[0], MAX_LEN_STR);
 	strncpy(node_array[node_index]->target_line_string, buffer, MAX_LEN);
 	
 	//if no dependency, set dependency is null, else set the string
 	// array slice(from index 1 to end) to dependency field
-	if(array_num == 1){
+	if(word_num == 1){
 	  free(node_array[node_index]->dependencies);
 	  node_array[node_index]->dependencies = NULL;
 	}
 	else{
 	  memcpy(node_array[node_index]->dependencies, &string_arr[1],
-		 (array_num - 1)*sizeof(*string_arr));
+		 (word_num - 1)*sizeof(*string_arr));
 	}
         
-	//     for(int i = 0; i<array_num-1; i++){
+	//     for(int i = 0; i<word_num-1; i++){
 	//        printf("%s**", node_array[node_index] -> dependencies[i]);
 	//     }
 	
@@ -328,13 +330,13 @@ node** parsing(int* nodes_num)
 	  }
 	  
 	  //if the cmd line splited string array is not only tab 
-	  if(array_num > 1){
+	  if(word_num > 1){
 	    (node_array[node_index-1]->cmdArray)[cmd_node_index] =
-	      CreateCmdNode(array_num - 1, line_index);
+	      CreateCmdNode(word_num - 1, line_index);
 	    
 	    memcpy((node_array[node_index-1]->
 		    cmdArray)[cmd_node_index]->cmdWord,&string_arr[1],
-		   (array_num - 1)*sizeof(*string_arr));
+		   (word_num - 1)*sizeof(*string_arr));
 	    
 	    strncpy((node_array[node_index-1]->
 		     cmdArray)[cmd_node_index]->cmd_string, buffer, MAX_LEN);
