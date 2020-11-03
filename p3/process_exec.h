@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include "graph.h"
 
 // check if needs to execute cmd
