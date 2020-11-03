@@ -353,6 +353,7 @@ node** parsing(int* nodes_num, FILE* fp)
   fclose(fp);
 
   // for debugging:
+  /*
   for(int i = 0; i< node_index; i++){
     printf("target: %s   ", node_array[i] -> target);
     for(int j = 0; j<node_array[i]->dependency_num; j++){
@@ -367,7 +368,7 @@ node** parsing(int* nodes_num, FILE* fp)
       printf("\n"); 
     }
   }
-  
+  */
   return node_array;
 }
 

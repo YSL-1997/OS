@@ -97,6 +97,12 @@ void execute_cmdline(int cmdWord_num, char** cmdWord)
       fprintf(stderr, "cmd execution failed.\n");
       exit(1);
     }
+    else{
+      printf("execute: ");
+      for(int i = 0; i < cmdWord_num; i++){
+	printf("%s ",cmdWord[i]);
+      }
+    }
   }
   else{ // this is the parent process
     while(wait(&status) != pid); // wait for child to complete
@@ -118,13 +124,17 @@ void postorder(node** node_array, int all_nodes_num, node* root)
   }
   printf("%s -> ", root->target);
   //if a target has cmd line, check the modification and then execute the cmd
+  
   if(root->cmd_lines_num != 0){
     if(need_exec_cmd(root)){
       for(int i = 0; i < root->cmd_lines_num; i++){
+	//printf("execute: %s\n", root->cmdArray[i]->cmd_string);
+	
         execute_cmdline(root->cmdArray[i]->cmdWord_num,
 			root->cmdArray[i]->cmdWord);
       }
     }
   }
-  // execute(root);
+ 
+  
 }
