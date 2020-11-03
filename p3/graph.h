@@ -9,6 +9,9 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include "errorHandling.h"
+#include "process_exec.h"
+#include "build_spec_rep.h"
+#include "parsing.h"
 
 /* a struct that stores info of each cmd line */
 typedef struct cmd_node

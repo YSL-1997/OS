@@ -6,8 +6,6 @@
 */
 
 #include "build_spec_rep.h"
-#include "graph.h"
-#include "parsing.h"
 
 /*
   This module contains the basic build specification abstraction.
@@ -56,6 +54,7 @@ bool need_exec_cmd(node* target_node)
     if(target_node->cmd_lines_num > 0){
       return true;
     }
+    return false;
   }
 }
 
@@ -68,12 +67,13 @@ bool need_exec_cmd(node* target_node)
 */
 bool has_f(int argc, char** argv, int* f_index)
 {
-  for(int i = 0; i < argc, i++){
+  for(int i = 0; i < argc; i++){
     if(strcmp(argv[i], "-f") == 0){
       return true;
     }
     *f_index++;
   }
+  return false;
 }
 
 /*
@@ -97,6 +97,7 @@ bool has_less(int argc, char** argv, int* less_index, int* less_inside_index)
     }
     *less_index++;
   }
+  return false;
 }
 
 /*
@@ -105,7 +106,8 @@ bool has_less(int argc, char** argv, int* less_index, int* less_inside_index)
   return: true if includes >, false otherwise
   note that great_index will be updated, great_inside_index may be updated
 */
-bool has_great(int argc, char** argv, int* great_index, int* great_inside_index)
+bool has_great(int argc, char** argv, int* great_index,
+	       int* great_inside_index)
 {
   for(int i = 0; i < argc; i++){
     int len = strlen(argv[i]);
@@ -118,6 +120,7 @@ bool has_great(int argc, char** argv, int* great_index, int* great_inside_index)
     }
     *great_index++;
   }
+  return false;
 }
 
 /*
@@ -205,9 +208,9 @@ void read_user_input(int argc, char** argv)
 
 
 /*
-  
+  execute according to the value of target_name
 */
-node** basic_exec_option(char* target_name)
+void basic_exec_option(char* target_name)
 {
   // read makefile or Makefile
   FILE* fp = fopen("makefile", "r");
@@ -247,6 +250,7 @@ node** basic_exec_option(char* target_name)
 
 void read_user_input(int argc, char** argv)
 {
+
   // if the following are in basic_exec_option, i.e. three flags all false
   if(argc == 1 && strcmp(argv[0], "537make") == 0){
     // in terminal: 537make

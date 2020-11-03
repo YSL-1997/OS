@@ -153,7 +153,6 @@ bool duplicate_target(node** node_array, int node_num, char* target)
     if(!strcmp(node_array[i]->target, target)){
       return true;          
     }
-    
   }
   return false;
 }

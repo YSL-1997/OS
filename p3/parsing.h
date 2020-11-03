@@ -3,8 +3,6 @@
 
 #include "graph.h"
 
-
-
 /* given a line string, split it into string array*/
 char** split(char* string, int line_index, int* array_len);
 
