@@ -55,7 +55,7 @@ node* CreateNode(int depen_size, int line_index, int cmdLine_num_init)
   handle_malloc_error(n->dependencies);
 
   n->target_line_string = (char*) malloc(sizeof(char)*MAX_LEN);
-  handle_malloc_error(n->line_string);
+  handle_malloc_error(n->target_line_string);
 
   n->cmdArray = malloc(cmdLine_num_init * sizeof(struct cmd_node*));
   handle_malloc_error(n->cmdArray);
@@ -260,7 +260,7 @@ char** getRoot(node** n, int t_num, int* root_num)
   // mallocate memory for the array to store target and dependency string
   //需要realloc 吗
   char** root_array = (char**)malloc(sizeof(char*)*root_num_init);
-  handle_malloc_error(targets_name)
+  handle_malloc_error(root_array);
   
   //comparing a target with all dependencies, if find, it's not root
   for(int i = 0; i < t_num; i++){

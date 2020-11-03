@@ -7,6 +7,7 @@
 
 #include "parsing.h"
 
+static int MAX_LEN = 4096;
 /* 
    given a line string, split it into string array
    input: line string, line number, length of the array
@@ -236,7 +237,7 @@ node** parsing(int* nodes_num)
       }
       
       //if the line is blank or comment line, reset index then continue
-      if(!strcmp(buffer, "\0") || buffer[0] == '#' || isempty(buffer)){
+      if(!strcmp(buffer, "\0") || buffer[0] == '#' || is_empty(buffer)){
 	read_len = 0;
 	line_index++;
 	continue;
@@ -291,7 +292,7 @@ node** parsing(int* nodes_num)
 	  node_array[node_index - 1]->cmd_lines_num = cmd_node_index;
 
 	  // if there's duplicate target
-	  if(duplicateTarget(node_array, node_index - 1,
+	  if(duplicate_target(node_array, node_index - 1,
 			     node_array[node_index]->target)){
 	    fprintf(stderr, "%d: <Duplicate target>: \"%s\"\n",
 		    line_index+1, buffer);
