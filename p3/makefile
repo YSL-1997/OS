@@ -1,5 +1,7 @@
-537make: main.o build_spec_rep.o parsing.o process_exec.o graph.o errorHandling.o
-	gcc -Wall -Werror -o 537make main.o build_spec_rep.o parsing.o process_exec.o graph.o errorHandling.o
+537make: main.o build_spec_rep.o parsing.o process_exec.o graph.o \
+errorHandling.o
+	gcc -Wall -Werror -o 537make main.o build_spec_rep.o parsing.o \
+process_exec.o graph.o errorHandling.o
 
 main.o: main.c build_spec_rep.h
 	gcc -Wall -Werror -c main.c
