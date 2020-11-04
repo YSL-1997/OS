@@ -101,9 +101,9 @@ void execute_cmdline(int cmdWord_num, char** cmdWord)
     exit(1);
   }
   else if(pid == 0){ // child process created
-    if(execvp(*cmd_arg, cmd_arg) < 0){
+    if(execvp(*cmd_arg, cmd_arg) == -1){
       fprintf(stderr, "cmd execution failed.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
   }
   else{ // this is the parent process

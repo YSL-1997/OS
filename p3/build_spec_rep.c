@@ -109,54 +109,9 @@ bool start_correct(argv)
 */
 
 
-// -f needs an argument. If there's no argument after -f, that's an error.''
-// 537make -f filename target
-
-/*
-void read_user_input(int argc, char** argv)
-{
-  int f_index = 0; // index for -f
-  int less_index = 0; // index for <
-  int less_inside_index = 0; // inside index for <
-  int great_index = 0; // index for >
-  int great_inside_index = 0; // inside index for >
-
-  // flags for -f, < and >
-  bool f_flag = has_f(argc, argv, f_index);
-  bool less_flag = has_less(argc, argv, &less_index, &less_inside_index);
-  bool great_flag = has_great(argc, argv, &great_index, &great_inside_index);
-  
-  
-  char* start_str = "537make";
-  int start_str_len = strlen(start_str);
-
-  // if the first word of user input is not 537make only
-  if(strncmp(argv[0], start_str, strlen(argv[0])) != 0){
-
-    // check if the first 7 chars are 537make
-    // if not, then error
-    for(int i = 0; i < start_str_len; i++){
-      if(argv[0][i] != start_str[i]){
-	fprintf(stderr, "Input should start with 537make\n");
-	exit(EXIT_FAILURE);
-      }
-    }
-
-
-    
-  }
-  else{ // the first word of user input is 537make
-
-    // traverse argv, update the three flags
-    
-  }
-}
-*/
-
-
-
 /*
   execute according to the value of target_name
+  input: target_name can be either target or NULL
 */
 void basic_exec_option(char* target_name)
 {
