@@ -230,10 +230,17 @@ node** parsing(int* nodes_num, FILE* fp)
       }
       
       //if the line is blank or comment line, reset index then continue
-      if(!strcmp(buffer, "\0") || buffer[0] == '#' || is_empty(buffer)){
-	read_len = 0;
-	line_index++;
-	continue;
+      if( buffer[0] == '#' || is_empty(buffer)){
+	if(ch == EOF){
+	  node_array[node_index - 1] -> cmd_lines_num = cmd_node_index;
+	  free(buffer);
+	  break;	          
+	}
+	else{
+	  read_len = 0;
+	  line_index++;
+	  continue;	          
+	}	
       }
       
       string_arr = split(buffer, line_index, &word_num);
@@ -247,7 +254,6 @@ node** parsing(int* nodes_num, FILE* fp)
 	
 	//if the current node number reach the initial value, reallocate
 	if(node_index == nodes_num_init){
-	  printf("need realloc\n");
 	  int addition_nodes_num = 5;
 	  // realloc more spaces
 	  node_array = realloc(node_array,
@@ -274,10 +280,6 @@ node** parsing(int* nodes_num, FILE* fp)
 	  memcpy(node_array[node_index]->dependencies, &string_arr[1],
 		 (word_num - 1)*sizeof(*string_arr));
 	}
-        
-	//     for(int i = 0; i<word_num-1; i++){
-	//        printf("%s**", node_array[node_index] -> dependencies[i]);
-	//     }
 	
 	//store the # of cmd line and check depulicate target
 	if(node_index > 0){
@@ -353,7 +355,7 @@ node** parsing(int* nodes_num, FILE* fp)
   fclose(fp);
 
   // for debugging:
-  
+  /*
   for(int i = 0; i< node_index; i++){
     printf("target: %s   ", node_array[i] -> target);
     for(int j = 0; j<node_array[i]->dependency_num; j++){
@@ -369,7 +371,7 @@ node** parsing(int* nodes_num, FILE* fp)
       printf("\n"); 
     }
   }
-  
+  */
   return node_array;
 }
 

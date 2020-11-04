@@ -124,17 +124,17 @@ void postorder(node** node_array, int all_nodes_num, node* root)
     postorder(node_array, all_nodes_num, temp);
       
   }
-  printf("%s -> ", root->target);
+  // printf("%s -> ", root->target);
   //if a target has cmd line, check the modification and then execute the cmd
   
   if(root->cmd_lines_num != 0){
     if(need_exec_cmd(root)){
       for(int i = 0; i < root->cmd_lines_num; i++){
-	printf("execute: ");
-	for(int j = 0; j < root->cmdArray[i]->cmdWord_num; j++){
-	  printf("%s ",root->cmdArray[i]->cmdWord[j]);
-	}
-	printf("\n");
+	//	printf("execute: ");
+	//for(int j = 0; j < root->cmdArray[i]->cmdWord_num; j++){
+	//printf("%s ",root->cmdArray[i]->cmdWord[j]);
+	//}
+	//printf("\n");
         execute_cmdline(root->cmdArray[i]->cmdWord_num,
 			root->cmdArray[i]->cmdWord);
       }

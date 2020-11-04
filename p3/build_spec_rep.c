@@ -227,15 +227,24 @@ void read_user_input(int argc, char** argv)
       exit(1);
     }
   }
+
+  /*
   else{
-    if(f_flag == true){      
+    if(f_flag && !less_flag && !great_flag){      
       // if there's no argument after -f, that's an error.
       // 537make -f filename target AND/OR 537make target -f filename
       // 537make -f filename
 
+      //需要先判断f_index后面有没有东西
+      if(argc >= f_index + 1)
+	//char* file_name = argv[f_index + 1];
+      //if(argc == f_index + 1)
+	printf("%d,%d,%d,%d,%d\n", f_index, less_index,
+	       less_inside_index, great_index, great_inside_index );
       
     }
   }
+  */
   /*
   if(argc == 1 && strcmp(argv[0], "537make") == 0){
     // in terminal: 537make
