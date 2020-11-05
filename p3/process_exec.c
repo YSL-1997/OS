@@ -100,25 +100,26 @@ void execute_cmdline(int cmdWord_num, char** cmdWord)
     fprintf(stderr, "fork() failed to create a child process.\n");
     exit(1);
   }
-  else if(pid == 0){ // child process created
+  else if(pid == 0){ // we are now in the child process
     if(execvp(*cmd_arg, cmd_arg) == -1){
       fprintf(stderr, "cmd execution failed.\n");
       exit(EXIT_FAILURE);
     }
   }
-  else{ // this is the parent process
+  else{ // we are now in the parent process
     if(wait(&status) < 0){
 	    perror("wait failed %d", status)
-    		exit}
-    else{
-	if(WIFEXITED(status)){ // returns true if child process returns normally
-		if(WEXITSTATUS(status)){// other errors (program returns nonzero)
-			nonzero exit status
+    	exit
 		}
-	}
-	else{ // if child receives interrupt, seg fault
-		error
-	}
+    else{
+			if(WIFEXITED(status)){ // returns true if child process returns normally
+				if(WEXITSTATUS(status)){// other errors (program returns nonzero)
+					
+				}
+			}
+			else{ // if child receives interrupt, seg fault
+				error
+			}
 	}
 	  //while(wait(&status) != pid); // wait for child to complete
   }
