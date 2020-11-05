@@ -107,7 +107,20 @@ void execute_cmdline(int cmdWord_num, char** cmdWord)
     }
   }
   else{ // this is the parent process
-    while(wait(&status) != pid); // wait for child to complete
+    if(wait(&status) < 0){
+	    perror("wait failed %d", status)
+    		exit}
+    else{
+	if(WIFEXITED(status)){ // returns true if child process returns normally
+		if(WEXITSTATUS(status)){// other errors (program returns nonzero)
+			nonzero exit status
+		}
+	}
+	else{ // if child receives interrupt, seg fault
+		error
+	}
+	}
+	  //while(wait(&status) != pid); // wait for child to complete
   }
 }
 
