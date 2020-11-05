@@ -182,7 +182,7 @@ void read_user_input(int argc, char** argv)
       exit(1);
     }
   }
-
+dup2 to map stdout to file_name
   /*
   else{
     if(f_flag && !less_flag && !great_flag){      
