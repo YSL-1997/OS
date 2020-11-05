@@ -6,15 +6,16 @@
 #include <sys/types.h>
 #include "process_exec.h"
 #include "parsing.h"
+#include "errorHandling.h"
 
 // check if the user input includes -f
-bool has_f(int argc, char** argv, int* f_index);
+bool has_f(int argc, char* argv[], int* f_index);
 
 // check if the user input includes <
-bool has_less(int argc, char** argv, int* less_index, int* less_inside_index);
+bool has_less(int argc, char* argv[], int* less_index, int* less_inside_index);
 
 // check if the user input includes >
-bool has_great(int argc, char** argv,
+bool has_great(int argc, char* argv[],
 	       int* great_index, int* great_inside_index);
 
 // execute according to the value of target_name

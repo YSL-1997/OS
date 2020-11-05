@@ -115,16 +115,11 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode)
       exit(EXIT_FAILURE);
     }
     else{
-      // WIFEXITED returns true if child process returns normally
+      // WSTOPSIG returns the number of the signal
+      // which caused the child to stop
       if(WSTOPSIG(status)){
 	exit(EXIT_FAILURE);
       }
-      /*
-      if(WSTOPSIG(status)){ 
-	perror("cmd cannot execute due to error: ");
-	exit(EXIT_FAILURE);
-      }
-      */
     }
   }
 }

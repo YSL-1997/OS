@@ -12,6 +12,7 @@
   It allows you to create, update, and access a build specification.
 */
 
+static int MAX_LEN_FILENAME = 4096;
 
 /*
   check if the user input includes -f
@@ -19,13 +20,13 @@
   return: true if includes -f, false otherwise
   note that f_index will store the index of -f
 */
-bool has_f(int argc, char** argv, int* f_index)
+bool has_f(int argc, char* argv[], int* f_index)
 {
   for(int i = 0; i < argc; i++){
     if(strcmp(argv[i], "-f") == 0){
       return true;
     }
-    *f_index++;
+    (*f_index)++;
   }
   return false;
 }
@@ -36,7 +37,7 @@ bool has_f(int argc, char** argv, int* f_index)
   return: true if includes <, false otherwise
   note that less_index will be updated, less_inside_index may be updated
 */
-bool has_less(int argc, char** argv, int* less_index, int* less_inside_index)
+bool has_less(int argc, char* argv[], int* less_index, int* less_inside_index)
 {
   // traverse all words in user input
   for(int i = 0; i < argc; i++){
@@ -47,9 +48,9 @@ bool has_less(int argc, char** argv, int* less_index, int* less_inside_index)
       if(argv[i][j] == '<'){
 	return true;
       }
-      *less_inside_index++;
+      (*less_inside_index)++;
     }
-    *less_index++;
+    (*less_index)++;
   }
   return false;
 }
@@ -60,7 +61,7 @@ bool has_less(int argc, char** argv, int* less_index, int* less_inside_index)
   return: true if includes >, false otherwise
   note that great_index will be updated, great_inside_index may be updated
 */
-bool has_great(int argc, char** argv, int* great_index,
+bool has_great(int argc, char* argv[], int* great_index,
 	       int* great_inside_index)
 {
   for(int i = 0; i < argc; i++){
@@ -70,44 +71,12 @@ bool has_great(int argc, char** argv, int* great_index,
       if(argv[i][j] == '>'){
 	return true;
       }
-      *great_inside_index++;
+      (*great_inside_index)++;
     }
-    *great_index++;
+    (*great_index)++;
   }
   return false;
 }
-
-/*
-  check if the start of user input is correct
-  only possible cases: 537make<*, 537make, 537make>*
-  input: argv
-  return: if not in the 3 possible cases, false; else true
-*/
-/*
-bool start_correct(argv)
-{
-  char* str = "537make";
-  int len = strlen(str);
-  
-  for(int i = 0; i < len; i++){
-    if(argv[i] != str[i]){
-      return false;
-    }
-  }
-
-  // now, the first 7 chars of argv[0] is 537make
-  // need to consider if argv[0] has other things
-  if(strlen(argv[0]) > len){
-    if(argv[0][len] == '<' || argv[0][len] == '>'){
-      return true;
-    }
-    return false;
-  }
-  
-}
-
-*/
-
 
 /*
   execute according to the value of target_name
@@ -115,21 +84,38 @@ bool start_correct(argv)
 */
 void basic_exec_option(char* target_name)
 {
-  // read makefile or Makefile
-  FILE* fp = fopen("makefile", "r");
-  if(fp == NULL){
+  int m_flag = 0; // flag for makefile
+  int M_flag = 0; // flag for Makefile
+  FILE* fp;
+  
+  if(access("makefile", F_OK) != -1) // makefile exists
+    m_flag = 1;
+  
+  if(access("Makefile", F_OK) != -1) // Makefile exists
+    M_flag = 1;
+
+  // read makefile or Makefile 
+  if(m_flag == 1)
+    fp = fopen("makefile", "r");
+  
+  if(M_flag == 1 && m_flag == 0)
     fp = fopen("Makefile", "r");
-    if(fp == NULL){
-      fprintf(stderr, "No makefile or Makefile found\n");
-      exit(1);
-    }
+  
+  if(m_flag == 0 && M_flag == 0)
+    fprintf(stderr, "No makefile or Makefile found\n");
+  
+  if(fp == NULL){
+    fprintf(stderr, "fopen error\n");
+    exit(EXIT_FAILURE);
   }
   
   int target_nodes_num;
   int all_nodes_num;
-  
+
+  // stores the target nodes
   node** target_nodes_list = parsing(&target_nodes_num, fp);
-  
+
+  // stores all nodes (targets + dependencies)
   node** all_nodes_list = get_all_nodes_list(target_nodes_list,
 					     target_nodes_num,
 					     &all_nodes_num);
@@ -183,27 +169,99 @@ void read_user_input(int argc, char** argv)
     }
     else{
       fprintf(stderr, "invalid input\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
   }
 
-	// dup2 to map stdout to file_name
-  /*
-  else{
-    if(f_flag && !less_flag && !great_flag){      
-      // if there's no argument after -f, that's an error.
-      // 537make -f filename target AND/OR 537make target -f filename
-      // 537make -f filename
+  if(f_flag && !less_flag && !great_flag){
+    // if there's no argument after -f, that's an error.
+    // 537make -f filename target AND/OR 537make target -f filename
+    // 537make -f filename
+    int ch;
+    char* file_path = (char*)malloc(MAX_LEN_FILENAME*sizeof(char));
+    handle_malloc_error(file_path);
+    char* target_name = (char*)malloc(MAX_LEN_FILENAME*sizeof(char));
+    handle_malloc_error(target_name);
+    
+    while((ch = getopt(argc, argv, "f:")) != -1){
+      switch(ch){
 
-      //需要先判断f_index后面有没有东西
-      if(argc >= f_index + 1)
-	//char* file_name = argv[f_index + 1];
-      //if(argc == f_index + 1)
-	printf("%d,%d,%d,%d,%d\n", f_index, less_index,
-	       less_inside_index, great_index, great_inside_index );
+      case 'f':
+	// in this case, file_path has index f_index+1
+	strncpy(file_path, optarg, MAX_LEN_FILENAME);
+	
+	// need to check if file_path exists or not
+	if(access(file_path, F_OK) == -1){
+	  fprintf(stderr, "%s not exist, exit...\n", file_path);
+	  exit(EXIT_FAILURE);
+	}
+
+	// now, we have to start parsing the file - file_path
+	FILE* fp = fopen(file_path, "r");
+	if(fp == NULL){
+          fprintf(stderr, "%s fopen failed\n", file_path);
+	  exit(EXIT_FAILURE);
+	}
       
-    }
+	int target_nodes_num;
+	int all_nodes_num;
+  
+	node** target_nodes_list = parsing(&target_nodes_num, fp);
+	
+	node** all_nodes_list = get_all_nodes_list(target_nodes_list,
+						   target_nodes_num,
+						   &all_nodes_num);
+  
+	// check cycle for every node
+	for(int i = 0; i < all_nodes_num; i++){
+	  check_cycle(all_nodes_list[i], all_nodes_list, all_nodes_num);
+	}
+
+	// now, need to check if there's target specified
+	if(argc == 3){
+	  // no target, i.e. ./537make -f file_path
+	  postorder(all_nodes_list, all_nodes_num, all_nodes_list[0]);
+	}
+	else if(argc == 4){
+	  // there's target, need to find where the target is
+	  int target_index = -1;
+
+	  if(argc == f_index + 3){ // ./537make -f file_path target
+	    target_index = f_index + 2;
+	  }
+	  else if(argc == f_index + 2){ // ./537make target -f file_path
+	    target_index = f_index - 1;
+	  }
+	  else{
+	    fprintf(stderr, "invalid input\n");
+	    exit(EXIT_FAILURE);
+	  }
+
+	  // get target node
+	  node* tmp = getNode(all_nodes_list,
+			      all_nodes_num, argv[target_index]);
+	  if(tmp == NULL){
+	    fprintf(stderr, "invalid target name: %s\n", argv[target_index]);
+	    exit(EXIT_FAILURE);
+	  }
+	  
+	  postorder(all_nodes_list, all_nodes_num, tmp);
+	}
+      else{
+	fprintf(stderr, "invalid input\n");
+	exit(EXIT_FAILURE);
+      }
+      	
+      break;
+	
+      }
+    } 
+  }
+
+  /*
+  if(!f_flag && less_flag && !great_flag){
+    
   }
   */
-
+	// dup2 to map stdout to file_name
 }
