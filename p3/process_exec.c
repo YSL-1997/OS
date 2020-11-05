@@ -78,7 +78,7 @@ bool need_exec_cmd(node* target_node)
   input: num of words, words list
   note that: before calling this function, need to check stat()
 */
-void execute_cmdline(int cmdWord_num, char** cmdWord)
+void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode)
 {
   // malloc space for cmd arguments
   char** cmd_arg = (char**)malloc((cmdWord_num + 1) * sizeof(char*));
@@ -102,8 +102,10 @@ void execute_cmdline(int cmdWord_num, char** cmdWord)
   }
   else if(pid == 0){ // we are now in the child process
     if(execvp(*cmd_arg, cmd_arg) == -1){
-      perror("error:!!!");
-      printf("now it's time to exit\n");
+      // meaning that the cmd is not executable
+      fprintf(stderr, "%d: <cmdline invalid>: \"%s\"\n",
+	      cmdNode->cmd_index,
+	      cmdNode->cmd_string);
       exit(EXIT_FAILURE);
     }
   }
@@ -113,17 +115,16 @@ void execute_cmdline(int cmdWord_num, char** cmdWord)
       exit(EXIT_FAILURE);
     }
     else{
-
       // WIFEXITED returns true if child process returns normally
-      if(WIFEXITED(status)){ 
-	if(WEXITSTATUS(status)){
-
-	}
+      if(WSTOPSIG(status)){
+	exit(EXIT_FAILURE);
       }
-      else{ // if child receives interrupt, seg fault
+      /*
+      if(WSTOPSIG(status)){ 
 	perror("cmd cannot execute due to error: ");
 	exit(EXIT_FAILURE);
       }
+      */
     }
   }
 }
@@ -153,7 +154,8 @@ void postorder(node** node_array, int all_nodes_num, node* root)
 	//}
 	//printf("\n");
         execute_cmdline(root->cmdArray[i]->cmdWord_num,
-			root->cmdArray[i]->cmdWord);
+			root->cmdArray[i]->cmdWord,
+			root->cmdArray[i]);
       }
     }
   }

@@ -6,4 +6,5 @@
 void write_message()
 {
     printf("Here is a char.\n");
+    printf("hello");
 }

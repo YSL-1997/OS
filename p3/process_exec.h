@@ -11,7 +11,7 @@
 bool need_exec_cmd(node* target_node);
 
 // execute a cmd line
-void execute_cmdline(int cmdWord_num, char** cmdWord);
+void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode);
 
 // post-order traversal
 void postorder(node** node_array, int all_nodes_num, node* root);
