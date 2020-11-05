@@ -146,6 +146,10 @@ void basic_exec_option(char* target_name)
   else{
     // get the node according to target_name
     node* tmp = getNode(all_nodes_list, all_nodes_num, target_name);
+	  if(tmp == NULL){
+			fprintf("invalid target name: %s\n", target_name);
+			exit(EXIT_FAILURE);
+		}
     postorder(all_nodes_list, all_nodes_num, tmp);
   }
 }
@@ -182,7 +186,8 @@ void read_user_input(int argc, char** argv)
       exit(1);
     }
   }
-dup2 to map stdout to file_name
+
+	// dup2 to map stdout to file_name
   /*
   else{
     if(f_flag && !less_flag && !great_flag){      
@@ -200,19 +205,5 @@ dup2 to map stdout to file_name
     }
   }
   */
-  /*
-  if(argc == 1 && strcmp(argv[0], "537make") == 0){
-    // in terminal: 537make
-    basic_exec_option(NULL);
-  }
-  else if(argc == 2 && strcmp(argv[0], "537make") == 0){
-    // in terminal: 537make target_name
-    basic_exec_option(argv[1]);
-  }
-  else{
-    fprintf(stderr, "invalid input\n");
-    exit(1);
-  }
 
-  */
 }
