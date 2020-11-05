@@ -88,7 +88,7 @@ void execute_cmdline(int cmdWord_num, char** cmdWord)
   for(int i = 0; i < cmdWord_num; i++){
     cmd_arg[i] = cmdWord[i];
   }
-  cmd_arg[cmdWord_num] = '\0';
+  cmd_arg[cmdWord_num] = NULL;
 
   // prepare to fork()
   pid_t pid;
@@ -97,31 +97,34 @@ void execute_cmdline(int cmdWord_num, char** cmdWord)
   pid = fork();
 
   if(pid < 0){ // creation of a child process failed
-    fprintf(stderr, "fork() failed to create a child process.\n");
-    exit(1);
+    perror("fork() error: ");
+    exit(EXIT_FAILURE);
   }
   else if(pid == 0){ // we are now in the child process
     if(execvp(*cmd_arg, cmd_arg) == -1){
-      fprintf(stderr, "cmd execution failed.\n");
+      perror("error:!!!");
+      printf("now it's time to exit\n");
       exit(EXIT_FAILURE);
     }
   }
   else{ // we are now in the parent process
-    if(wait(&status) < 0){
-	    perror("wait failed %d", status)
-    	exit
-		}
+    if(wait(&status) == -1){
+      perror("wait() error: ");
+      exit(EXIT_FAILURE);
+    }
     else{
-			if(WIFEXITED(status)){ // returns true if child process returns normally
-				if(WEXITSTATUS(status)){// other errors (program returns nonzero)
-					
-				}
-			}
-			else{ // if child receives interrupt, seg fault
-				error
-			}
+
+      // WIFEXITED returns true if child process returns normally
+      if(WIFEXITED(status)){ 
+	if(WEXITSTATUS(status)){
+
 	}
-	  //while(wait(&status) != pid); // wait for child to complete
+      }
+      else{ // if child receives interrupt, seg fault
+	perror("cmd cannot execute due to error: ");
+	exit(EXIT_FAILURE);
+      }
+    }
   }
 }
 

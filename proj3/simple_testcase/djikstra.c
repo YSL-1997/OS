@@ -2,5 +2,6 @@
 
 void shortest_path()
 {
-    return;
+  printf("hhh\n");
+  return;
 }

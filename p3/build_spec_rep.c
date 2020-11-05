@@ -146,10 +146,10 @@ void basic_exec_option(char* target_name)
   else{
     // get the node according to target_name
     node* tmp = getNode(all_nodes_list, all_nodes_num, target_name);
-	  if(tmp == NULL){
-			fprintf("invalid target name: %s\n", target_name);
-			exit(EXIT_FAILURE);
-		}
+    if(tmp == NULL){
+      fprintf(stderr, "invalid target name: %s\n", target_name);
+      exit(EXIT_FAILURE);
+    }
     postorder(all_nodes_list, all_nodes_num, tmp);
   }
 }
