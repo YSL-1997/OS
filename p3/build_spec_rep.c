@@ -14,6 +14,79 @@
 
 static int MAX_LEN_FILENAME = 4096;
 
+
+/* 
+   return a list of all nodes in the graph 
+   with all_nodes_num updated
+   input: target_nodes_list, len(target_nodes_list), pointer to an int
+   return: a list of all nodes
+*/
+node** get_all_nodes_list(node** target_nodes_list, int target_list_len,
+			  int* all_nodes_num)
+{
+  int num_nodes_init = target_list_len;
+  int num_nodes = 0; // stores the length of nodes_list
+  
+  // node_list is what is returned eventually, realloc() may be required
+  node** nodes_list = (node**)malloc(sizeof(node*) * num_nodes_init);
+  handle_malloc_error(nodes_list);
+  
+  // add the target_nodes_list to the node_list
+  for(int i = 0; i < target_list_len; i++){
+    nodes_list[i] = target_nodes_list[i];
+    num_nodes++;
+  }
+
+  // next, need to add the dependencies to node_list
+  // traverse target_nodes_list to get all dependencies
+  for(int i = 0; i < target_list_len; i++){
+
+    // for each target node, traverse all its dependencies
+    for(int j = 0; j < target_nodes_list[i]->dependency_num; j++){
+
+      // if the dependency is already in the nodes_list
+      if(in_nodes_list(target_nodes_list[i]->dependencies[j],
+		       nodes_list, num_nodes)){
+	continue;
+      }
+      else{ // add to the node_list
+
+	// if realloc is required
+	if(num_nodes == num_nodes_init){
+	  int addition_num = 10;
+	  nodes_list = realloc(nodes_list,
+			       (num_nodes_init + addition_num)*sizeof(node*));
+	  handle_malloc_error(nodes_list);
+	  num_nodes_init = num_nodes_init + addition_num; 
+	}
+	node* new_node = CreateNode(0, -1, 0);// new_node has no dependency
+
+	// update the attribute - new_node->target
+	strncpy(new_node->target, target_nodes_list[i]->dependencies[j],
+		MAX_LEN_STR);
+
+
+	// set dependencies to be NULL
+	new_node->dependencies = NULL;
+
+	// set attribute - target_line_string to be NULL
+	free(new_node->target_line_string);
+	new_node->target_line_string = NULL;
+
+	// set attribute - cmdArray to be NULL
+	free(new_node->cmdArray);
+	new_node->cmdArray = NULL;
+
+	// add the new_node to node_list
+	nodes_list[num_nodes] = new_node;
+	num_nodes++;
+      }     
+    }
+  }
+  *all_nodes_num = num_nodes;
+  return nodes_list; 
+}
+
 /*
   check if the user input includes -f
   input: string of user input, f_index
