@@ -9,6 +9,10 @@
 #include "parsing.h"
 #include "errorHandling.h"
 
+/* return a list of all nodes in the graph */
+node** get_all_nodes_list(node** target_nodes_list, int target_list_len,
+			  int* all_nodes_num);
+
 // check if the user input includes -f
 bool has_f(int argc, char* argv[], int* f_index);
 
