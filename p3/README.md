@@ -2,7 +2,7 @@
 
 ## Achievement
 - All testcases passed.
-- Support: 537make -f filename target, 537make target -f filename and 537make -f filename. Error will be reported if there's no argument after -f.
+- Support: "537make -f filename target", "537make target -f filename" and "537make -f filename". Error will be reported if there's no argument after -f.
 - Support: I/O redirection. Implemented in process_exec.c, in the child process. Need to set redirect_flag to be true, and specify the redirected input and redirected output. 
 
 ## Project Instruction
