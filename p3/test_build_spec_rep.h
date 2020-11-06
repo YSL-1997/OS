@@ -23,6 +23,11 @@ bool has_great(int argc, char* argv[],
 void basic_exec_option(char* target_name,
 		       bool redirect_flag, char* redirect_file_path);
 
+// execute by file_path and check cycle
+void execute_by_fp(char* file_path,
+		       int* target_nodes_num, int* all_nodes_num,
+		       node** target_nodes_list, node** all_nodes_list);
+
 void check_existence(char* file_path);
 
 /*

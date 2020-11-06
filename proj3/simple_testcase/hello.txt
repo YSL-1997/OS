@@ -1,0 +1,17 @@
+Building main1.o!
+Building queue.o!
+Building reader.o!
+Building writer.o!
+Building prog1
+prog1 build successfully
+Building main2.o!
+Building Parser!
+Building prog2
+prog2 build successfully
+Building main3.o!
+Building process1.o!
+Building process2.o!
+BUILDING graph.o !!!!! !!!!!
+building djikstra.o!
+Building prog3
+prog3 built successfully

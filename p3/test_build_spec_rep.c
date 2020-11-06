@@ -144,6 +144,43 @@ void basic_exec_option(char* target_name,
 }
 
 
+/*
+  this function reads file_path and execute
+  after execution, the last four params are updated for further use
+  and there's no cycle if successfully executed
+  input: file_path, pointer to target_nodes_num, pointer to all_nodes_num, 
+         target_nodes_list, all_nodes_list
+*/
+void execute_by_fp(char* file_path,
+		       int* target_nodes_num, int* all_nodes_num,
+		       node** target_nodes_list, node** all_nodes_list){
+  
+  // need to check if file_path exists or not
+  if(access(file_path, F_OK) == -1){
+    fprintf(stderr, "%s not exist, exit...\n", file_path);
+    exit(EXIT_FAILURE);
+  }
+  
+  // now, we have to start parsing the file - file_path
+  FILE* fp = fopen(file_path, "r");
+  if(fp == NULL){
+    fprintf(stderr, "%s fopen failed\n", file_path);
+    exit(EXIT_FAILURE);
+  }
+  
+  target_nodes_list = parsing(target_nodes_num, fp);
+  
+  all_nodes_list = get_all_nodes_list(target_nodes_list,
+				      *target_nodes_num,
+				      all_nodes_num);
+  
+  // check cycle for every node
+  for(int i = 0; i < *all_nodes_num; i++){
+    check_cycle(all_nodes_list[i], all_nodes_list, *all_nodes_num);
+  }
+  
+}
+
 // check existence of a file
 void check_existence(char* file_path){
   if(access(file_path, F_OK) == -1){
@@ -269,7 +306,7 @@ void read_user_input(int argc, char* argv[])
       }
     } 
   }
-  /*
+
   // for the case < only
   else if(!f_flag && less_flag && !great_flag){
     // now we have the less_index and less_inside_index
@@ -416,5 +453,9 @@ void read_user_input(int argc, char* argv[])
     basic_exec_option(NULL, true, file_path);
         
   }
-  */
+
+  else if(!f_flag && less_flag && great_flag){
+    
+  }
+
 }

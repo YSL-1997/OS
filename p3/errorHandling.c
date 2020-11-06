@@ -38,3 +38,36 @@ void handle_stat_error(int err)
     exit(EXIT_FAILURE);
   }
 }
+
+/*
+  on success, return the new file descriptor (a nonnegative integer),
+  or -1 if an error occurred (in which case, errno is set appropriately).
+*/
+void handle_open_error(int err)
+{
+  if(err == -1){
+    perror("open() error");
+  }
+}
+
+/*
+  on success, return the new file descriptor (a nonnegative integer),
+  or -1 if an error occurred (in which case, errno is set appropriately).
+*/
+void handle_dup2_error(int err)
+{
+  if(err == -1){
+    perror("dup2() error");
+  }
+}
+
+/* 
+   close() returns zero on success. 
+   On error, -1 is returned, and errno is set appropriately.
+*/
+void handle_close_error(int err)
+{
+  if(err == -1){
+    perror("close() error");
+  }
+}

@@ -74,11 +74,14 @@ bool need_exec_cmd(node* target_node)
 }
 
 /*
-  execute one single cmd line
-  input: num of words, words list
+  execute one single cmd line, with I/O redirection implemented
+  input: num of words, words list, cmdNode, redirect_flag, write-to path
   note that: before calling this function, need to check stat()
+  if you want to do the I/O redirection, set redirect_flag to be true
+  and give the redirect_file_path
 */
-void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode)
+void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
+		     bool redirect_flag, char* redirect_file_path)
 {
   // malloc space for cmd arguments
   char** cmd_arg = (char**)malloc((cmdWord_num + 1) * sizeof(char*));
@@ -100,7 +103,20 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode)
     perror("fork() error: ");
     exit(EXIT_FAILURE);
   }
+  
   else if(pid == 0){ // we are now in the child process
+
+    // I/O redirection, only when redirect_flag == true
+    if(redirect_flag){
+      int redirect_fd = open(redirect_file_path, O_CREAT | O_TRUNC | O_RDWR);
+      handle_open_error(redirect_fd);
+      
+      // use dup2 to replace stdout with the output file
+      handle_dup2_error(dup2(redirect_fd, STDOUT_FILENO));
+      
+      handle_close_error(close(redirect_fd));
+    }
+    
     if(execvp(*cmd_arg, cmd_arg) == -1){
       // meaning that the cmd is not executable
       fprintf(stderr, "%d: <cmdline invalid>: \"%s\"\n",
@@ -109,16 +125,22 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode)
       exit(EXIT_FAILURE);
     }
   }
+  
   else{ // we are now in the parent process
+    
+    // parent calls wait, waiting for child to finish
     if(wait(&status) == -1){
       perror("wait() error: ");
       exit(EXIT_FAILURE);
     }
     else{
-      // WSTOPSIG returns the number of the signal
-      // which caused the child to stop
-      if(WSTOPSIG(status)){
-	exit(EXIT_FAILURE);
+      // WIFEXITED returns true if the child terminated normally
+      if(WIFEXITED(status)){
+	// check the exit status of the child process
+	if(WEXITSTATUS(status)){
+	  perror("cmd cannot execute due to error");
+	  exit(EXIT_FAILURE);
+	}
       }
     }
   }
@@ -128,29 +150,28 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode)
    post-order traversal
    input: all nodes, num of all nodes, a pointer to a root node
 */
-void postorder(node** node_array, int all_nodes_num, node* root)
+void postorder(node** node_array, int all_nodes_num, node* root,
+	       bool redirect_flag, char* redirect_file_path)
 {
 
   for(int i = 0; i < root->dependency_num; i++){
     struct node* temp;
     temp = getNode(node_array, all_nodes_num, root->dependencies[i]);
-    postorder(node_array, all_nodes_num, temp);
+    postorder(node_array, all_nodes_num, temp,
+	      redirect_flag, redirect_file_path);
       
   }
-  // printf("%s -> ", root->target);
-  //if a target has cmd line, check the modification and then execute the cmd
-  
+
+  //if a target has cmd line, check the modification and then execute the cmd  
   if(root->cmd_lines_num != 0){
     if(need_exec_cmd(root)){
+      
       for(int i = 0; i < root->cmd_lines_num; i++){
-	//	printf("execute: ");
-	//for(int j = 0; j < root->cmdArray[i]->cmdWord_num; j++){
-	//printf("%s ",root->cmdArray[i]->cmdWord[j]);
-	//}
-	//printf("\n");
         execute_cmdline(root->cmdArray[i]->cmdWord_num,
 			root->cmdArray[i]->cmdWord,
-			root->cmdArray[i]);
+			root->cmdArray[i],
+			redirect_flag,
+			redirect_file_path);
       }
     }
   }

@@ -106,6 +106,12 @@ char** split(char* string, int line_index, int* array_len)
   }
   
   *array_len = col_index; // update value of array_len
+
+  if(string[0] == ' ' && !is_empty(string)){
+    fprintf(stderr, "%d: <Non-blank line starts with whitespace.>: \"%s\"\n",
+	    line_index, string);
+    exit(EXIT_FAILURE);
+  }
   
   //print error message about colon usage error
   if(colon_error){
