@@ -70,10 +70,6 @@ node* CreateNode(int depen_size, int line_index, int cmdLine_num_init);
 /* check if a string name is in the nodes_list */
 int in_nodes_list(char* dep_str, node** nodes_list, int nodes_list_len);
 
-/* return a list of all nodes in the graph */
-node** get_all_nodes_list(node** target_nodes_list, int target_list_len,
-			  int* all_nodes_num);
-
 /* get a pointer to the corresponding node */
 node* getNode(node** node_array, int all_nodes_num, char* target);
 
