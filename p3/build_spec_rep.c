@@ -13,7 +13,7 @@
 */
 
 static int MAX_LEN_FILENAME = 4096;
-
+static int MAX_LEN_STR = 100;
 
 /* 
    return a list of all nodes in the graph 
