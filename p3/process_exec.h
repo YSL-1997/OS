@@ -13,11 +13,14 @@
 bool need_exec_cmd(node* target_node);
 
 // execute a cmd line
+// redirection implemented
 void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
-		     bool redirect_flag, char* redirect_file_path);
+		     bool redirect_flag, char* redirect_input_file_path,
+		     char* redirect_output_file_path);
 
 // post-order traversal
 void postorder(node** node_array, int all_nodes_num, node* root,
-	       bool redirect_flag, char* redirect_file_path);
+	       bool redirect_flag, char* redirect_input_file_path,
+	       char* redirect_output_file_path);
 
 #endif

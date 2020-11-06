@@ -81,7 +81,8 @@ bool need_exec_cmd(node* target_node)
   and give the redirect_file_path
 */
 void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
-		     bool redirect_flag, char* redirect_file_path)
+		     bool redirect_flag, char* redirect_input_file_path,
+		     char* redirect_output_file_path)
 {
   // malloc space for cmd arguments
   char** cmd_arg = (char**)malloc((cmdWord_num + 1) * sizeof(char*));
@@ -108,13 +109,18 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
 
     // I/O redirection, only when redirect_flag == true
     if(redirect_flag){
-      int redirect_fd = open(redirect_file_path, O_CREAT | O_TRUNC | O_RDWR);
-      handle_open_error(redirect_fd);
+      int redirect_in_fd = open(redirect_input_file_path, O_RDONLY);
+      int redirect_out_fd = open(redirect_output_file_path,
+				 O_CREAT | O_TRUNC | O_RDWR);
+      handle_open_error(redirect_in_fd);
+      handle_open_error(redirect_out_fd);
       
-      // use dup2 to replace stdout with the output file
-      handle_dup2_error(dup2(redirect_fd, STDOUT_FILENO));
+      // use dup2 to replace stdin & stdout with redirect_in/out_fd
+      handle_dup2_error(dup2(redirect_in_fd, STDIN_FILENO));
+      handle_dup2_error(dup2(redirect_out_fd, STDOUT_FILENO));
       
-      handle_close_error(close(redirect_fd));
+      handle_close_error(close(redirect_in_fd));
+      handle_close_error(close(redirect_out_fd));
     }
     
     if(execvp(*cmd_arg, cmd_arg) == -1){
@@ -151,14 +157,16 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
    input: all nodes, num of all nodes, a pointer to a root node
 */
 void postorder(node** node_array, int all_nodes_num, node* root,
-	       bool redirect_flag, char* redirect_file_path)
+	       bool redirect_flag, char* redirect_input_file_path,
+	       char* redirect_output_file_path)
 {
 
   for(int i = 0; i < root->dependency_num; i++){
     struct node* temp;
     temp = getNode(node_array, all_nodes_num, root->dependencies[i]);
     postorder(node_array, all_nodes_num, temp,
-	      redirect_flag, redirect_file_path);
+	      redirect_flag, redirect_input_file_path,
+	      redirect_output_file_path);
       
   }
 
@@ -171,7 +179,8 @@ void postorder(node** node_array, int all_nodes_num, node* root,
 			root->cmdArray[i]->cmdWord,
 			root->cmdArray[i],
 			redirect_flag,
-			redirect_file_path);
+			redirect_input_file_path,
+			redirect_output_file_path);
       }
     }
   }

@@ -17,3 +17,12 @@ graph.o: graph.c graph.h errorHandling.h
 
 errorHandling.o: errorHandling.c errorHandling.h
 	gcc -Wall -Werror -c errorHandling.c
+
+clean:
+	rm -f $(EXE) *.o
+	rm -rf $(SCAN_BUILD_DIR)
+
+# run the Clang Static Analyzer
+
+scan-build: clean
+	scan-build -o $(SCAN_BUILD_DIR) make

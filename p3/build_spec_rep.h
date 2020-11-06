@@ -21,7 +21,8 @@ bool has_great(int argc, char* argv[],
 
 // execute according to the value of target_name
 void basic_exec_option(char* target_name,
-		       bool redirect_flag, char* redirect_file_path);
+		       bool redirect_flag, char* redirect_input_file_path,
+		       char* redirect_output_file_path);
 
 void check_existence(char* file_path);
 

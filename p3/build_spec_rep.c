@@ -83,7 +83,9 @@ bool has_great(int argc, char* argv[], int* great_index,
   input: target_name can be either target or NULL
 */
 void basic_exec_option(char* target_name,
-		       bool redirect_flag, char* redirect_file_path)
+		       bool redirect_flag,
+		       char* redirect_input_file_path,
+		       char* redirect_output_file_path)
 {
   int m_flag = 0; // flag for makefile
   int M_flag = 0; // flag for Makefile
@@ -129,7 +131,8 @@ void basic_exec_option(char* target_name,
   // specify root according to target_name
   if(target_name == NULL){
     postorder(all_nodes_list, all_nodes_num, all_nodes_list[0],
-	      redirect_flag, redirect_file_path);
+	      redirect_flag, redirect_input_file_path,
+	      redirect_output_file_path);
   }
   else{
     // get the node according to target_name
@@ -139,7 +142,8 @@ void basic_exec_option(char* target_name,
       exit(EXIT_FAILURE);
     }
     postorder(all_nodes_list, all_nodes_num, tmp,
-	      redirect_flag, redirect_file_path);
+	      redirect_flag, redirect_input_file_path,
+	      redirect_input_file_path);
   }
 }
 
@@ -177,10 +181,10 @@ void read_user_input(int argc, char* argv[])
   // if in basic_exec_option, i.e. three flags all false
   if(!f_flag && !less_flag && !great_flag){
     if(argc == 1){ // no target
-      basic_exec_option(NULL, false, NULL);
+      basic_exec_option(NULL, false, NULL, NULL);
     }
     else if(argc == 2){ // target specified
-      basic_exec_option(argv[1], false, NULL);
+      basic_exec_option(argv[1], false, NULL, NULL);
     }
     else{
       fprintf(stderr, "invalid input\n");
@@ -232,7 +236,7 @@ void read_user_input(int argc, char* argv[])
 	if(argc == 3){
 	  // no target, i.e. ./537make -f file_path
 	  postorder(all_nodes_list, all_nodes_num, all_nodes_list[0],
-		    false, NULL);
+		    false, NULL, NULL);
 	}
 	else if(argc == 4){
 	  // there's target, need to find where the target is
@@ -257,7 +261,7 @@ void read_user_input(int argc, char* argv[])
 	    exit(EXIT_FAILURE);
 	  }
 	  
-	  postorder(all_nodes_list, all_nodes_num, tmp, false, NULL);
+	  postorder(all_nodes_list, all_nodes_num, tmp, false, NULL, NULL);
 	}
       else{
 	fprintf(stderr, "invalid input\n");
