@@ -13,7 +13,7 @@
 */
 
 static int MAX_LEN_FILENAME = 4096;
-static int MAX_LEN_STR = 100;
+static int MAX_LEN_STR = 4096;
 
 /* 
    return a list of all nodes in the graph 
@@ -221,7 +221,10 @@ void basic_exec_option(char* target_name,
 }
 
 
-// check existence of a file
+/*
+  check existence of a file
+  input: file path
+*/
 void check_existence(char* file_path){
   if(access(file_path, F_OK) == -1){
     fprintf(stderr, "%s not exist, exit...\n", file_path);
@@ -346,152 +349,4 @@ void read_user_input(int argc, char* argv[])
       }
     } 
   }
-  /*
-  // for the case < only
-  else if(!f_flag && less_flag && !great_flag){
-    // now we have the less_index and less_inside_index
-
-    // "./537make<file_path"
-    if(argc == 1){
-      // "./537make<" error
-      if(less_inside_index == strnlen(argv[less_index], MAX_LEN_FILENAME) - 1){
-	fprintf(stderr, "< needs an argument\n");
-	exit(EXIT_FAILURE);
-      }
-      // "./537make<file_path"
-      else{
-	// the last/first index of file_path in argv[less_index]
-	int fp_last_index = strnlen(argv[less_index], MAX_LEN_FILENAME) - 1;
-	int fp_first_index = less_inside_index + 1;
-	int fp_length = fp_last_index - fp_first_index + 1;
-	
-	for(int i = 0; i < fp_length; i++){
-	  file_path[i] = argv[less_index][fp_first_index];
-	  fp_first_index++;
-	}
-	file_path[fp_length] = '\0';
-      }
-    }
-
-    else if(argc == 2){
-      if(less_index == 0){ // "./537make< file_path"
-	strncpy(file_path, argv[1], strlen(argv[1]));
-      }
-      else if(less_index == 1 && less_inside_index == 0){
-	// "./537make <file_path"
-	int fp_first_index = less_inside_index+1;
-	int fp_length = strnlen(argv[1], MAX_LEN_FILENAME)-1;
-	for(int i = 0; i < fp_length; i++){
-	  file_path[i] = argv[less_index][fp_first_index];
-	  fp_first_index++;
-	}
-	file_path[fp_length] = '\0';
-      }
-      else{
-	fprintf(stderr, "invalid input\n");
-	exit(EXIT_FAILURE);
-      }
-    }
-
-    else if(argc == 3 && less_index == 1 && strlen(argv[1]) == 1){
-      // "./537make < file_path"
-      strncpy(file_path, argv[2], strlen(argv[2]));
-    }
-
-    else{
-      fprintf(stderr, "invalid input\n");
-      exit(EXIT_FAILURE);
-    }
-
-    // after we have file_path, execute.
-    check_existence(file_path);
-    
-    FILE* fp = fopen(file_path, "r");
-    if(fp == NULL){
-      fprintf(stderr, "%s fopen failed\n", file_path);
-      exit(EXIT_FAILURE);
-    }
-    else{
-      fprintf(stderr, "invalid input\n");
-      exit(EXIT_FAILURE);
-    }
-    
-    int target_nodes_num;
-    int all_nodes_num;
-    
-    node** target_nodes_list = parsing(&target_nodes_num, fp);
-    
-    node** all_nodes_list = get_all_nodes_list(target_nodes_list,
-					       target_nodes_num,
-					       &all_nodes_num);
-    
-    for(int i = 0; i < all_nodes_num; i++){
-      check_cycle(all_nodes_list[i], all_nodes_list, all_nodes_num);
-    }
-    
-    postorder(all_nodes_list, all_nodes_num, all_nodes_list[0],
-	      false, NULL);
-  }
-
-  // for the case > only
-  else if(!f_flag && !less_flag && great_flag){
-    // now we have the great_index and great_inside_index
-
-    // "./537make>file_path"
-    if(argc == 1){
-      // "./537make>" error
-      if(great_inside_index == strnlen(argv[great_index],
-				       MAX_LEN_FILENAME) - 1){
-	fprintf(stderr, "> needs an argument\n");
-	exit(EXIT_FAILURE);
-      }
-      // "./537make>file_path"
-      else{
-	// the last/first index of file_path in argv[great_index]
-	int fp_last_index = strnlen(argv[great_index], MAX_LEN_FILENAME) - 1;
-	int fp_first_index = great_inside_index + 1;
-	int fp_length = fp_last_index - fp_first_index + 1;
-	
-	for(int i = 0; i < fp_length; i++){
-	  file_path[i] = argv[great_index][fp_first_index];
-	  fp_first_index++;
-	}
-	file_path[fp_length] = '\0';
-      }
-    }
-
-    else if(argc == 2){
-      if(great_index == 0){ // "./537make> file_path"
-	strncpy(file_path, argv[1], strlen(argv[1]));
-      }
-      else if(great_index == 1 && great_inside_index == 0){
-	// "./537make >file_path"
-	int fp_first_index = great_inside_index+1;
-	int fp_length = strnlen(argv[1], MAX_LEN_FILENAME)-1;
-	for(int i = 0; i < fp_length; i++){
-	  file_path[i] = argv[great_index][fp_first_index];
-	  fp_first_index++;
-	}
-	file_path[fp_length] = '\0';
-      }
-      else{
-	fprintf(stderr, "invalid input\n");
-	exit(EXIT_FAILURE);
-      }
-    }
-
-    else if(argc == 3 && great_index == 1 && strlen(argv[1]) == 1){
-      // "./537make > file_path"
-      strncpy(file_path, argv[2], strlen(argv[2]));
-    }
-
-    else{
-      fprintf(stderr, "invalid input\n");
-      exit(EXIT_FAILURE);
-    }
-
-    basic_exec_option(NULL, true, file_path);
-        
-  }
-  */
 }

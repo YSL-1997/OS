@@ -10,7 +10,7 @@
 
 
 static int MAX_LEN = 4096;
-static int MAX_LEN_STR = 100;
+static int MAX_LEN_STR = 4096;
 static int MAX_NUM_DEPENDENCY = 1000;
 
 /* 
