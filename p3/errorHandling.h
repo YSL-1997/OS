@@ -9,6 +9,7 @@
 #include <string.h>
 #include <fcntl.h>
 
+
 // functions on errorHandling
 void handle_fgetc_error(FILE* ptr);
 void handle_malloc_error(void* ptr);
