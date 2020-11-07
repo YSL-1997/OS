@@ -11,5 +11,6 @@ OBJECTS = 537ps.o read_process_info.o
 read_process_info.o: read_process_info.c read_process_info.h
 	$(CC) $(CFLAGS) -c read_process_info.c
 
+
 clean:
 	rm 537ps $(OBJECTS) -f
