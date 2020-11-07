@@ -1,3 +1,5 @@
+SCAN_BUILD_DIR = scan-build-out
+
 537make: main.o build_spec_rep.o parsing.o process_exec.o graph.o \
 errorHandling.o
 	gcc -Wall -Wextra -pedantic -o 537make main.o build_spec_rep.o \
