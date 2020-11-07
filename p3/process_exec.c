@@ -156,7 +156,6 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
       if(WIFEXITED(status)){
 	// check the exit status of the child process
 	if(WEXITSTATUS(status)){
-	  perror("cmd cannot execute due to error");
 	  exit(EXIT_FAILURE);
 	}
       }
