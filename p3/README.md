@@ -6,7 +6,7 @@
   and "537make -f filename". Error will be reported if there's no
   argument after -f.
 - Support: I/O redirection. Implemented in process_exec.c, in the
-  child process.
+  child process. ErrorHandling implemented
   When the cmdline is of the form: cat < f1 < f2 < f3 > f4 > f5 > f6,
   the redirection input will be f3 and redirection output is f6.
 
