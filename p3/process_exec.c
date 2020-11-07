@@ -123,9 +123,12 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
 
       // output redirection
       if(redirect_output_file_path != NULL){
+
+	// 0644 means that the owner can read+write (4+2)
+	// the group can read (4), others can read(4)
 	int redirect_out_fd = open(redirect_output_file_path,
-				   O_CREAT | O_TRUNC | O_RDWR);
-      
+				   O_CREAT | O_TRUNC | O_RDWR, 0644);
+	
 	handle_open_error(redirect_out_fd);
       	handle_dup2_error(dup2(redirect_out_fd, STDOUT_FILENO));
    	handle_close_error(close(redirect_out_fd));

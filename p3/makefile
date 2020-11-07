@@ -19,7 +19,7 @@ errorHandling.o: errorHandling.c errorHandling.h
 	gcc -Wall -Wextra -pedantic -c errorHandling.c
 
 clean:
-	rm -f $(EXE) *.o
+	rm -f 537make *.o
 	rm -rf $(SCAN_BUILD_DIR)
 
 # run the Clang Static Analyzer

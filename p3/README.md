@@ -7,8 +7,8 @@
   argument after -f.
 - Support: I/O redirection. Implemented in process_exec.c, in the
   child process.
-  Need to set redirect_flag to be true, and specify the redirected
-  input and redirected output. 
+  When the cmdline is of the form: cat < f1 < f2 < f3 > f4 > f5 > f6,
+  the redirection input will be f3 and redirection output is f6.
 
 ## Project Instruction
 The project requirements are in
