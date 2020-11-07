@@ -241,21 +241,13 @@ void check_existence(char* file_path){
 void read_user_input(int argc, char* argv[])
 {
   int f_index = 0; // index for -f
-  int less_index = 0; // index for <
-  int less_inside_index = 0; // inside index for <
-  int great_index = 0; // index for >
-  int great_inside_index = 0; // inside index for >
-
-  // flags for -f, < and >
-  bool f_flag = has_f(argc, argv, &f_index);
-  bool less_flag = has_less(argc, argv, &less_index, &less_inside_index);
-  bool great_flag = has_great(argc, argv, &great_index, &great_inside_index);
-
+  bool f_flag = has_f(argc, argv, &f_index);// flag for -f
+ 
   char* file_path = (char*)malloc(MAX_LEN_FILENAME*sizeof(char));
   handle_malloc_error(file_path);
     
   // if in basic_exec_option, i.e. three flags all false
-  if(!f_flag && !less_flag && !great_flag){
+  if(!f_flag){
     if(argc == 1){ // no target
       basic_exec_option(NULL, false, NULL, NULL);
     }
@@ -269,7 +261,7 @@ void read_user_input(int argc, char* argv[])
   }
 
   // for the case -f only
-  else if(f_flag && !less_flag && !great_flag){
+  else if(f_flag){
     // if there's no argument after -f, that's an error.
     // 537make -f filename target AND/OR 537make target -f filename
     // 537make -f filename

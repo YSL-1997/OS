@@ -13,6 +13,7 @@
   waiting for its completion, and getting the return code.
 */
 
+static int MAX_LEN_STR = 1000;
 
 /*
   before executing the cmdline for each target,
@@ -112,7 +113,7 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
 
       // input redirection
       if(redirect_input_file_path != NULL){
-	int redirect_in_fd = open(redirect_input_file_path, O_RDONLY);
+	int redirect_in_fd = open(redirect_input_file_path, O_RDWR);
 	handle_open_error(redirect_in_fd);
 
 	// use dup2 to replace stdin & stdout with redirect_in/out_fd
@@ -179,29 +180,41 @@ void postorder(node** node_array, int all_nodes_num, node* root,
       
   }
 
-  //if a target has cmd line, check the modification and then execute the cmd  
+  //if a target has cmd line, check the modification time
+  // and then execute the cmd  
   if(root->cmd_lines_num != 0){
+
     if(need_exec_cmd(root)){
       
       for(int i = 0; i < root->cmd_lines_num; i++){
-	// for each cmdArray[i], split it
+
+	// for each root->cmdArray[i], split it
 	int after_split_len; // stores the length of the splitted_argv_array
+
+	// the argv_array after splitted
 	char** splitted_argv_array = split_argv(root->cmdArray[i]->cmdWord_num,
 						root->cmdArray[i]->cmdWord,
 						&after_split_len);
+	
+	bool redir_flag = false; // redirection flag default to be false
 
-	bool redir_flag = false;
+	// create an array that stores the indices that should be set to NULL
+	int* indices_of_NULL = (int*)malloc(sizeof(int) * (after_split_len+1));
+	int null_list_len = 0;
 	
 	// traverse the splitted_argv_array, determine if there's < or >
 	for(int j = 0; j < after_split_len; j++){
-
+	  
 	  // if it's <
-	  if(strncmp(splitted_argv_array[j], "<", 2) == 0){
+	  if(strnlen(splitted_argv_array[j], MAX_LEN_STR) == 1 &&
+	     splitted_argv_array[j][0] == '<'){
 
 	    // check if what after < is valid
 	    if(j < after_split_len-1
-	       && strncmp(splitted_argv_array[j+1], "<", 2) != 0
-	       && strncmp(splitted_argv_array[j+1], ">", 2) != 0){
+	       && strncmp(splitted_argv_array[j+1], "<",
+			  strnlen(splitted_argv_array[j+1], MAX_LEN_STR)) != 0
+	       && strncmp(splitted_argv_array[j+1], ">",
+			  strnlen(splitted_argv_array[j+1], MAX_LEN_STR)) != 0){
 
 	      redir_flag = true;
 
@@ -209,8 +222,10 @@ void postorder(node** node_array, int all_nodes_num, node* root,
 	      redirect_input_file_path = splitted_argv_array[j+1];
 	      
 	      // mark < and its argumet as NULL
-	      splitted_argv_array[j] = NULL;
-	      splitted_argv_array[j+1] = NULL;
+	      indices_of_NULL[null_list_len] = j;
+	      null_list_len++;
+	      indices_of_NULL[null_list_len] = j+1;
+	      null_list_len++;
 	    }
 	    else{ // this cmdline has an error
 	      fprintf(stderr, "%d: <cmdline invalid>: \"%s\"\n",
@@ -219,23 +234,30 @@ void postorder(node** node_array, int all_nodes_num, node* root,
 	      exit(EXIT_FAILURE);
 	    }
 	  }
-
+	  
 	  // if it's >
-	  if(strncmp(splitted_argv_array[j], ">", 2) == 0){
+	  if(strnlen(splitted_argv_array[j], MAX_LEN_STR) == 1 &&
+	     splitted_argv_array[j][0] == '>'){
 
 	    // check if what after > is valid
 	    if(j < after_split_len-1
-	       && strncmp(splitted_argv_array[j+1], "<", 2) != 0
-	       && strncmp(splitted_argv_array[j+1], ">", 2) != 0){
+	       && strncmp(splitted_argv_array[j+1], "<",
+			  strnlen(splitted_argv_array[j+1], MAX_LEN_STR)) != 0
+	       && strncmp(splitted_argv_array[j+1], ">",
+			  strnlen(splitted_argv_array[j+1], MAX_LEN_STR)) != 0){
 
 	      redir_flag = true;
 
 	      // store the argument of >
 	      redirect_output_file_path = splitted_argv_array[j+1];
-	      splitted_argv_array[j] = NULL;
-	      splitted_argv_array[j+1] = NULL;
+
+	      indices_of_NULL[null_list_len]= j;
+	      null_list_len++;
+	      indices_of_NULL[null_list_len] = j+1;
+	      null_list_len++;
 	    }
 	    else{ // this cmdline has an error
+	      printf("error3");
 	      fprintf(stderr, "%d: <cmdline invalid>: \"%s\"\n",
 		      root->cmdArray[i]->cmd_index,
 		      root->cmdArray[i]->cmd_string);
@@ -244,6 +266,11 @@ void postorder(node** node_array, int all_nodes_num, node* root,
 	  }
 	}
 
+	// set NULL in splitted_argv_array
+	for(int x = 0; x < null_list_len; x++){
+	  splitted_argv_array[indices_of_NULL[x]] = NULL;
+	}
+	
 	// generate new command line arguments
 	char** new_cmd_args = malloc(sizeof(char*) * (after_split_len+2));
 	handle_malloc_error(new_cmd_args);
@@ -257,7 +284,7 @@ void postorder(node** node_array, int all_nodes_num, node* root,
 	  }
 	}
 
-	// append NULL
+	// append NULL at the end of new_cmd_args
 	new_cmd_args[new_cmd_args_len] = NULL;
 	new_cmd_args_len++;
 
@@ -269,7 +296,7 @@ void postorder(node** node_array, int all_nodes_num, node* root,
 	new_cmd_node->cmdWord = new_cmd_args;
 	new_cmd_node->cmd_string = root->cmdArray[i]->cmd_string;
 	
-	
+
 	// execute cmd according to redir_flag
 	if(!redir_flag){
 	  execute_cmdline(root->cmdArray[i]->cmdWord_num,
@@ -279,13 +306,13 @@ void postorder(node** node_array, int all_nodes_num, node* root,
 			redirect_input_file_path,
 			redirect_output_file_path);
 	}
+
 	else{
 	  execute_cmdline(new_cmd_args_len, new_cmd_args,
 			  new_cmd_node, redir_flag,
 			  redirect_input_file_path,
 			  redirect_output_file_path);
 	}
-        
       }
     }
   }
