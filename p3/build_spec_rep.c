@@ -131,9 +131,10 @@ void basic_exec_option(char* target_name,
   if(M_flag == 1 && m_flag == 0)
     fp = fopen("Makefile", "r");
   
-  if(m_flag == 0 && M_flag == 0)
+  if(m_flag == 0 && M_flag == 0){
     fprintf(stderr, "No makefile or Makefile found\n");
-  
+		exit(EXIT_FAILURE);
+  }
   if(fp == NULL){
     fprintf(stderr, "fopen error\n");
     exit(EXIT_FAILURE);
