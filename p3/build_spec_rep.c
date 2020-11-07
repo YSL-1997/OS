@@ -105,55 +105,10 @@ bool has_f(int argc, char* argv[], int* f_index)
 }
 
 /*
-  check if the user input includes <
-  input: string of user input, less_index, less_inside_index
-  return: true if includes <, false otherwise
-  note that less_index will be updated, less_inside_index may be updated
-*/
-bool has_less(int argc, char* argv[], int* less_index, int* less_inside_index)
-{
-  // traverse all words in user input
-  for(int i = 0; i < argc; i++){
-    int len = strlen(argv[i]);
-
-    // traverse each char in each word
-    for(int j = 0; j < len; j++){
-      if(argv[i][j] == '<'){
-	return true;
-      }
-      (*less_inside_index)++;
-    }
-    (*less_index)++;
-  }
-  return false;
-}
-
-/*
-  check if the user input includes >
-  input: string of user input, great_index, great_inside_index
-  return: true if includes >, false otherwise
-  note that great_index will be updated, great_inside_index may be updated
-*/
-bool has_great(int argc, char* argv[], int* great_index,
-	       int* great_inside_index)
-{
-  for(int i = 0; i < argc; i++){
-    int len = strlen(argv[i]);
-
-    for(int j = 0; j < len; j++){
-      if(argv[i][j] == '>'){
-	return true;
-      }
-      (*great_inside_index)++;
-    }
-    (*great_index)++;
-  }
-  return false;
-}
-
-/*
   execute according to the value of target_name
-  input: target_name can be either target or NULL
+  input: target_name can be either target or NULL,
+         redirect_flag specifies whether redirect or not
+	 redirect in and redirect out
 */
 void basic_exec_option(char* target_name,
 		       bool redirect_flag,
@@ -260,8 +215,8 @@ void read_user_input(int argc, char* argv[])
     }
   }
 
-  // for the case -f only
-  else if(f_flag){
+  // for the case -f
+  else{
     // if there's no argument after -f, that's an error.
     // 537make -f filename target AND/OR 537make target -f filename
     // 537make -f filename
@@ -337,7 +292,6 @@ void read_user_input(int argc, char* argv[])
       }
       	
       break;
-	
       }
     } 
   }
