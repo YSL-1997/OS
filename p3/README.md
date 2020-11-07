@@ -1,7 +1,9 @@
 # CS537 Programming Assignment #3: Make
 
 ## Achievement
-- All testcases passed.
+- All testcases passed. 
+  "./537make", 
+  "./537make target_name", if target_name not exists, report error.
 - Support: "537make -f filename target", "537make target -f filename"
   and "537make -f filename". Error will be reported if there's no
   argument after -f.
