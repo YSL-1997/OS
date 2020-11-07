@@ -109,18 +109,26 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
 
     // I/O redirection, only when redirect_flag == true
     if(redirect_flag){
-      int redirect_in_fd = open(redirect_input_file_path, O_RDONLY);
-      int redirect_out_fd = open(redirect_output_file_path,
-				 O_CREAT | O_TRUNC | O_RDWR);
-      handle_open_error(redirect_in_fd);
-      handle_open_error(redirect_out_fd);
+
+      // input redirection
+      if(redirect_input_file_path != NULL){
+	int redirect_in_fd = open(redirect_input_file_path, O_RDONLY);
+	handle_open_error(redirect_in_fd);
+
+	// use dup2 to replace stdin & stdout with redirect_in/out_fd
+	handle_dup2_error(dup2(redirect_in_fd, STDIN_FILENO));
+	handle_close_error(close(redirect_in_fd));
+      }
+
+      // output redirection
+      if(redirect_output_file_path != NULL){
+	int redirect_out_fd = open(redirect_output_file_path,
+				   O_CREAT | O_TRUNC | O_RDWR);
       
-      // use dup2 to replace stdin & stdout with redirect_in/out_fd
-      handle_dup2_error(dup2(redirect_in_fd, STDIN_FILENO));
-      handle_dup2_error(dup2(redirect_out_fd, STDOUT_FILENO));
-      
-      handle_close_error(close(redirect_in_fd));
-      handle_close_error(close(redirect_out_fd));
+	handle_open_error(redirect_out_fd);
+      	handle_dup2_error(dup2(redirect_out_fd, STDOUT_FILENO));
+   	handle_close_error(close(redirect_out_fd));
+      }
     }
     
     if(execvp(*cmd_arg, cmd_arg) == -1){
@@ -154,7 +162,8 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
 
 /* 
    post-order traversal
-   input: all nodes, num of all nodes, a pointer to a root node
+   input: all nodes, num of all nodes, a pointer to a root node,
+          redirection flag, and two redirect paths
 */
 void postorder(node** node_array, int all_nodes_num, node* root,
 	       bool redirect_flag, char* redirect_input_file_path,
@@ -175,12 +184,108 @@ void postorder(node** node_array, int all_nodes_num, node* root,
     if(need_exec_cmd(root)){
       
       for(int i = 0; i < root->cmd_lines_num; i++){
-        execute_cmdline(root->cmdArray[i]->cmdWord_num,
+	// for each cmdArray[i], split it
+	int after_split_len; // stores the length of the splitted_argv_array
+	char** splitted_argv_array = split_argv(root->cmdArray[i]->cmdWord_num,
+						root->cmdArray[i]->cmdWord,
+						&after_split_len);
+
+	bool redir_flag = false;
+	
+	// traverse the splitted_argv_array, determine if there's < or >
+	for(int j = 0; j < after_split_len; j++){
+
+	  // if it's <
+	  if(strncmp(splitted_argv_array[j], "<", 2) == 0){
+
+	    // check if what after < is valid
+	    if(j < after_split_len-1
+	       && strncmp(splitted_argv_array[j+1], "<", 2) != 0
+	       && strncmp(splitted_argv_array[j+1], ">", 2) != 0){
+
+	      redir_flag = true;
+
+	      // store the argument of <
+	      redirect_input_file_path = splitted_argv_array[j+1];
+	      
+	      // mark < and its argumet as NULL
+	      splitted_argv_array[j] = NULL;
+	      splitted_argv_array[j+1] = NULL;
+	    }
+	    else{ // this cmdline has an error
+	      fprintf(stderr, "%d: <cmdline invalid>: \"%s\"\n",
+		      root->cmdArray[i]->cmd_index,
+		      root->cmdArray[i]->cmd_string);
+	      exit(EXIT_FAILURE);
+	    }
+	  }
+
+	  // if it's >
+	  if(strncmp(splitted_argv_array[j], ">", 2) == 0){
+
+	    // check if what after > is valid
+	    if(j < after_split_len-1
+	       && strncmp(splitted_argv_array[j+1], "<", 2) != 0
+	       && strncmp(splitted_argv_array[j+1], ">", 2) != 0){
+
+	      redir_flag = true;
+
+	      // store the argument of >
+	      redirect_output_file_path = splitted_argv_array[j+1];
+	      splitted_argv_array[j] = NULL;
+	      splitted_argv_array[j+1] = NULL;
+	    }
+	    else{ // this cmdline has an error
+	      fprintf(stderr, "%d: <cmdline invalid>: \"%s\"\n",
+		      root->cmdArray[i]->cmd_index,
+		      root->cmdArray[i]->cmd_string);
+	      exit(EXIT_FAILURE);
+	    }
+	  }
+	}
+
+	// generate new command line arguments
+	char** new_cmd_args = malloc(sizeof(char*) * (after_split_len+2));
+	handle_malloc_error(new_cmd_args);
+	
+	int new_cmd_args_len = 0;
+	
+	for(int k = 0; k < after_split_len; k++){
+	  if(splitted_argv_array[k] != NULL){
+	    new_cmd_args[new_cmd_args_len] = splitted_argv_array[k];
+	    new_cmd_args_len++;
+	  }
+	}
+
+	// append NULL
+	new_cmd_args[new_cmd_args_len] = NULL;
+	new_cmd_args_len++;
+
+	// create a cmd_node* for executing execute_cmdline()
+	cmd_node* new_cmd_node = CreateCmdNode(new_cmd_args_len,
+					       root->cmdArray[i]->cmd_index);
+	free(new_cmd_node->cmdWord);
+	free(new_cmd_node->cmd_string);
+	new_cmd_node->cmdWord = new_cmd_args;
+	new_cmd_node->cmd_string = root->cmdArray[i]->cmd_string;
+	
+	
+	// execute cmd according to redir_flag
+	if(!redir_flag){
+	  execute_cmdline(root->cmdArray[i]->cmdWord_num,
 			root->cmdArray[i]->cmdWord,
 			root->cmdArray[i],
 			redirect_flag,
 			redirect_input_file_path,
 			redirect_output_file_path);
+	}
+	else{
+	  execute_cmdline(new_cmd_args_len, new_cmd_args,
+			  new_cmd_node, redir_flag,
+			  redirect_input_file_path,
+			  redirect_output_file_path);
+	}
+        
       }
     }
   }

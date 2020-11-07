@@ -19,4 +19,16 @@ bool duplicate_target(node** node_array, int node_num, char* target);
 */
 node** parsing(int* nodes_num, FILE* path);
 
+/* the following functions are used for I/O redirection */
+
+/* convert char to string */
+char *strfromchar(char source);
+
+/* the split_argv function are used to split the cmd which are associated, e.g.
+   <input>output is splited into an array [<, input, > , output].
+   Function arguments are # of words of command line, string array of command
+   line and total number of doubled splited string.
+*/
+char** split_argv(int argc, char** argv, int* len_args_list);
+
 #endif

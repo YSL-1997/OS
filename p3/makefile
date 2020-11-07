@@ -9,7 +9,7 @@ main.o: main.c build_spec_rep.h
 build_spec_rep.o: build_spec_rep.c build_spec_rep.h parsing.h process_exec.h
 	gcc -Wall -Wextra -pedantic -c build_spec_rep.c
 
-process_exec.o: process_exec.c process_exec.h graph.h
+process_exec.o: process_exec.c process_exec.h graph.h parsing.h
 	gcc -Wall -Wextra -pedantic -c process_exec.c
 
 graph.o: graph.c graph.h errorHandling.h

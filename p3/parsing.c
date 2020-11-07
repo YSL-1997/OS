@@ -360,24 +360,136 @@ node** parsing(int* nodes_num, FILE* fp)
   *nodes_num = node_index;
   fclose(fp);
 
-  // for debugging:
-  /*
-  for(int i = 0; i< node_index; i++){
-    printf("target: %s   ", node_array[i] -> target);
-    for(int j = 0; j<node_array[i]->dependency_num; j++){
-      printf(" dependencies: %s ", (node_array[i]->dependencies)[j]);
-    }
-    printf("\n");
-    printf("cmd line: \n");
-    for(int k = 0; k < node_array[i] -> cmd_lines_num; k++){
-      for(int m = 0; m<(node_array[i]->cmdArray)[k] -> cmdWord_num; m++){
-	// printf("%s**", (node_array[i]->cmdArray)[k] -> cmd_string);
-	printf("%s ", ((node_array[i]->cmdArray)[k] -> cmdWord)[m]);
-      }
-      printf("\n"); 
-    }
-  }
-  */
   return node_array;
 }
+
+/* the following functions are used for I/O redirection */
+
+// convert char to string
+char *strfromchar(char source)
+{
+  char* str = (char*)malloc(2 * sizeof(char));
+  handle_malloc_error(str);
+  str[0] = source;
+  str[1] = '\0';
+  
+  return str;
+}
+
+/* the split_argv function are used to split the cmd which are associated, e.g.
+   <input>output is splited into an array [<, input, > , output].
+   Function arguments are # of words of command line, string array of command 
+   line and total number of doubled splited string. 
+*/
+char** split_argv(int argc, char** argv, int* len_args_list)
+{
+  char ch = 'a'; //initialize character variable
+  int col_num = 100; // set the max length of string array
+  int len = 100; //set the max length of each string
+  int word_index = 0; //initialize the index of array
+  int str_index = 0; //initialize the index of each string
+  int read_len = 0; //initialize the index of line string
+  int less_num; // the number of '<'
+  int greater_num; // the number of '>'
+  
+  // create a pointer to string to store every parsing word
+  char* str = (char*)malloc(len * sizeof(char));
+  handle_malloc_error(str);
+
+  // create a pointer to string array to store totally splited argvs
+  char** string_arr = malloc(col_num * sizeof(char*));
+  handle_malloc_error(string_arr);
+
+  for(int j = 0; j < col_num; j++){
+    string_arr[j] = malloc(len * sizeof(char));
+    handle_malloc_error(string_arr[j]);    
+  }
+
+  for(int i = 0; i < argc; i++){
+
+    // if an argv includes "-f"
+    if(strstr(argv[i], "-f") && argv[i][0] == '-'){
+      // if the argv is not "-f", split argv into "-f" and filename
+      if(strnlen(argv[i], 100) != 2){
+	string_arr[word_index] = "-f";
+	word_index++;
+	string_arr[word_index] = argv[i] + 2;
+	          
+      }
+      // if the argv is "-f", store it
+      else{
+	string_arr[word_index] = "-f";	          
+      }
+      word_index++;
+    }
+
+    // if an argv includes '<' or '>'
+    else if(strchr(argv[i], '<') || strchr(argv[i], '>')){
+      less_num = 0;
+      greater_num = 0;
+      
+      // parsing the argv string
+      while(1){
+	ch = argv[i][read_len];
+	
+	if(ch == '<' || ch == '>'|| ch == '\0'){
+
+	  if(ch == '<') less_num++;
+	  if(ch == '>') greater_num++;
+	  
+	  // store the string before '<' or '>' if the
+	  // previous char is not '<' or '>'
+	  if(str_index != 0){
+	    str[str_index] = '\0';
+	    strncpy(string_arr[word_index], str, str_index+1);
+	    word_index++;
+
+	    // if the end of string, reset the index and break;
+	    if(ch == '\0'){
+	      read_len = 0;
+	      str_index = 0;
+	      break;                   
+	    }
+	    else{
+	      strncpy(string_arr[word_index], strfromchar(ch), 4);
+	      word_index++;
+	      str_index = 0;	                          
+	    }
+	  }
+
+	  else{
+	    //if the end of string, break;
+	    if(ch == '\0'){
+	      read_len = 0;
+	      break;
+	    }
+	    
+	    //if the previous char is still '<' or '>', store the char as string
+	    else{
+	      strncpy(string_arr[word_index], strfromchar(ch), 4);
+	      word_index++;
+	      str_index = 0;
+	    }
+	  }
+	}
+	//if the current char is not '<' or '>', continue to parse
+	else{
+	  str[str_index] = (char) ch;
+	  str_index++;
+	}
+	read_len++;
+      }      
+    }
+    
+    //if the argv doesn't include the above char, store it in the array
+    else{
+      strncpy(string_arr[word_index], argv[i], 100);
+      word_index++;     
+    }
+  }
+  *len_args_list = word_index;
+  free(str);
+  return string_arr;  
+}
+
 
