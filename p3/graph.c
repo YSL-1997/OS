@@ -186,6 +186,7 @@ char** getRoot(node** n, int t_num, int* root_num)
   bool flag = false; //root node flage
   int index = 0;
   int root_num_init = 10;
+  
   // mallocate memory for the array to store target and dependency string
   char** root_array = (char**)malloc(sizeof(char*)*root_num_init);
   handle_malloc_error(root_array);
@@ -193,6 +194,7 @@ char** getRoot(node** n, int t_num, int* root_num)
   //comparing a target with all dependencies, if find, it's not root
   for(int i = 0; i < t_num; i++){
     for(int j = 0; j < t_num; j++){
+      
       if(include(n[j]->dependencies, n[j]->dependency_num, n[i]->target)){
 	flag = true;
 	printf("include %s  ", n[i]->target);

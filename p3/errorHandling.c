@@ -62,8 +62,8 @@ void handle_dup2_error(int err)
 }
 
 /* 
-   close() returns zero on success. 
-   On error, -1 is returned, and errno is set appropriately.
+  close() returns zero on success. 
+  On error, -1 is returned, and errno is set appropriately.
 */
 void handle_close_error(int err)
 {

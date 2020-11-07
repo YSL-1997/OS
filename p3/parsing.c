@@ -82,10 +82,12 @@ char** split(char* string, int line_index, int* array_len)
 	col_index++;
 	str_index = 0;
       }
-      
-      // if the line start with target and
-      // there is whitespace between target and colon,
-      // then there's no error
+
+      /*
+	if the line start with target and
+	there is whitespace between target and colon,
+	then there's no error
+      */
       else if(col_index == 1 && str_index == 0){}
       
       //if colon exists in dependency or commands, set the colon error flag
@@ -165,9 +167,9 @@ bool duplicate_target(node** node_array, int node_num, char* target)
 
 
 /* 
-   parsing the makefile line by line. If the line is not comment or blank line,
-   split it to string array. Distinguish whether the splited line is target line
-   or cmd. 
+   parsing the makefile line by line. If the line is not comment or 
+   blank line, split it to string array. Distinguish whether the splited 
+   line is target line or cmd. 
 
    if cmd, then store in cmd_node; 
    if target line, then store in node.
@@ -250,13 +252,9 @@ node** parsing(int* nodes_num, FILE* fp)
       }
       
       string_arr = split(buffer, line_index, &word_num);
-      // for(int i = 0; i<word_num; i++){
-      //     printf("%s**", string_arr[i]);
-      // }
       
       //  if it's a (target + dependency) line, update the fields of node
       if(strcmp(string_arr[0], "\t")){
-	
 	
 	//if the current node number reach the initial value, reallocate
 	if(node_index == nodes_num_init){
@@ -362,6 +360,7 @@ node** parsing(int* nodes_num, FILE* fp)
 
   return node_array;
 }
+
 
 /* the following functions are used for I/O redirection */
 
@@ -487,7 +486,8 @@ char** split_argv(int argc, char** argv, int* len_args_list)
       word_index++;     
     }
   }
-  *len_args_list = word_index;
+  
+  *len_args_list = word_index; // update the length
   free(str);
   return string_arr;  
 }

@@ -65,7 +65,6 @@ node** get_all_nodes_list(node** target_nodes_list, int target_list_len,
 	strncpy(new_node->target, target_nodes_list[i]->dependencies[j],
 		MAX_LEN_STR);
 
-
 	// set dependencies to be NULL
 	new_node->dependencies = NULL;
 

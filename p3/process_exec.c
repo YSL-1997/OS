@@ -76,10 +76,11 @@ bool need_exec_cmd(node* target_node)
 
 /*
   execute one single cmd line, with I/O redirection implemented
-  input: num of words, words list, cmdNode, redirect_flag, write-to path
+  input: num of words, words list, cmdNode, redirect_flag, 
+         redirection in and out paths
   note that: before calling this function, need to check stat()
   if you want to do the I/O redirection, set redirect_flag to be true
-  and give the redirect_file_path
+  and give the corresponding redirect file_path
 */
 void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
 		     bool redirect_flag, char* redirect_input_file_path,
@@ -116,7 +117,7 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
 	int redirect_in_fd = open(redirect_input_file_path, O_RDWR);
 	handle_open_error(redirect_in_fd);
 
-	// use dup2 to replace stdin & stdout with redirect_in/out_fd
+	// use dup2 to replace stdin with redirect_in_fd
 	handle_dup2_error(dup2(redirect_in_fd, STDIN_FILENO));
 	handle_close_error(close(redirect_in_fd));
       }
@@ -154,6 +155,7 @@ void execute_cmdline(int cmdWord_num, char** cmdWord, cmd_node* cmdNode,
     else{
       // WIFEXITED returns true if the child terminated normally
       if(WIFEXITED(status)){
+	
 	// check the exit status of the child process
 	if(WEXITSTATUS(status)){
 	  exit(EXIT_FAILURE);
