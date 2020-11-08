@@ -202,6 +202,7 @@ void postorder(node** node_array, int all_nodes_num, node* root,
 	
 	bool redir_flag = false; // redirection flag default to be false
 
+	int last_red_index = 0;
 	// create an array that stores the indices that should be set to NULL
 	int* indices_of_NULL = (int*)malloc(sizeof(int) * (after_split_len+1));
 	int null_list_len = 0;
@@ -230,6 +231,7 @@ void postorder(node** node_array, int all_nodes_num, node* root,
 	      null_list_len++;
 	      indices_of_NULL[null_list_len] = j+1;
 	      null_list_len++;
+	      last_red_index = j;
 	    }
 	    else{ // this cmdline has an error
 	      fprintf(stderr, "%d: <cmdline invalid>: \"%s\"\n",
@@ -259,9 +261,10 @@ void postorder(node** node_array, int all_nodes_num, node* root,
 	      null_list_len++;
 	      indices_of_NULL[null_list_len] = j+1;
 	      null_list_len++;
+	      last_red_index = j;
 	    }
 	    else{ // this cmdline has an error
-	      printf("error3");
+
 	      fprintf(stderr, "%d: <cmdline invalid>: \"%s\"\n",
 		      root->cmdArray[i]->cmd_index,
 		      root->cmdArray[i]->cmd_string);
@@ -273,6 +276,9 @@ void postorder(node** node_array, int all_nodes_num, node* root,
 	// set NULL in splitted_argv_array
 	for(int x = 0; x < null_list_len; x++){
 	  splitted_argv_array[indices_of_NULL[x]] = NULL;
+	}
+	for(int x = last_red_index; x < after_split_len; x++){
+	  splitted_argv_array[x] = NULL;
 	}
 	
 	// generate new command line arguments
