@@ -17,6 +17,9 @@ process_exec.o: process_exec.c process_exec.h graph.h parsing.h
 graph.o: graph.c graph.h errorHandling.h
 	gcc -Wall -Wextra -pedantic -c graph.c
 
+parsing.o: parsing.c parsing.h graph.h
+	gcc -Wall -Wextra -pedantic -c parsing.c
+
 errorHandling.o: errorHandling.c errorHandling.h
 	gcc -Wall -Wextra -pedantic -c errorHandling.c
 
