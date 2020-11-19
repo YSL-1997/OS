@@ -35,7 +35,7 @@ processes* get_processes_info(FILE* fp)
 {
   char ch = 'a';
   while(ch != EOF){
-    ch = fgetc(fp);
+    ch = fgets(fp);
     
   }
 }
