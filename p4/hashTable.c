@@ -7,8 +7,8 @@
 
 /*
   This module is for building the hash table
-  In this project, we basically need 2 hash tables: 
-  page table & inverted page table
+  In this project, we basically need 3 hash tables: 
+  page table & inverted page table & process table
 */
 
 
