@@ -72,6 +72,7 @@ void insert_pt(page** table, unsigned long size, page* ptr)
   }
 
   tmp->pt_next = ptr;
+  tmp->pt_next->pt_prev = tmp;
 }
 
 
@@ -90,6 +91,7 @@ void insert_ipt(page** table, unsigned long size, page* ptr)
   }
 
   tmp->ipt_next = ptr;
+  tmp->ipt_next->ipt_prev = tmp;
 }
 
 
