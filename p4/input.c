@@ -11,6 +11,7 @@
 */
 
 #include <stdio.h>
+#include "process.h"
 
 /*
   this function reads a file according to path

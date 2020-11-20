@@ -1,5 +1,5 @@
-#ifndef PROCESSES_H_
-#define PROCESSES_H_
+#ifndef PROCESS_H_
+#define PROCESS_H_
 
 typedef struct process{
   unsigned long pid;
@@ -11,13 +11,16 @@ typedef struct process{
   unsigned long end_index;
   // stores the end index of the pid
 
-  unsigned long cur_index
+  unsigned long cur_index;
   // stores the current index of the pid that about to execute
   // e.g. on line_index 0, pid 1 has a page fault, then pid_1->cur_index = 0
   // then add to the I/O queue
 
-  process* next;
+  process* io_next;
   // this is used in the I/O queue
+
+  bool is_blocked;
+  // indicates whether the process is blocked or not
   
 }process;
 
