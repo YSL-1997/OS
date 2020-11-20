@@ -22,6 +22,9 @@ typedef struct process{
   bool is_blocked;
   // indicates whether the process is blocked or not
   
+  unsigned long* index_list;
+  // stores a linked list of all indices of a process in the trace file
+  
 }process;
 
 
