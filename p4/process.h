@@ -19,12 +19,12 @@ typedef struct process{
   process* io_next;
   // this is used in the I/O queue
 
+  process* runnable_next;
+  // this is for the runnable list
+  
   bool is_blocked;
   // indicates whether the process is blocked or not
-  
-  unsigned long* index_list;
-  // stores a linked list of all indices of a process in the trace file
-  
+
 }process;
 
 
