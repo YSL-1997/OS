@@ -5,6 +5,9 @@ typedef struct process{
   unsigned long pid;
   // stores the pid of the process
 
+  unsigned long blocked_vpn;
+  // stores the vpn corresponds to this pid that gets blocked
+  
   unsigned long start_index;
   // stores the starting index of the pid
   
@@ -20,7 +23,10 @@ typedef struct process{
   // this is used in the I/O queue
 
   process* runnable_next;
-  // this is for the runnable list
+  // this is for the runnable list(double linked list)
+
+  process* runnable_prev;
+  // this is for the runnable list(double linked list)
   
   bool is_blocked;
   // indicates whether the process is blocked or not
