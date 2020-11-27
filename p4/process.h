@@ -19,18 +19,21 @@ typedef struct process{
   // e.g. on line_index 0, pid 1 has a page fault, then pid_1->cur_index = 0
   // then add to the I/O queue
 
-  process* io_next;
+  struct process* io_next;
   // this is used in the I/O queue
 
-  process* runnable_next;
+  struct process* runnable_next;
   // this is for the runnable list(double linked list)
 
-  process* runnable_prev;
+  struct process* runnable_prev;
   // this is for the runnable list(double linked list)
   
   bool is_blocked;
   // indicates whether the process is blocked or not
 
+  unsigned long timer;
+  // stores the time before I/O completes
+  
 }process;
 
 

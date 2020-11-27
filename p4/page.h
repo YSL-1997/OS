@@ -17,28 +17,28 @@ typedef struct page{
   int valid_bit;
   // valid bit
 
-  page* pt_next;
+  struct page* pt_next;
   // pointer to the next page in page table
   
-  page* pt_prev;
+  struct page* pt_prev;
   // pointer to the previous page in page table
   
-  page* ipt_next;
+  struct page* ipt_next;
   // pointer to the next page in inverted page table
   
-  page* ipt_prev;
+  struct page* ipt_prev;
   // pointer to the previous page in inverted page table
 
-  page* free_next;
+  struct page* free_next;
   // pointer to the next page in free list
 
-  page* free_prev;
+  struct page* free_prev;
   // pointer to the previous page in free list
   
-  page* ram_next;
+  struct page* ram_next;
   // pointer to the next page in RAM list
 
-  page* ram_prev;
+  struct page* ram_prev;
   // pointer to the previous page in RAM list
 
 }page;
