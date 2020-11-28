@@ -41,6 +41,8 @@ void fifo(process* process_head, process* process_tail, int num_pages)
   // global timer
   unsigned long global_timer = 0;
 
+  //--------------------------------------------------------------------
+  // start processing the tracefile
   FILE* fp = read_file("./tracefile");
   
   // the working buffer that stores each line of tracefile
@@ -56,22 +58,42 @@ void fifo(process* process_head, process* process_tail, int num_pages)
     // check if fp reaches the end of the tracefile
     if(feof(fp)){
 
-      // if io_list is empty, and we've reached the end of file,
-      // then all processes has terminated
-      ////////////////////////////////////////////////////
-      //////////////////////////////////////////////////////
-      not sure!!!!
+      // if io_list is empty, and we've reached the end of file, and 
+      // then all processes have terminated
       if(io_head == NULL){
+	// exit(0);
 	break;
       }
-      // nothing to read, if io_list is not empty, then wait for its completion
+      
+      // if we've reached EOF & io_list is not empty,
+      // then wait for its completion
       if(io_head != NULL){
 	wait_for_io_completion(&io_head, &io_tail,
 			       &runnable_head, &runnable_tail,
-			       *global_timer);
-	///////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////
-	need to do more
+			       &global_timer);
+
+	// specific to FIFO, get the page to replace
+	// i.e. the page that ram_head points to
+
+	page* page_to_replace = ram_head; // get the page to be replaced
+
+	// before actually replacing the page:
+	// according to the page-to-be-replaced, update page table
+	unsigned long invalid_pid = ram_head->pid;
+	unsigned long invalid_vpn = ram_head->vpn;
+	// update page table
+	// find the key (invalid_pid, invalid_vpn), mark as NULL;
+	
+	
+	// update page info
+	ram_head->pid = runnable_tail->pid;
+	ram_head->vpn = runnable_tail->blocked_vpn;
+	
+	// add to last of ram list
+
+	// update page table and inverted page table
+
+	page_to_replace->ppn
       }
     }
     
@@ -92,7 +114,7 @@ void fifo(process* process_head, process* process_tail, int num_pages)
 	if(io_head != NULL){
 	  wait_for_io_completion(&io_head, &io_tail,
 				 &runnable_head, &runnable_tail,
-				 *global_timer);
+				 &global_timer);
 	  //////////////////////////////////////////////////
 	  /////////////////////////////////////
 	  need to do more
@@ -121,8 +143,8 @@ page* initialize_page_frame(unsigned long ppn)
   handle_malloc_error(page);
 
   // initialize the fields
-  page->pid = 0;
-  page->vpn = 0;
+  page->pid = "";
+  page->vpn = "";
   page->ppn = ppn;
   page->ref_bit = 0;
   page->valid_bit = 0;
@@ -219,12 +241,10 @@ void add_to_runnable(process* ptr, process** head, process** tail)
 
 
 /*  
-  this function pops from io_list, update page struct, update timer, 
-  add to ram_list,
-  update page table, update inverted page table, update process table
-  In order to enter this function, io_list must be non-empty
+  this function pops from io_list, update timer, add to ram list
+  
+  in order to enter this function, io_list must be non-empty
   input: all the pointers that keep track of info of simulator
-
 */
 void wait_for_io_completion(process** io_head, process** io_tail,
 			    process** runnable_head, process** runnable_tail,
@@ -236,5 +256,9 @@ void wait_for_io_completion(process** io_head, process** io_tail,
   *global_timer += tmp->timer;
 }
 
-
-
+/*
+  this function updates:
+    page struct, page table, inverted page table, process table
+  
+*/
+void 

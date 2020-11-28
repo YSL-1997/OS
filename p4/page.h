@@ -2,10 +2,10 @@
 #define PAGE_H_
 
 typedef struct page{
-  unsigned long pid;
+  char* pid;
   // process id
   
-  unsigned long vpn;
+  char* vpn;
   // virtual page number
   
   unsigned long ppn;
