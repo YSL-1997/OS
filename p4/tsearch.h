@@ -12,18 +12,22 @@
 
 typedef struct proc_node
 {
-  char* key;
+  unsigned long key;
   process* value;
 } node_proc;
 
-// struct of page table and inverted page table
+// struct of page table
 typedef struct node_pt
 {
   char* key;
   page* value;
 } node_pt;
 
-
+typedef struct node_ipt
+{
+  unsigned long key;
+  page* value;
+} node_ipt;
 
 
 int compare_proc(const void *a, const void *b);
