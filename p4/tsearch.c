@@ -14,6 +14,40 @@
 #include "tsearch.h"
 
 /*
+  this function creates an entry of the process table
+  input: pid, pointer to the process struct
+  return: a pointer to the node_proc struct
+*/
+node_proc *create_entry_proc(unsigned long pid, process *proc)
+{
+  node_proc *new_proc = malloc(sizeof(node_proc));
+  handle_malloc_error(new_proc);
+
+  new_proc->key = pid;
+  new_proc->value = proc;
+
+  return new_proc;
+}
+
+/*
+  this function creates an entry of the page table & inverted page table
+  input: 
+    for page table: string "pid vpn", pointer to the page struct
+    for inverted page table: string "ppn", pointer to the page struct
+  return: a pointer to the node_pt struct
+*/
+node_pt *create_entry_pt(char *key, page *value)
+{
+  node_pt *new_entry = malloc(sizeof(node_pt));
+  handle_malloc_error(new_entry);
+
+  new_entry->key = key;
+  new_entry->value = value;
+
+  return new_entry;
+}
+
+/*
   compare the two keys of two nodes for the binary tree
   for the process table
   input: two pointers to process struct
@@ -101,7 +135,7 @@ int compare_ipt(const void *a, const void *b)
   // cast the params into process*
   page *tmp_a = (page *)a;
   page *tmp_b = (page *)b;
-  
+
   if (tmp_a->ppn > tmp_b->ppn)
   {
     return 1;
@@ -116,3 +150,27 @@ int compare_ipt(const void *a, const void *b)
   }
 }
 
+/*
+  this function adds an entry to the process table
+  input: address of the pointer to the root of process table, 
+         entry to be added
+*/
+void add_to_proc_table(void** root, node_proc* ptr)
+{
+  void* result;
+  node_proc* existing;
+
+  if((result = tsearch(ptr, root, compare_proc)) == NULL){
+    // add to process table failed
+    fprintf(stderr, "insufficient memory\n");
+    exit(EXIT_FAILURE);
+  }
+  else{
+    // check if the to-be-added node's key already existed
+    existing = *(node_proc**)result;
+
+    if(existing != ptr){
+      
+    }
+  }
+}
