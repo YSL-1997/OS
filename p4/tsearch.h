@@ -5,7 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <search.h>
-
+#include <string.h>
+#include "input.c"
+#include "page.h"
+#include "process.h"
 
 
 #endif

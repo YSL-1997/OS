@@ -15,38 +15,38 @@ static int MAX_LEN = 4096;
          tail of process list,
 	 num of pages that can be allocated in RAM
 */
-void fifo(process* process_head, process* process_tail, int num_pages)
+void fifo(process *process_head, process *process_tail, int num_pages)
 {
   // page table and inverted page table
-  struct hsearch_data* pt;
-  struct hsearch_data* ipt;
-  
+  struct hsearch_data *pt;
+  struct hsearch_data *ipt;
+
   // head and tail pointers to the head of blocked processes
-  process* io_head = NULL;
-  process* io_tail = NULL;
-  
+  process *io_head = NULL;
+  process *io_tail = NULL;
+
   // head and tail pointers to the head of runnable processes
-  process* runnable_head = process_head;
-  process* runnable_tail = process_tail;
-  
+  process *runnable_head = process_head;
+  process *runnable_tail = process_tail;
+
   // pointer to the head of free page frames
-  page** free_arr = malloc_page_frames(num_pages);
-  page* free_head = free_arr[0];
-  page* free_tail = free_arr[1];
-  
+  page **free_arr = malloc_page_frames(num_pages);
+  page *free_head = free_arr[0];
+  page *free_tail = free_arr[1];
+
   // pointer to the head of the page frame that is in RAM
-  page* ram_head = NULL;
-  page* ram_tail = NULL;
-  
+  page *ram_head = NULL;
+  page *ram_tail = NULL;
+
   // global timer
   unsigned long global_timer = 0;
 
   //--------------------------------------------------------------------
   // start processing the tracefile
-  FILE* fp = read_file("./tracefile");
-  
+  FILE *fp = read_file("./tracefile");
+
   // the working buffer that stores each line of tracefile
-  char* buf = (char*)malloc(sizeof(char) * MAX_LEN);
+  char *buf = (char *)malloc(sizeof(char) * MAX_LEN);
   handle_malloc_error(buf);
 
   /* 
@@ -54,110 +54,86 @@ void fifo(process* process_head, process* process_tail, int num_pages)
      (EOF is not really an error). Thus, need to use feof() and ferror()
      to distinguish the cause of fgets failing.
   */
-  do{
+  do
+  {
     // check if fp reaches the end of the tracefile
-    if(feof(fp)){
+    if (feof(fp))
+    {
 
-      // if io_list is empty, and we've reached the end of file, and 
+      // if io_list is empty, and we've reached the end of file, and
       // then all processes have terminated
-      if(io_head == NULL){
-	// exit(0);
-	break;
+      if (io_head == NULL)
+      {
+        // exit(0);
+        break;
       }
-      
+
       // if we've reached EOF & io_list is not empty,
       // then wait for its completion
-      if(io_head != NULL){
-	wait_for_io_completion(&io_head, &io_tail,
-			       &runnable_head, &runnable_tail,
-			       &global_timer);
+      if (io_head != NULL)
+      {
+        wait_for_io_completion(&io_head, &io_tail,
+                               &runnable_head, &runnable_tail,
+                               &global_timer);
 
-	// specific to FIFO, get the page to replace
-	// i.e. the page that ram_head points to
+        // specific to FIFO, get the page to replace
+        // i.e. the page that ram_head points to
 
-	page* page_to_replace = ram_head; // get the page to be replaced
+        page *page_to_replace = ram_head; // get the page to be replaced
 
-	// before actually replacing the page:
-	// according to the page-to-be-replaced, update page table
-	unsigned long invalid_pid = ram_head->pid;
-	unsigned long invalid_vpn = ram_head->vpn;
-	// update page table
-	// find the key (invalid_pid, invalid_vpn), mark as NULL;
-	
-	
-	// update page info
-	ram_head->pid = runnable_tail->pid;
-	ram_head->vpn = runnable_tail->blocked_vpn;
-	
-	// add to last of ram list
+        // before actually replacing the page:
+        // according to the page-to-be-replaced, update page table
+        unsigned long invalid_pid = ram_head->pid;
+        unsigned long invalid_vpn = ram_head->vpn;
+        // update page table
+        // find the key (invalid_pid, invalid_vpn), mark as NULL;
 
-	// update page table and inverted page table
+        // update page info
+        ram_head->pid = runnable_tail->pid;
+        ram_head->vpn = runnable_tail->blocked_vpn;
 
-	page_to_replace->ppn
+        // add to last of ram list
+
+        // update page table and inverted page table
+
+        page_to_replace->ppn;
       }
     }
-    
-    if(fgets(buf, MAX_LEN, fp) != NULL){
-      char** pid_vpn_pair = (char**)malloc(sizeof(char*) * 2);
+
+    if (fgets(buf, MAX_LEN, fp) != NULL)
+    {
+      char **pid_vpn_pair = (char **)malloc(sizeof(char *) * 2);
       handle_malloc_error(pid_vpn_pair);
 
       // now the line is stored in buf, parse it
       pid_vpn_pair = parsing(buf);
-      
+
       tmp_pid = pid_vpn_pair[0];
       tmp_vpn = pid_vpn_pair[1];
 
       // check if there are runnable processes
-      if(runnable_head == NULL){
-	// if no runnable process, then no need to read the rest of tracefile
-	// all we need to do is to wait for I/O completion
-	if(io_head != NULL){
-	  wait_for_io_completion(&io_head, &io_tail,
-				 &runnable_head, &runnable_tail,
-				 &global_timer);
-	  //////////////////////////////////////////////////
-	  /////////////////////////////////////
-	  need to do more
-	}
+      if (runnable_head == NULL)
+      {
+        // if no runnable process, then no need to read the rest of tracefile
+        // all we need to do is to wait for I/O completion
+        if (io_head != NULL)
+        {
+          wait_for_io_completion(&io_head, &io_tail,
+                                 &runnable_head, &runnable_tail,
+                                 &global_timer);
+          //////////////////////////////////////////////////
+          /////////////////////////////////////
+          need to do more
+        }
       }
     }
-    else{
+    else
+    {
       fprintf(stderr, "fgets() error\n");
       exit(EXIT_FAILURE);
     }
-    
-  }while();
-    
-}
 
-
-/*
-  initialize a single page frame
-  input: ppn
-  return: a pointer to a page struct
-*/
-page* initialize_page_frame(unsigned long ppn)
-{
-  // malloc the page frame
-  page* page = (page*)malloc(sizeof(page));
-  handle_malloc_error(page);
-
-  // initialize the fields
-  page->pid = "";
-  page->vpn = "";
-  page->ppn = ppn;
-  page->ref_bit = 0;
-  page->valid_bit = 0;
-  page->pt_next = NULL;
-  page->pt_prev = NULL;
-  page->ipt_next = NULL;
-  page->ipt_prev = NULL;
-  page->free_next = NULL;
-  page->free_prev = NULL;
-  page->ram_next = NULL;
-  page->ram_prev = NULL;
-
-  return page;
+  } while ();
 }
 
 
@@ -168,19 +144,20 @@ page* initialize_page_frame(unsigned long ppn)
   return: pointers to the head and tail of malloc'd page frames
           i.e. free_list and free_tail
 */
-page** malloc_page_frames(unsigned long num_pages)
+page **malloc_page_frames(unsigned long num_pages)
 {
-  page** ret = (page*)malloc(sizeof(page*) * 2);
-  
+  page **ret = (page *)malloc(sizeof(page *) * 2);
+
   // malloc the first page frame
-  page* page1 = initialize_page_frame(1);
+  page *page1 = initialize_page_frame(1);
 
   // create a pointer to the current page frame
-  page* tmp = page1;
-  
-  for(int i = 0; i < num_pages-1; i++){
+  page *tmp = page1;
+
+  for (int i = 0; i < num_pages - 1; i++)
+  {
     // initialize the next page frame
-    page* new_page = initialize_page_frame(i+2);
+    page *new_page = initialize_page_frame(i + 2);
 
     // add the new page frame to the free_list
     tmp->free_next = new_page;
@@ -191,54 +168,55 @@ page** malloc_page_frames(unsigned long num_pages)
   }
 
   ret[0] = page1; // free_list
-  ret[1] = tmp; // free_tail
-  
+  ret[1] = tmp;   // free_tail
+
   return ret;
 }
-
-
 
 /*
   this function pops from io_list
   input: head and tail pointers to I/O list
   return: pointer to the popped process struct
 */
-process* pop_from_io(process** head, process** tail)
+process *pop_from_io(process **head, process **tail)
 {
-  if(*head == NULL && *tail == NULL){
+  if (*head == NULL && *tail == NULL)
+  {
     // if length of I/O list is 0
     return NULL;
   }
-  else if(*head == *tail && *head != NULL){
+  else if (*head == *tail && *head != NULL)
+  {
     // if length of I/O list is 1
-    process* tmp = *head;
+    process *tmp = *head;
     *head = NULL;
     *tail = NULL;
     return tmp;
   }
-  else{
+  else
+  {
     // if length of I/O list is greater than 1
-    process* tmp = *head;
+    process *tmp = *head;
     *head = (*head)->io_next;
     return tmp;
   }
 }
 
-void add_to_runnable(process* ptr, process** head, process** tail)
+void add_to_runnable(process *ptr, process **head, process **tail)
 {
-  if(*head == NULL && *tail == NULL){
+  if (*head == NULL && *tail == NULL)
+  {
     // runnable list is empty
     *head = ptr;
     *tail = ptr;
   }
-  else{
+  else
+  {
     (*tail)->runnable_next = ptr;
     ptr->runnable_prev = *tail;
     *tail = ptr;
   }
 }
-
-
 
 /*  
   this function pops from io_list, update timer, add to ram list
@@ -246,11 +224,11 @@ void add_to_runnable(process* ptr, process** head, process** tail)
   in order to enter this function, io_list must be non-empty
   input: all the pointers that keep track of info of simulator
 */
-void wait_for_io_completion(process** io_head, process** io_tail,
-			    process** runnable_head, process** runnable_tail,
-			    *global_timer)
+void wait_for_io_completion(process **io_head, process **io_tail,
+                            process **runnable_head, process **runnable_tail,
+                            *global_timer)
 {
-  process* tmp = pop_from_io(&io_head, &io_tail);
+  process *tmp = pop_from_io(&io_head, &io_tail);
   tmp->is_blocked = false;
   add_to_runnable(tmp, &runnable_head, &runnable_tail);
   *global_timer += tmp->timer;
@@ -261,4 +239,4 @@ void wait_for_io_completion(process** io_head, process** io_tail,
     page struct, page table, inverted page table, process table
   
 */
-void 
+void

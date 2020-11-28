@@ -1,6 +1,12 @@
 #ifndef PROCESS_H_
 #define PROCESS_H_
 
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <search.h>
+#include <string.h>
+
 typedef struct process{
   unsigned long pid;
   // stores the pid of the process
