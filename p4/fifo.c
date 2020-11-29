@@ -145,11 +145,55 @@ void fifo(process **process_head, process **process_tail, int num_pages,
 
           if (result_pt == NULL)
           {
-            // not found, i.e. page fault
+            /* not found, i.e. page fault
             // (+1 ns)（io_head timer -1, 检查是否为0 if 0：go to "x"）
             // 回溯file pointer，然后更新process的cur_index (即回溯后的fp), blocked vpn,
-            // isBlocked = true, 将process从runnable list移除，加入io queue
+            // isBlocked = true, 将process从runnable list移除，加入io queue (2000000)
             // "x": wait_for_io_completion()
+            */
+
+            // get the current position of fp
+            long cur_pos = ftell(fp);
+            // modify the cur_index of this process
+            result_proc->value->cur_index = cur_pos - strlen(buf);
+            result_proc->value->is_blocked = true;
+            result_proc->value->blocked_vpn = cur_vpn;
+            result_proc->value->timer = 2000000;
+            result_proc->value->io_next = NULL;
+
+            // check if io list is empty
+            bool io_empty = true;
+            if (io_head != NULL && io_tail != NULL)
+            {
+              io_empty = false;
+            }
+
+            // remove from runnable list
+            process *popped_proc = remove_from_runnable(result_proc->value,
+                                                        &runnable_head,
+                                                        &runnable_tail);
+
+            // add to io list
+            add_to_io(popped_proc, &io_head, &io_tail);
+
+            // modify the timer
+            global_timer++;
+
+            if (io_head->io_next != NULL && !io_empty)
+            {
+              // before add_to_io, io list was not empty
+              io_head->timer--;
+
+              if (io_head->timer == 0)
+              {
+                wait_for_io_completion(&fp, &io_head, &io_tail,
+                                       &runnable_head, &runnable_tail,
+                                       &free_head, &free_tail,
+                                       &ram_head, &ram_tail,
+                                       &global_timer, &pt, &ipt);
+                continue;
+              }
+            }
           }
           else
           {
@@ -158,6 +202,8 @@ void fifo(process **process_head, process **process_tail, int num_pages,
             // 在reference之后，检查是否这个process已经达到了end index
             //  if 到达end index，就remove 这个process （runnable list中），以及对应的page from pt(a lot) ipt(a lot)
             // "x": wait_for_io_completion()
+            global_timer++;
+
           }
 
           // fgets之后，如果当前行可以执行，memory reference 之后，fp == end index。说明刚刚执行的process结束了，要free掉它
@@ -173,7 +219,7 @@ void fifo(process **process_head, process **process_tail, int num_pages,
       exit(EXIT_FAILURE);
     }
 
-  } while ();
+  } while (true);
 }
 
 /*
@@ -438,4 +484,67 @@ void wait_for_io_completion(FILE **fp,
 
   // modify fp
   fseek(*fp, offset, SEEK_CUR);
+}
+
+/*
+  this function removes a process from the runnable list
+  input: pointer to the process to be removed, runnable_head, runnable_tail
+  return: pointer to the removed process
+*/
+process *remove_from_runnable(process *ptr, process **runnable_head,
+                              process **runnable_tail)
+{
+  assert(*runnable_head != NULL);
+  assert(*runnable_tail != NULL);
+  if (*runnable_head == *runnable_tail)
+  {
+    *runnable_head = NULL;
+    *runnable_tail = NULL;
+    return ptr;
+  }
+  else if (*runnable_head == ptr)
+  {
+    // ptr is the head of runnable list
+    *runnable_head = ptr->runnable_next;
+    ptr->runnable_next->runnable_prev = NULL;
+    ptr->runnable_next = NULL;
+    return ptr;
+  }
+  else if (*runnable_tail == ptr)
+  {
+    // ptr is the tail of runnable list
+    *runnable_tail = ptr->runnable_prev;
+    ptr->runnable_prev->runnable_next = NULL;
+    ptr->runnable_prev = NULL;
+    return ptr;
+  }
+  else
+  {
+    ptr->runnable_prev->runnable_next = ptr->runnable_next;
+    ptr->runnable_next->runnable_prev = ptr->runnable_prev;
+    ptr->runnable_next = NULL;
+    ptr->runnable_prev = NULL;
+    return ptr;
+  }
+}
+
+/*
+  this function adds a process to the tail of io list
+  input: pointer to the to-be-added process, io_head, io_tail
+*/
+void add_to_io(process *ptr, process **io_head, process **io_tail)
+{
+  if (*io_head == *io_tail && *io_head == NULL)
+  {
+    // io list is empty
+    *io_head = ptr;
+    *io_tail = ptr;
+  }
+  else
+  {
+    // io list has at least one processes
+    (*io_tail)->io_next = ptr;
+    *io_tail = ptr;
+    ptr->io_next = NULL;
+  }
 }
