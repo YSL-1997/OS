@@ -435,7 +435,7 @@ void wait_for_io_completion(FILE **fp,
 
   // get the offset that passed into fseek()
   long offset = (*runnable_tail)->cur_index - cur_pos;
-  
+
   // modify fp
   fseek(*fp, offset, SEEK_CUR);
 }
