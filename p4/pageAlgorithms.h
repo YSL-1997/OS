@@ -6,7 +6,7 @@
 #include "input.c"
 #include "page.h"
 #include "process.h"
-
+#include "tsearch.h"
 static int MAX_LEN = 4096;
 
 void fifo();

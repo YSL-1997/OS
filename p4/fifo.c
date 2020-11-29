@@ -15,11 +15,12 @@ static int MAX_LEN = 4096;
          tail of process list,
 	 num of pages that can be allocated in RAM
 */
-void fifo(process *process_head, process *process_tail, int num_pages)
+void fifo(process *process_head, process *process_tail, int num_pages,
+          void *proc_table)
 {
   // page table and inverted page table
-  struct hsearch_data *pt;
-  struct hsearch_data *ipt;
+  void *pt;
+  void *ipt;
 
   // head and tail pointers to the head of blocked processes
   process *io_head = NULL;
@@ -49,6 +50,12 @@ void fifo(process *process_head, process *process_tail, int num_pages)
   char *buf = (char *)malloc(sizeof(char) * MAX_LEN);
   handle_malloc_error(buf);
 
+  // stores the current information of the line we've read
+  char *cur_pid = "";
+  char *cur_vpn = "";
+
+  page *page_to_replace = NULL;
+
   /* 
      Important notes: fgets may return NULL for errors as well as EOF
      (EOF is not really an error). Thus, need to use feof() and ferror()
@@ -59,13 +66,11 @@ void fifo(process *process_head, process *process_tail, int num_pages)
     // check if fp reaches the end of the tracefile
     if (feof(fp))
     {
-
-      // if io_list is empty, and we've reached the end of file, and
+      // if io_list is empty, and we've reached the end of file,
       // then all processes have terminated
       if (io_head == NULL)
       {
-        // exit(0);
-        break;
+        exit(0);
       }
 
       // if we've reached EOF & io_list is not empty,
@@ -74,57 +79,76 @@ void fifo(process *process_head, process *process_tail, int num_pages)
       {
         wait_for_io_completion(&io_head, &io_tail,
                                &runnable_head, &runnable_tail,
-                               &global_timer);
-
-        // specific to FIFO, get the page to replace
-        // i.e. the page that ram_head points to
-
-        page *page_to_replace = ram_head; // get the page to be replaced
-
-        // before actually replacing the page:
-        // according to the page-to-be-replaced, update page table
-        unsigned long invalid_pid = ram_head->pid;
-        unsigned long invalid_vpn = ram_head->vpn;
-        // update page table
-        // find the key (invalid_pid, invalid_vpn), mark as NULL;
-
-        // update page info
-        ram_head->pid = runnable_tail->pid;
-        ram_head->vpn = runnable_tail->blocked_vpn;
-
-        // add to last of ram list
-
-        // update page table and inverted page table
-
-        page_to_replace->ppn;
+                               &free_head, &free_tail,
+                               &ram_head, &ram_tail,
+                               &global_timer, &pt, &ipt);
       }
+    }
+
+|1 123
+2 123
+1 123
+|3 123
+4 123
+ftell()
+1 123\n2 123\n3 123\n4123\n
+
+
+对于process 1来说，
+在process1 的 start index之前，所有的行，都没有出现过1
+在process1 的 end index之后，再也不会出现跟1有关的东西了
+  所以，1的end index就是等于 2的start index
+
+fgets之后，如果当前行可以执行，并且fp == end index。说明刚刚执行的process结束了，要free掉它
+即：从runnable list里删除，从process table里删除，然后：traverse ram list，将所有当前process
+对应的page 移动到 free list中 （因为我们traverse page，所以可以得到pid,vpn,ppn。所以
+我们可以同时将"pid vpn" 和ppn变成key，删除对应的pt entry，ipt entry）
+
+fgets之后，要根据读的pid，从process table中，找到对应的process，看process->isBlocked
+是否是true：
+  如果是，那么
+    如果当前fp < process->cur_index，就说明刚刚读的这一行，已经被
+执行过了。
+    如果当前fp > process->cur_index,就说明当前得这一行应该被skip
+
+  如果不是（process->isBlocked 是false）：
+    那么根据刚刚读的pid vpn => "pid vpn" 去page table里面查找：
+      如果有找到，就reference （+1 ns）（io_head timer -1, 检查是否为0 if 0：go to "x"）
+        在reference之后，检查是否这个process已经达到了end index
+      如果未找到，就page fault，(+1 ns)（io_head timer -1, 检查是否为0 if 0：go to "x"）
+      回溯file pointer，然后更新process的cur_index (即回溯后的fp), blocked vpn, 
+      isBlocked = true, 将process从runnable list移除，加入io queue
+
+"x": wait_for_io_completion()
+
+
+    // check if there are runnable processes
+    if (runnable_head == NULL && io_head != NULL)
+    {
+      // if no runnable process, then no need to read the rest of tracefile
+      // all processes are blocked in I/O list => io_head is not NULL
+      // all we need to do is to wait for I/O completion, and start from there
+      wait_for_io_completion(&io_head, &io_tail,
+                             &runnable_head, &runnable_tail,
+                             &free_head, &free_tail,
+                             &ram_head, &ram_tail,
+                             &global_timer, &pt, &ipt);
+      continue;
     }
 
     if (fgets(buf, MAX_LEN, fp) != NULL)
     {
-      char **pid_vpn_pair = (char **)malloc(sizeof(char *) * 2);
-      handle_malloc_error(pid_vpn_pair);
 
-      // now the line is stored in buf, parse it
-      pid_vpn_pair = parsing(buf);
-
-      tmp_pid = pid_vpn_pair[0];
-      tmp_vpn = pid_vpn_pair[1];
-
-      // check if there are runnable processes
-      if (runnable_head == NULL)
+      if (runnable_head != NULL)
       {
-        // if no runnable process, then no need to read the rest of tracefile
-        // all we need to do is to wait for I/O completion
-        if (io_head != NULL)
-        {
-          wait_for_io_completion(&io_head, &io_tail,
-                                 &runnable_head, &runnable_tail,
-                                 &global_timer);
-          //////////////////////////////////////////////////
-          /////////////////////////////////////
-          need to do more
-        }
+        char **pid_vpn_pair = (char **)malloc(sizeof(char *) * 2);
+        handle_malloc_error(pid_vpn_pair);
+
+        // now the line is stored in buf, parse it
+        pid_vpn_pair = parsing(buf);
+
+        cur_pid = pid_vpn_pair[0];
+        cur_vpn = pid_vpn_pair[1];
       }
     }
     else
@@ -136,8 +160,6 @@ void fifo(process *process_head, process *process_tail, int num_pages)
   } while ();
 }
 
-
-
 /*
   malloc num_pages page frames
   input: number of page frames
@@ -148,7 +170,7 @@ page **malloc_page_frames(unsigned long num_pages)
 {
   page **ret = (page *)malloc(sizeof(page *) * 2);
 
-  // malloc the first page frame
+  // malloc the first page frame (unsigned long ppn = 1)
   page *page1 = initialize_page_frame(1);
 
   // create a pointer to the current page frame
@@ -167,7 +189,7 @@ page **malloc_page_frames(unsigned long num_pages)
     tmp = new_page;
   }
 
-  ret[0] = page1; // free_list
+  ret[0] = page1; // free_head
   ret[1] = tmp;   // free_tail
 
   return ret;
@@ -202,6 +224,10 @@ process *pop_from_io(process **head, process **tail)
   }
 }
 
+/*
+  this function adds a process popped from io_queue to runnable queue
+  input: a pointer to a process struct, runnable_head, runnable_tail
+*/
 void add_to_runnable(process *ptr, process **head, process **tail)
 {
   if (*head == NULL && *tail == NULL)
@@ -215,28 +241,171 @@ void add_to_runnable(process *ptr, process **head, process **tail)
     (*tail)->runnable_next = ptr;
     ptr->runnable_prev = *tail;
     *tail = ptr;
+    (*tail)->runnable_next = NULL;
   }
 }
 
-/*  
-  this function pops from io_list, update timer, add to ram list
+/*
+  get the concatenated key string from a page struct ("pid vpn")
+  input: pointer to a page struct
+  return: key string
+*/
+char *get_key_pt(page *ptr)
+{
+  char *key_str = (char *)malloc(sizeof(char) * (strlen(ptr->pid) +
+                                                 strlen(ptr->vpn) + 2));
+  handle_malloc_error(key_str);
+
+  strcat(key_str, ptr->pid);
+  strcat(key_str, " ");
+  strcat(key_str, ptr->vpn);
+
+  return key_str;
+}
+
+/*
+  in FIFO, move the head of ram_queue to the tail
+  input: two pointers to ram_head and ram_tail
+*/
+void move_to_ram_tail(page **ram_head, page **ram_tail)
+{
+  if (*ram_head == *ram_tail && *ram_head != NULL)
+  {
+    // do nothing
+  }
+  if (*ram_head != *ram_tail)
+  {
+
+    page *tmp = *ram_head;
+    *ram_head = tmp->ram_next;
+    (*ram_head)->ram_prev = NULL;
+    (*ram_tail)->ram_next = tmp;
+    tmp->ram_prev = *ram_tail;
+    *ram_tail = tmp;
+    tmp->ram_next = NULL;
+  }
+}
+
+/*
+  this function pops from free_list
+  input: head and tail pointers to free list
+  return: pointer to the popped page struct
+*/
+page *pop_from_free(page **free_head, page **free_tail)
+{
+  if (*free_head == NULL && *free_tail == NULL)
+  {
+    return NULL;
+  }
+  else if (*free_head == *free_tail && *free_head != NULL)
+  {
+    // if length of free list is 1
+    page *tmp = *free_head;
+    *free_head = NULL;
+    *free_tail = NULL;
+    return tmp;
+  }
+  else
+  {
+    // if length of free list is greater than 1
+    page *tmp = *free_head;
+    *free_head = (*free_head)->free_next;
+    (*free_head)->free_prev = NULL;
+    return tmp;
+  }
+}
+
+/*
+  this function adds a page popped from free list to ram list
+  input: a pointer to a page struct, ram_head, ram_tail
+*/
+void add_to_ram(page *ptr, page **head, page **tail)
+{
+  if (*head == NULL && *tail == NULL)
+  {
+    // ram list is empty
+    *head = ptr;
+    *tail = ptr;
+  }
+  else
+  {
+    (*tail)->ram_next = ptr;
+    ptr->ram_prev = *tail;
+    *tail = ptr;
+  }
+}
+
+/*
+  this function pops from io_list, update timer, add to runnable list,
+  update page table, inverted page table, free list (if needed), ram list,
+  and set file pointer to the blocked index when page fault occurred
+
+  after executing this function, the desired page has been fetched from disk
+  to RAM already, with pt, ipt updated.
   
   in order to enter this function, io_list must be non-empty
   input: all the pointers that keep track of info of simulator
 */
 void wait_for_io_completion(process **io_head, process **io_tail,
                             process **runnable_head, process **runnable_tail,
-                            *global_timer)
+                            page **free_head, page **free_tail,
+                            page **ram_head, page **ram_tail,
+                            int *global_timer, void **pt, void **ipt)
 {
-  process *tmp = pop_from_io(&io_head, &io_tail);
-  tmp->is_blocked = false;
-  add_to_runnable(tmp, &runnable_head, &runnable_tail);
+  process *tmp = pop_from_io(io_head, io_tail);
+  add_to_runnable(tmp, runnable_head, runnable_tail);
   *global_timer += tmp->timer;
+
+  // specific to FIFO, get the page to replace-------------
+  if (*free_head == NULL)
+  {
+    // need to replace a page
+    // page_to_replace is ram_head;
+
+    // update pt (delete former entry)
+    char *key_pt = get_key_pt(ram_head); // key of pt to be deleted
+    delete_pt(pt, key_pt);
+
+    // modify the page
+    (*ram_head)->pid = (*runnable_tail)->pid;
+    (*ram_head)->vpn = (*runnable_tail)->blocked_vpn;
+    // move the page from ram_head to ram_tail
+    move_to_ram_tail(ram_head, ram_tail);
+
+    // update ipt (no need in this case)
+
+    // add the "new" page to the page table
+    node_pt *entry_pt = create_entry_pt(*ram_tail); // create entry
+    add_to_pt(pt, entry_pt);
+  }
+  else
+  {
+    // no need to replace a page
+    // take free_head as the page to allocate
+    page *page_to_replace = pop_from_free(free_head, free_tail);
+    page_to_replace->pid = (*runnable_tail)->pid;
+    page_to_replace->vpn = (*runnable_tail)->blocked_vpn;
+    add_to_ram(page_to_replace, ram_head, ram_tail);
+
+    // update page table
+    // since no page replacement, simply add the entry to pt
+    node_pt *entry_pt = create_entry_pt(*ram_tail); // create entry
+    add_to_pt(pt, entry_pt);
+
+    // add to ipt
+    node_ipt *entry_ipt = create_entry_ipt((*ram_tail)->ppn, *ram_tail);
+    add_to_ipt(ipt, entry_ipt);
+  }
+
+  // now, I/O completes, go to execute the previously blocked process
+  (*runnable_tail)->is_blocked = false;
+
+  (*runnable_tail)->cur_index 传入fseek() ，改变fp
 }
 
-/*
-  this function updates:
-    page struct, page table, inverted page table, process table
-  
-*/
-void
+
+
+
+
+
+

@@ -31,20 +31,27 @@ node_proc *create_entry_proc(unsigned long pid, process *proc)
 
 /*
   this function creates an entry of the page table
-  input: string "pid vpn", pointer to the page struct
+  input: pointer to the page struct
   return: a pointer to the node_pt struct
 */
-node_pt *create_entry_pt(char *key, page *value)
+node_pt *create_entry_pt(page *ptr)
 {
   node_pt *new_entry = malloc(sizeof(node_pt));
   handle_malloc_error(new_entry);
 
-  new_entry->key = key;
-  new_entry->value = value;
+  char *key_str = (char *)malloc(sizeof(char) * (strlen(ptr->pid) +
+                                                 strlen(ptr->vpn) + 2));
+  handle_malloc_error(key_str);
+
+  strcat(key_str, ptr->pid);
+  strcat(key_str, " ");
+  strcat(key_str, ptr->vpn);
+
+  new_entry->key = key_str;
+  new_entry->value = ptr;
 
   return new_entry;
 }
-
 
 /*
   this function creates an entry of the inverted page table
@@ -77,15 +84,15 @@ node_pt *create_entry_ipt(unsigned long key, page *value)
 int compare_proc(const void *a, const void *b)
 {
   // cast the params into process*
-  process *tmp_a = (process *)a;
-  process *tmp_b = (process *)b;
+  node_proc *tmp_a = (node_proc *)a;
+  node_proc *tmp_b = (node_proc *)b;
 
   // compare the values
-  if (tmp_a->pid > tmp_b->pid)
+  if (tmp_a->key > tmp_b->key)
   {
     return 1;
   }
-  else if (tmp_a->pid == tmp_b->pid)
+  else if (tmp_a->key == tmp_b->key)
   {
     return 0;
   }
@@ -105,29 +112,16 @@ int compare_proc(const void *a, const void *b)
 */
 int compare_pt(const void *a, const void *b)
 {
-  // cast the params into process*
-  page *tmp_a = (page *)a;
-  page *tmp_b = (page *)b;
-
-  // malloc the two keys to be compared
-  char *str_a = (char *)malloc(sizeof(char) * (strlen(tmp_a->pid) +
-                                               strlen(tmp_a->vpn) + 2));
-  char *str_b = (char *)malloc(sizeof(char) * (strlen(tmp_b->pid) +
-                                               strlen(tmp_b->vpn) + 2));
-  strcat(str_a, tmp_a->pid);
-  strcat(str_a, " ");
-  strcat(str_a, tmp_a->vpn);
-
-  strcat(str_b, tmp_b->pid);
-  strcat(str_b, " ");
-  strcat(str_b, tmp_b->vpn);
+  // cast the params into node_pt*
+  node_pt *tmp_a = (node_pt *)a;
+  node_pt *tmp_b = (node_pt *)b;
 
   // compare the values
-  if (str_a > str_b)
+  if (tmp_a->key > tmp_b->key)
   {
     return 1;
   }
-  else if (str_a == str_b)
+  else if (tmp_a->key = tmp_b->key)
   {
     return 0;
   }
@@ -148,14 +142,14 @@ int compare_pt(const void *a, const void *b)
 int compare_ipt(const void *a, const void *b)
 {
   // cast the params into process*
-  page *tmp_a = (page *)a;
-  page *tmp_b = (page *)b;
+  node_ipt *tmp_a = (node_ipt *)a;
+  node_ipt *tmp_b = (node_ipt *)b;
 
-  if (tmp_a->ppn > tmp_b->ppn)
+  if (tmp_a->key > tmp_b->key)
   {
     return 1;
   }
-  else if (tmp_a->ppn == tmp_b->ppn)
+  else if (tmp_a->key == tmp_b->key)
   {
     return 0;
   }
@@ -255,26 +249,27 @@ void add_to_ipt(void **root, node_ipt *ptr)
   }
 }
 
-
 /*
   this function finds the node in the process table if there's one
   input: root of the process table, pid(unsigned long)
 */
-node_proc* find_proc(void** root, unsigned long key)
+node_proc *find_proc(void **root, unsigned long key)
 {
-  void* result;
-  node_proc* node;
+  void *result;
+  node_proc *node;
   node_proc search_node;
 
   search_node.key = key;
 
-  if((result = tfind(&search_node, root, compare_proc)) == NULL){
+  if ((result = tfind(&search_node, root, compare_proc)) == NULL)
+  {
     // no node found
-    printf("no node found\n");
+    node = NULL;
   }
-  else{
+  else
+  {
     // node found
-    node = *(node_proc**)result;
+    node = *(node_proc **)result;
   }
 
   return node;
@@ -284,21 +279,23 @@ node_proc* find_proc(void** root, unsigned long key)
   this function finds the node in the page table if there's one
   input: root of the page table, string "pid vpn"
 */
-node_proc* find_pt(void** root, char* key)
+node_proc *find_pt(void **root, char *key)
 {
-  void* result;
-  node_pt* node;
+  void *result;
+  node_pt *node;
   node_pt search_node;
 
   search_node.key = key;
 
-  if((result = tfind(&search_node, root, compare_pt)) == NULL){
+  if ((result = tfind(&search_node, root, compare_pt)) == NULL)
+  {
     // no node found
-    printf("no node found\n");
+    node = NULL;
   }
-  else{
+  else
+  {
     // node found
-    node = *(node_pt**)result;
+    node = *(node_pt **)result;
   }
 
   return node;
@@ -308,21 +305,23 @@ node_proc* find_pt(void** root, char* key)
   this function finds the node in the inverted page table if there's one
   input: root of the inverted page table, unsigned long ppn
 */
-node_proc* find_ipt(void** root, unsigned long key)
+node_proc *find_ipt(void **root, unsigned long key)
 {
-  void* result;
-  node_ipt* node;
+  void *result;
+  node_ipt *node;
   node_ipt search_node;
 
   search_node.key = key;
 
-  if((result = tfind(&search_node, root, compare_ipt)) == NULL){
+  if ((result = tfind(&search_node, root, compare_ipt)) == NULL)
+  {
     // no node found
-    printf("no node found\n");
+    node = NULL;
   }
-  else{
+  else
+  {
     // node found
-    node = *(node_ipt**)result;
+    node = *(node_ipt **)result;
   }
 
   return node;
@@ -333,14 +332,16 @@ node_proc* find_ipt(void** root, unsigned long key)
   if not found, then do nothing
   input: root of process table, unsigned long pid
 */
-void delete_proc(void** root, unsigned long key)
+void delete_proc(void **root, unsigned long key)
 {
-  node_proc* node;
+  node_proc *node;
 
-  if((node = find_proc(root, key)) == NULL){
+  if ((node = find_proc(root, key)) == NULL)
+  {
     // nothing to delete
   }
-  else{
+  else
+  {
     tdelete(node, root, compare_proc);
     free(node);
   }
@@ -351,14 +352,16 @@ void delete_proc(void** root, unsigned long key)
   if not found, then do nothing
   input: root of page table, string "pid vpn"
 */
-void delete_pt(void** root, char* key)
+void delete_pt(void **root, char *key)
 {
-  node_pt* node;
+  node_pt *node;
 
-  if((node = find_pt(root, key)) == NULL){
+  if ((node = find_pt(root, key)) == NULL)
+  {
     // nothing to delete
   }
-  else{
+  else
+  {
     tdelete(node, root, compare_pt);
     free(node);
   }
@@ -369,14 +372,16 @@ void delete_pt(void** root, char* key)
   if not found, then do nothing
   input: root of inverted page table, unsigned long ppn
 */
-void delete_ipt(void** root, unsigned long key)
+void delete_ipt(void **root, unsigned long key)
 {
-  node_ipt* node;
+  node_ipt *node;
 
-  if((node = find_ipt(root, key)) == NULL){
+  if ((node = find_ipt(root, key)) == NULL)
+  {
     // nothing to delete
   }
-  else{
+  else
+  {
     tdelete(node, root, compare_ipt);
     free(node);
   }
@@ -385,26 +390,26 @@ void delete_ipt(void** root, unsigned long key)
 /*
   this function frees node when destroying the process table
 */
-void free_proc(void* ptr)
+void free_proc(void *ptr)
 {
-  node_proc* node = ptr;
+  node_proc *node = ptr;
   free(node);
 }
 
 /*
   this function frees node when destroying the page table
 */
-void free_pt(void* ptr)
+void free_pt(void *ptr)
 {
-  node_pt* node = ptr;
+  node_pt *node = ptr;
   free(node);
 }
 
 /*
   this function frees node when destroying the inverted page table
 */
-void free_ipt(void* ptr)
+void free_ipt(void *ptr)
 {
-  node_ipt* node = ptr;
+  node_ipt *node = ptr;
   free(node);
 }

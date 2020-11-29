@@ -8,10 +8,10 @@
 #include <string.h>
 
 typedef struct process{
-  unsigned long pid;
+  char* pid;
   // stores the pid of the process
 
-  unsigned long blocked_vpn;
+  char* blocked_vpn;
   // stores the vpn corresponds to this pid that gets blocked
   
   unsigned long start_index;
