@@ -54,8 +54,6 @@ void fifo(process *process_head, process *process_tail, int num_pages,
   char *cur_pid = "";
   char *cur_vpn = "";
 
-  page *page_to_replace = NULL;
-
   /* 
      Important notes: fgets may return NULL for errors as well as EOF
      (EOF is not really an error). Thus, need to use feof() and ferror()
@@ -85,10 +83,10 @@ void fifo(process *process_head, process *process_tail, int num_pages,
       }
     }
 
-|1 123
+1 123
 2 123
 1 123
-|3 123
+3 123
 4 123
 ftell()
 1 123\n2 123\n3 123\n4123\n
@@ -149,6 +147,9 @@ fgets之后，要根据读的pid，从process table中，找到对应的process�
 
         cur_pid = pid_vpn_pair[0];
         cur_vpn = pid_vpn_pair[1];
+
+        // look into process table to see if it's blocked
+        
       }
     }
     else
@@ -252,13 +253,26 @@ void add_to_runnable(process *ptr, process **head, process **tail)
 */
 char *get_key_pt(page *ptr)
 {
-  char *key_str = (char *)malloc(sizeof(char) * (strlen(ptr->pid) +
+  char *key_str = (char *)malloc(sizeofchar) * (strlen(ptr->pid) +
                                                  strlen(ptr->vpn) + 2));
   handle_malloc_error(key_str);
 
   strcat(key_str, ptr->pid);
   strcat(key_str, " ");
   strcat(key_str, ptr->vpn);
+
+  return key_str;
+}
+
+char* get_key_pt(char* s1, char* s2)
+{
+  char *key_str = (char *)malloc(sizeof(char) * (strlen(s1) +
+                                                 strlen(s2) + 2));
+  handle_malloc_error(key_str);
+  
+  strcat(key_str, s1);
+  strcat(key_str, " ");
+  strcat(key_str, s2);
 
   return key_str;
 }

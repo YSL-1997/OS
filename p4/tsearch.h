@@ -11,7 +11,7 @@
 
 typedef struct proc_node
 {
-  unsigned long key;
+  char* key;
   process* value;
 } node_proc;
 
@@ -29,7 +29,7 @@ typedef struct node_ipt
 } node_ipt;
 
 // functions to create an entry
-node_proc *create_entry_proc(unsigned long pid, process *proc);
+node_proc *create_entry_proc(char* pid, process *proc);
 node_pt *create_entry_pt(page *ptr);
 node_pt *create_entry_ipt(unsigned long key, page *value);
 
@@ -44,12 +44,12 @@ void add_to_pt(void **root, node_pt *ptr);
 void add_to_ipt(void **root, node_ipt *ptr);
 
 // functions to find a node given the key
-node_proc *find_proc(void **root, unsigned long key);
+node_proc *find_proc(void **root, char* key);
 node_proc *find_pt(void **root, char *key);
 node_proc *find_ipt(void **root, unsigned long key);
 
 // functions to delete a node given the key
-void delete_proc(void **root, unsigned long key);
+void delete_proc(void **root, char* key);
 void delete_pt(void **root, char *key);
 void delete_ipt(void **root, unsigned long key);
 
