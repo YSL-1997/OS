@@ -9,7 +9,7 @@
 #include "page.h"
 #include "process.h"
 
-typedef struct proc_node
+typedef struct node_proc
 {
   char* key;
   process* value;

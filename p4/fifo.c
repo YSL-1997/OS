@@ -13,10 +13,11 @@ static int MAX_LEN = 4096;
   read the tracefile and execute
   input: head of process list, 
          tail of process list,
-	 num of pages that can be allocated in RAM
+	       num of pages that can be allocated in RAM
+         process table
 */
-void fifo(process *process_head, process *process_tail, int num_pages,
-          void *proc_table)
+void fifo(process **process_head, process **process_tail, int num_pages,
+          void **proc_table)
 {
   // page table and inverted page table
   void *pt;
@@ -27,8 +28,8 @@ void fifo(process *process_head, process *process_tail, int num_pages,
   process *io_tail = NULL;
 
   // head and tail pointers to the head of runnable processes
-  process *runnable_head = process_head;
-  process *runnable_tail = process_tail;
+  process *runnable_head = *process_head;
+  process *runnable_tail = *process_tail;
 
   // pointer to the head of free page frames
   page **free_arr = malloc_page_frames(num_pages);
@@ -75,7 +76,7 @@ void fifo(process *process_head, process *process_tail, int num_pages,
       // then wait for its completion
       if (io_head != NULL)
       {
-        wait_for_io_completion(&io_head, &io_tail,
+        wait_for_io_completion(&fp, &io_head, &io_tail,
                                &runnable_head, &runnable_tail,
                                &free_head, &free_tail,
                                &ram_head, &ram_tail,
@@ -83,73 +84,87 @@ void fifo(process *process_head, process *process_tail, int num_pages,
       }
     }
 
-1 123
-2 123
-1 123
-3 123
-4 123
-ftell()
-1 123\n2 123\n3 123\n4123\n
-
-
-对于process 1来说，
-在process1 的 start index之前，所有的行，都没有出现过1
-在process1 的 end index之后，再也不会出现跟1有关的东西了
-  所以，1的end index就是等于 2的start index
-
-fgets之后，如果当前行可以执行，并且fp == end index。说明刚刚执行的process结束了，要free掉它
-即：从runnable list里删除，从process table里删除，然后：traverse ram list，将所有当前process
-对应的page 移动到 free list中 （因为我们traverse page，所以可以得到pid,vpn,ppn。所以
-我们可以同时将"pid vpn" 和ppn变成key，删除对应的pt entry，ipt entry）
-
-fgets之后，要根据读的pid，从process table中，找到对应的process，看process->isBlocked
-是否是true：
-  如果是，那么
-    如果当前fp < process->cur_index，就说明刚刚读的这一行，已经被
-执行过了。
-    如果当前fp > process->cur_index,就说明当前得这一行应该被skip
-
-  如果不是（process->isBlocked 是false）：
-    那么根据刚刚读的pid vpn => "pid vpn" 去page table里面查找：
-      如果有找到，就reference （+1 ns）（io_head timer -1, 检查是否为0 if 0：go to "x"）
-        在reference之后，检查是否这个process已经达到了end index
-      如果未找到，就page fault，(+1 ns)（io_head timer -1, 检查是否为0 if 0：go to "x"）
-      回溯file pointer，然后更新process的cur_index (即回溯后的fp), blocked vpn, 
-      isBlocked = true, 将process从runnable list移除，加入io queue
-
-"x": wait_for_io_completion()
-
-
     // check if there are runnable processes
-    if (runnable_head == NULL && io_head != NULL)
+    if (runnable_head == NULL)
     {
-      // if no runnable process, then no need to read the rest of tracefile
-      // all processes are blocked in I/O list => io_head is not NULL
-      // all we need to do is to wait for I/O completion, and start from there
-      wait_for_io_completion(&io_head, &io_tail,
-                             &runnable_head, &runnable_tail,
-                             &free_head, &free_tail,
-                             &ram_head, &ram_tail,
-                             &global_timer, &pt, &ipt);
-      continue;
+      if (io_head != NULL)
+      {
+        // if no runnable process, then no need to read the rest of tracefile
+        // all processes (if not all have terminated) are blocked in I/O list
+        // all we need to do is to wait for I/O completion and start from there
+        wait_for_io_completion(&fp, &io_head, &io_tail,
+                               &runnable_head, &runnable_tail,
+                               &free_head, &free_tail,
+                               &ram_head, &ram_tail,
+                               &global_timer, &pt, &ipt);
+
+        continue;
+      }
+      else
+      {
+        // io_head == NULL
+        // no runnable processes, no blocked processes
+        exit(0);
+      }
     }
 
+    // now, runnable list is not null (there are runnable processes)
+    // read one line of the trace file at fp
     if (fgets(buf, MAX_LEN, fp) != NULL)
     {
+      char **pid_vpn_pair = (char **)malloc(sizeof(char *) * 2);
+      handle_malloc_error(pid_vpn_pair);
 
-      if (runnable_head != NULL)
+      // now the line is stored in buf, parse it
+      pid_vpn_pair = parsing(buf);
+
+      cur_pid = pid_vpn_pair[0]; // current pid
+      cur_vpn = pid_vpn_pair[1]; // current vpn
+
+      // look into process table to see if it is in process table
+      node_proc *result_proc = find_proc(proc_table, cur_pid);
+
+      if (result_proc == NULL)
       {
-        char **pid_vpn_pair = (char **)malloc(sizeof(char *) * 2);
-        handle_malloc_error(pid_vpn_pair);
+        // not found in process table => process has terminated, skip this line
+        continue;
+      }
+      else
+      {
+        // found in the process table => process has not terminated
+        if (result_proc->value->is_blocked)
+        {
+          // if this process is blocked, then it must be in io_queue, skip
+          continue;
+        }
+        else
+        {
+          // this process is not blocked, go to pt to see if there's page fault
+          char *key_pt = get_key_pt(cur_pid, cur_vpn);
+          node_pt *result_pt = find_pt(&pt, key_pt);
 
-        // now the line is stored in buf, parse it
-        pid_vpn_pair = parsing(buf);
+          if (result_pt == NULL)
+          {
+            // not found, i.e. page fault
+            // (+1 ns)（io_head timer -1, 检查是否为0 if 0：go to "x"）
+            // 回溯file pointer，然后更新process的cur_index (即回溯后的fp), blocked vpn,
+            // isBlocked = true, 将process从runnable list移除，加入io queue
+            // "x": wait_for_io_completion()
+          }
+          else
+          {
+            // found, no page fault, just reference the page (+1 ns)
+            // 如果有找到，就reference （+1 ns）（io_head timer -1, 检查是否为0 if 0：go to "x"）
+            // 在reference之后，检查是否这个process已经达到了end index
+            //  if 到达end index，就remove 这个process （runnable list中），以及对应的page from pt(a lot) ipt(a lot)
+            // "x": wait_for_io_completion()
+          }
 
-        cur_pid = pid_vpn_pair[0];
-        cur_vpn = pid_vpn_pair[1];
-
-        // look into process table to see if it's blocked
-        
+          // fgets之后，如果当前行可以执行，memory reference 之后，fp == end index。说明刚刚执行的process结束了，要free掉它
+          //  即：从runnable list里删除，从process table里删除，然后：traverse ram list，将所有当前process
+          //  对应的page 移动到 free list中 （因为我们traverse page，所以可以得到pid,vpn,ppn。所以
+          //  我们可以同时将"pid vpn" 和ppn变成key，删除对应的pt entry，ipt entry）
+        }
       }
     }
     else
@@ -253,7 +268,7 @@ void add_to_runnable(process *ptr, process **head, process **tail)
 */
 char *get_key_pt(page *ptr)
 {
-  char *key_str = (char *)malloc(sizeofchar) * (strlen(ptr->pid) +
+  char *key_str = (char *)malloc(sizeof(char) * (strlen(ptr->pid) +
                                                  strlen(ptr->vpn) + 2));
   handle_malloc_error(key_str);
 
@@ -264,12 +279,12 @@ char *get_key_pt(page *ptr)
   return key_str;
 }
 
-char* get_key_pt(char* s1, char* s2)
+char *get_key_pt(char *s1, char *s2)
 {
   char *key_str = (char *)malloc(sizeof(char) * (strlen(s1) +
                                                  strlen(s2) + 2));
   handle_malloc_error(key_str);
-  
+
   strcat(key_str, s1);
   strcat(key_str, " ");
   strcat(key_str, s2);
@@ -360,7 +375,8 @@ void add_to_ram(page *ptr, page **head, page **tail)
   in order to enter this function, io_list must be non-empty
   input: all the pointers that keep track of info of simulator
 */
-void wait_for_io_completion(process **io_head, process **io_tail,
+void wait_for_io_completion(FILE **fp,
+                            process **io_head, process **io_tail,
                             process **runnable_head, process **runnable_tail,
                             page **free_head, page **free_tail,
                             page **ram_head, page **ram_tail,
@@ -414,12 +430,12 @@ void wait_for_io_completion(process **io_head, process **io_tail,
   // now, I/O completes, go to execute the previously blocked process
   (*runnable_tail)->is_blocked = false;
 
-  (*runnable_tail)->cur_index 传入fseek() ，改变fp
+  // get the current position of fp
+  long cur_pos = ftell(*fp);
+
+  // get the offset that passed into fseek()
+  long offset = (*runnable_tail)->cur_index - cur_pos;
+  
+  // modify fp
+  fseek(*fp, offset, SEEK_CUR);
 }
-
-
-
-
-
-
-

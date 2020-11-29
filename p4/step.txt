@@ -1,0 +1,37 @@
+1 123
+2 123
+1 123
+3 123
+4 123
+ftell()
+1 123\n2 123\n3 123\n4123\n
+
+
+对于process 1来说，
+在process1 的 start index之前，所有的行，都没有出现过1
+在process1 的 end index之后，再也不会出现跟1有关的东西了
+  所以，1的end index就是等于 2的start index
+
+
+
+fgets之后，要根据读的pid，从process table中，找到对应的process，（找到/未找到）
+看process->isBlocked是否是true：
+  如果是，那么
+    如果当前fp < process->cur_index，就说明刚刚读的这一行，已经被
+执行过了，直接skip
+    如果当前fp > process->cur_index,就说明当前得这一行应该被skip
+
+  如果不是（process->isBlocked 是false）：
+    那么根据刚刚读的pid vpn => "pid vpn" 去page table里面查找：
+      如果有找到，就reference （+1 ns）（io_head timer -1, 检查是否为0 if 0：go to "x"）
+        在reference之后，检查是否这个process已经达到了end index
+      如果未找到，就page fault，(+1 ns)（io_head timer -1, 检查是否为0 if 0：go to "x"）
+      回溯file pointer，然后更新process的cur_index (即回溯后的fp), blocked vpn, 
+      isBlocked = true, 将process从runnable list移除，加入io queue
+
+"x": wait_for_io_completion()
+
+fgets之后，如果当前行可以执行，memory reference 之后，fp == end index。说明刚刚执行的process结束了，要free掉它
+即：从runnable list里删除，从process table里删除，然后：traverse ram list，将所有当前process
+对应的page 移动到 free list中 （因为我们traverse page，所以可以得到pid,vpn,ppn。所以
+我们可以同时将"pid vpn" 和ppn变成key，删除对应的pt entry，ipt entry）
