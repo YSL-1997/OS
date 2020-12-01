@@ -285,7 +285,7 @@ node_pt *find_pt(void **root, char *key)
   node_pt *node;
   node_pt search_node;
 
-  search_node.key = key;
+  strncpy(search_node.key, key, strlen(key));
 
   if ((result = tfind(&search_node, root, compare_pt)) == NULL)
   {
