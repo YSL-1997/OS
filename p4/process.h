@@ -40,5 +40,6 @@ typedef struct process{
   
 }process;
 
+process* create_process(char* pid);
 
 #endif
