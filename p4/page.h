@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <search.h>
 #include <string.h>
+#include "errorHandling.h"
 
 typedef struct page{
   char* pid;

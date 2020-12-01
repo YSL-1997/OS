@@ -8,7 +8,7 @@
 #include <string.h>
 #include "page.h"
 #include "process.h"
-
+#include "errorHandling.h"
 typedef struct node_proc
 {
   char* key;
