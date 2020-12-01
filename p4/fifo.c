@@ -9,7 +9,7 @@
 
 /*
   read the tracefile and execute
-  input: head of process list, 
+  input: head of process list,
          tail of process list,
 	       num of pages that can be allocated in RAM
          process table
@@ -53,7 +53,7 @@ void fifo(process **process_head, process **process_tail,
   char *cur_pid = "";
   char *cur_vpn = "";
 
-  /* 
+  /*
      Important notes: fgets may return NULL for errors as well as EOF
      (EOF is not really an error). Thus, need to use feof() and ferror()
      to distinguish the cause of fgets failing.
@@ -233,7 +233,7 @@ void fifo(process **process_head, process **process_tail,
                   add_to_free(removed_page, &free_head, &free_tail);
 
                   // remove the entry in pt and ipt
-                  delete_pt(&pt, get_key_pt(tmp));
+                  delete_pt(&pt, get_key_pt(tmp->pid, tmp->vpn));
                   delete_ipt(&ipt, tmp->ppn);
                 }
                 tmp = tmp->ram_next;
@@ -372,20 +372,24 @@ void add_to_runnable(process *ptr, process **head, process **tail)
   input: pointer to a page struct
   return: key string
 */
-char *get_key_pt(page *ptr)
-{
-  char *key_str = (char *)malloc(sizeof(char) * (strlen(ptr->pid) +
-                                                 strlen(ptr->vpn) + 2));
-  handle_malloc_error(key_str);
+// char *get_key_pt(page *ptr)
+// {
+//   char *key_str = (char *)malloc(sizeof(char) * (strlen(ptr->pid) +
+//                                                  strlen(ptr->vpn) + 2));
+//   handle_malloc_error(key_str);
 
-  // strcat(key_str, ptr->pid);
-  // strcat(key_str, " ");
-  // strcat(key_str, ptr->vpn);
-  snprintf(key_str, strlen(ptr->pid) + strlen(ptr->vpn) + 2,
-           "%s %s", ptr->pid, ptr->vpn);
-  return key_str;
-}
-
+//   // strcat(key_str, ptr->pid);
+//   // strcat(key_str, " ");
+//   // strcat(key_str, ptr->vpn);
+//   snprintf(key_str, strlen(ptr->pid) + strlen(ptr->vpn) + 2,
+//            "%s %s", ptr->pid, ptr->vpn);
+//   return key_str;
+// }
+/*
+  get the concatenated key string from a pid and a vpn
+  input: pointer to a page struct
+  return: key string
+*/
 char *get_key_pt(char *s1, char *s2)
 {
   char *key_str = (char *)malloc(sizeof(char) * (strlen(s1) +
@@ -478,7 +482,7 @@ void add_to_ram(page *ptr, page **head, page **tail)
 
   after executing this function, the desired page has been fetched from disk
   to RAM already, with pt, ipt updated.
-  
+
   in order to enter this function, io_list must be non-empty
   input: all the pointers that keep track of info of simulator
 */
@@ -500,7 +504,9 @@ void wait_for_io_completion(FILE **fp,
     // page_to_replace is ram_head;
 
     // update pt (delete former entry)
-    char *key_pt = get_key_pt(ram_head); // key of pt to be deleted
+    // get the key of pt to be deleted
+    char *key_pt = get_key_pt((*ram_head)->pid, (*ram_head)->vpn);
+    
     delete_pt(pt, key_pt);
 
     // modify the page
