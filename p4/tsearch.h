@@ -31,7 +31,7 @@ typedef struct node_ipt
 // functions to create an entry
 node_proc *create_entry_proc(char* pid, process *proc);
 node_pt *create_entry_pt(page *ptr);
-node_pt *create_entry_ipt(unsigned long key, page *value);
+node_ipt *create_entry_ipt(unsigned long key, page *value);
 
 // functions used to compare
 int compare_proc(const void *a, const void *b);
