@@ -5,4 +5,4 @@
   Project #4 - page replacement simulator
 */
 
-#include "pageAlgorithm.h"
+#include "pageAlgorithms.h"

@@ -12,38 +12,30 @@
   arguments to get frame size of RAM
 */
 
-#include <stdio.h>
-#include "process.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <math.h>
-#include "tsearch.h"
+#include "input.h"
+
 
 static int MAX_LEN = 4096;
 
-// create a process pointer and initialize with pid 
-process* create_process(char* pid)
-{
-  process* ptr = (process*)malloc(sizeof(process));
-  handle_malloc_error(ptr);
+// // create a process pointer and initialize with pid 
+// process* create_process(char* pid)
+// {
+//   process* ptr = (process*)malloc(sizeof(process));
+//   handle_malloc_error(ptr);
   
-  ptr->pid = pid;
-  ptr->start_index = 0;
-  ptr->end_index = 0;
-  ptr->cur_index = 0;
-  ptr->io_next = NULL;
-  ptr->runnable_next = NULL;
-  ptr->runnable_prev = NULL;
-  ptr->is_blocked = false;
-  ptr->timer = 0;
-  ptr->blocked_vpn = "";
+//   ptr->pid = pid;
+//   ptr->start_index = 0;
+//   ptr->end_index = 0;
+//   ptr->cur_index = 0;
+//   ptr->io_next = NULL;
+//   ptr->runnable_next = NULL;
+//   ptr->runnable_prev = NULL;
+//   ptr->is_blocked = false;
+//   ptr->timer = 0;
+//   ptr->blocked_vpn = "";
 
-  return ptr;
-}
+//   return ptr;
+// }
 
 /*
   this function reads a file according to path
@@ -334,18 +326,18 @@ unsigned long option_parser( int argc, char* argv[]){
 }
 
 
-int main(int argc, char* argv[]){
-  void* root;
+// int main(int argc, char* argv[]){
+//   void* root;
 
-  unsigned long frame_size = option_parser( argc, argv);
-  printf("frame_size %lu\n", frame_size);
+//   unsigned long frame_size = option_parser( argc, argv);
+//   printf("frame_size %lu\n", frame_size);
 
-  node_proc *proc_node;
-  process* runnable_head = malloc( sizeof(struct process));
-  process* runnable_tail = malloc( sizeof(struct process));
-  runnable_head = NULL;
-  runnable_tail = NULL;
-  root = get_processes_info(&runnable_head, &runnable_tail);
+//   node_proc *proc_node;
+//   process* runnable_head = malloc( sizeof(struct process));
+//   process* runnable_tail = malloc( sizeof(struct process));
+//   runnable_head = NULL;
+//   runnable_tail = NULL;
+//   root = get_processes_info(&runnable_head, &runnable_tail);
 
-  return 1;
-}
+//   return 1;
+// }

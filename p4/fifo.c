@@ -147,7 +147,7 @@ void fifo(process **process_head, process **process_tail, int num_pages,
           {
             /* not found, i.e. page fault
             // (+1 ns)（io_head timer -1, 检查是否为0 if 0：go to "x"）
-            // 回溯file pointer，然后更新process的cur_index (即回溯后的fp), blocked vpn,
+            // 回溯file pointer，然后更新process的blocked_index (即回溯后的fp), blocked vpn,
             // isBlocked = true, 将process从runnable list移除，加入io queue (2000000)
             // "x": wait_for_io_completion()
             */
@@ -202,8 +202,70 @@ void fifo(process **process_head, process **process_tail, int num_pages,
             // 在reference之后，检查是否这个process已经达到了end index
             //  if 到达end index，就remove 这个process （runnable list中），以及对应的page from pt(a lot) ipt(a lot)
             // "x": wait_for_io_completion()
-            global_timer++;
 
+            global_timer++; // reference the page
+
+            // 在reference之后，检查是否这个process已经达到了end index
+            // check if this process has terminated
+            // result_proc->value is pointer to this process
+            if (ftell(fp) == result_proc->value->end_index)
+            {
+              //  if 到达end index，就remove 这个process （runnable list中），
+              // if this process has terminated
+              // remove this process from runnable list
+              process *end_proc = remove_from_runnable(result_proc->value,
+                                                       &runnable_head,
+                                                       &runnable_tail);
+              // end_proc->pid, this entry needs to be deleted in proc_table
+              delete_proc(proc_table, end_proc->pid);
+
+              // 以及对应的page from pt(a lot) ipt(a lot)
+              // need to remove the corresponding entries in pt, ipt
+              // remove the page frames that corresponds to end_proc
+              page *tmp = ram_head;
+              while (tmp != NULL)
+              {
+
+                // if we find the page that corresponds to end_proc
+                if (!strncmp(tmp->pid, end_proc->pid, strlen(tmp->pid)))
+                {
+                  // need to remove tmp from ram_list, add to free_list
+                  // note that we do not modify anything stored in the page tmp
+                  page *removed_page = remove_from_ram(tmp, &ram_head, &ram_tail);
+                  add_to_free(removed_page, &free_head, &free_tail);
+
+                  // remove the entry in pt and ipt
+                  delete_pt(&pt, get_key_pt(tmp));
+                  delete_ipt(&ipt, tmp->ppn);
+                }
+                tmp = tmp->ram_next;
+              }
+
+              free(end_proc);
+            }
+
+            // （io_head timer -1, 检查是否为0 if 0：go to "x"）
+            // check if io list is empty
+            bool io_empty = true;
+            if (io_head != NULL && io_tail != NULL)
+            {
+              io_empty = false;
+            }
+
+            if (!io_empty)
+            {
+              io_head->timer--;
+
+              if (io_head->timer == 0)
+              {
+                wait_for_io_completion(&fp, &io_head, &io_tail,
+                                       &runnable_head, &runnable_tail,
+                                       &free_head, &free_tail,
+                                       &ram_head, &ram_tail,
+                                       &global_timer, &pt, &ipt);
+                continue;
+              }
+            }
           }
 
           // fgets之后，如果当前行可以执行，memory reference 之后，fp == end index。说明刚刚执行的process结束了，要free掉它
@@ -318,10 +380,11 @@ char *get_key_pt(page *ptr)
                                                  strlen(ptr->vpn) + 2));
   handle_malloc_error(key_str);
 
-  strcat(key_str, ptr->pid);
-  strcat(key_str, " ");
-  strcat(key_str, ptr->vpn);
-
+  // strcat(key_str, ptr->pid);
+  // strcat(key_str, " ");
+  // strcat(key_str, ptr->vpn);
+  snprintf(key_str, strlen(ptr->pid) + strlen(ptr->vpn) + 2,
+           "%s %s", ptr->pid, ptr->vpn);
   return key_str;
 }
 
@@ -331,10 +394,10 @@ char *get_key_pt(char *s1, char *s2)
                                                  strlen(s2) + 2));
   handle_malloc_error(key_str);
 
-  strcat(key_str, s1);
-  strcat(key_str, " ");
-  strcat(key_str, s2);
-
+  // strcat(key_str, s1);
+  // strcat(key_str, " ");
+  // strcat(key_str, s2);
+  snprintf(key_str, strlen(s1) + strlen(s2) + 2, "%s %s", s1, s2);
   return key_str;
 }
 
@@ -496,13 +559,13 @@ process *remove_from_runnable(process *ptr, process **runnable_head,
 {
   assert(*runnable_head != NULL);
   assert(*runnable_tail != NULL);
-  if (*runnable_head == *runnable_tail)
+  if (*runnable_head == ptr && *runnable_tail == ptr)
   {
     *runnable_head = NULL;
     *runnable_tail = NULL;
     return ptr;
   }
-  else if (*runnable_head == ptr)
+  else if (*runnable_head == ptr && *runnable_tail != ptr)
   {
     // ptr is the head of runnable list
     *runnable_head = ptr->runnable_next;
@@ -510,7 +573,7 @@ process *remove_from_runnable(process *ptr, process **runnable_head,
     ptr->runnable_next = NULL;
     return ptr;
   }
-  else if (*runnable_tail == ptr)
+  else if (*runnable_tail == ptr && *runnable_head != ptr)
   {
     // ptr is the tail of runnable list
     *runnable_tail = ptr->runnable_prev;
@@ -546,5 +609,69 @@ void add_to_io(process *ptr, process **io_head, process **io_tail)
     (*io_tail)->io_next = ptr;
     *io_tail = ptr;
     ptr->io_next = NULL;
+  }
+}
+
+page *remove_from_ram(page *ptr, page **ram_head, page **ram_tail)
+{
+
+  // if ram list is null, report an error
+  if (*ram_head == NULL && *ram_tail == NULL)
+  {
+    fprintf(stderr, "ram list is empty\n");
+    exit(1);
+  }
+
+  // if length of ram list is 1, i.e. only ptr is in ram list
+  else if (*ram_head == ptr && *ram_tail == ptr)
+  {
+    *ram_head = NULL;
+    *ram_tail = NULL;
+    return ptr;
+  }
+
+  else if (*ram_head == ptr && *ram_tail != ptr)
+  {
+    // ptr is the head of ram list
+    *ram_head = ptr->ram_next;
+    ptr->ram_next->ram_prev = NULL;
+    ptr->ram_next = NULL;
+    return ptr;
+  }
+
+  else if (*ram_tail == ptr && *ram_head != ptr)
+  {
+    // ptr is the tail of runnable list
+    *ram_tail = ptr->ram_prev;
+    ptr->ram_prev->ram_next = NULL;
+    ptr->ram_prev = NULL;
+    return ptr;
+  }
+  else
+  {
+    ptr->ram_prev->ram_next = ptr->ram_next;
+    ptr->ram_next->ram_prev = ptr->ram_prev;
+    ptr->ram_next = NULL;
+    ptr->ram_prev = NULL;
+    return ptr;
+  }
+}
+
+void add_to_free(page *ptr, page **free_head, page **free_tail)
+{
+
+  if (*free_head == *free_tail && *free_head == NULL)
+  {
+    // free list is empty
+    *free_head = ptr;
+    *free_tail = ptr;
+  }
+  else
+  {
+    // free list has at least one page frame
+    (*free_tail)->free_next = ptr;
+    *free_tail = ptr;
+    ptr->free_next = NULL;
+    ptr->free_prev = NULL;
   }
 }

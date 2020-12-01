@@ -3,7 +3,7 @@
 
 #define _GNU_SOURCE
 #include <search.h>
-#include "input.c"
+#include "input.h"
 #include "page.h"
 #include "process.h"
 #include "tsearch.h"

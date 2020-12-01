@@ -21,9 +21,7 @@ typedef struct process{
   // stores the end index of the pid
 
   unsigned long cur_index;
-  // stores the current index of the pid that about to execute
-  // e.g. on line_index 0, pid 1 has a page fault, then pid_1->cur_index = 0
-  // then add to the I/O queue
+  // stores the current index of the pid that has a page fault
 
   struct process* io_next;
   // this is used in the I/O queue
