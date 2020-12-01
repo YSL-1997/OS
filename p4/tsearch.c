@@ -279,7 +279,7 @@ node_proc *find_proc(void **root, char* key)
   this function finds the node in the page table if there's one
   input: root of the page table, string "pid vpn"
 */
-node_proc *find_pt(void **root, char *key)
+node_pt *find_pt(void **root, char *key)
 {
   void *result;
   node_pt *node;
@@ -305,7 +305,7 @@ node_proc *find_pt(void **root, char *key)
   this function finds the node in the inverted page table if there's one
   input: root of the inverted page table, unsigned long ppn
 */
-node_proc *find_ipt(void **root, unsigned long key)
+node_ipt *find_ipt(void **root, unsigned long key)
 {
   void *result;
   node_ipt *node;
