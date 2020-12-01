@@ -7,8 +7,6 @@
 
 #include "pageAlgorithms.h"
 
-static int MAX_LEN = 4096;
-
 /*
   read the tracefile and execute
   input: head of process list, 
@@ -16,8 +14,8 @@ static int MAX_LEN = 4096;
 	       num of pages that can be allocated in RAM
          process table
 */
-void fifo(process **process_head, process **process_tail, int num_pages,
-          void **proc_table)
+void fifo(process **process_head, process **process_tail,
+          unsigned long num_pages, void **proc_table)
 {
   // page table and inverted page table
   void *pt;
