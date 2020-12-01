@@ -45,7 +45,7 @@ void fifo(process **process_head, process **process_tail,
 
   //--------------------------------------------------------------------
   // start processing the tracefile
-  FILE *fp = read_file("./tracefile");
+  FILE *fp = read_file("./tracefile.txt");
 
   // the working buffer that stores each line of tracefile
   char *buf = (char *)malloc(sizeof(char) * MAX_LEN);
