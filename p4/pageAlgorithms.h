@@ -14,7 +14,6 @@ static int MAX_LEN = 4096;
 page **malloc_page_frames(unsigned long num_pages);
 process *pop_from_io(process **head, process **tail);
 void add_to_runnable(process *ptr, process **head, process **tail);
-char *get_key_pt(page *ptr);
 char *get_key_pt(char *s1, char *s2);
 void move_to_ram_tail(page **ram_head, page **ram_tail);
 page *pop_from_free(page **free_head, page **free_tail);
