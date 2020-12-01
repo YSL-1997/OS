@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <math.h>
 #include "tsearch.h"
+#include "errorHandling.h"
 
 FILE* read_file(char* path);
 char** parsing(char* string);
