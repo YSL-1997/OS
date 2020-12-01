@@ -10,7 +10,7 @@
 #include "assert.h"
 #include "errorHandling.h"
 
-static int MAX_LEN = 4096;
+
 
 page **malloc_page_frames(unsigned long num_pages);
 process *pop_from_io(process **head, process **tail);
@@ -24,7 +24,7 @@ void wait_for_io_completion(FILE **fp,
                             process **runnable_head, process **runnable_tail,
                             page **free_head, page **free_tail,
                             page **ram_head, page **ram_tail,
-                            int *global_timer, void **pt, void **ipt);
+                            unsigned long *global_timer, void **pt, void **ipt);
 
 process *remove_from_runnable(process *ptr, process **runnable_head,
                               process **runnable_tail);
@@ -35,6 +35,5 @@ void add_to_free(page *ptr, page **free_head, page **free_tail);
 
 void fifo(process **process_head, process **process_tail,
           unsigned long num_pages, void **proc_table);
-
 
 #endif

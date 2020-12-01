@@ -48,5 +48,6 @@ typedef struct page{
 
 }page;
 
+page *initialize_page_frame(unsigned long ppn);
 
 #endif

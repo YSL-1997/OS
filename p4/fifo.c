@@ -7,6 +7,8 @@
 
 #include "pageAlgorithms.h"
 
+static int MAX_LEN = 4096;
+
 /*
   read the tracefile and execute
   input: head of process list,
@@ -491,7 +493,7 @@ void wait_for_io_completion(FILE **fp,
                             process **runnable_head, process **runnable_tail,
                             page **free_head, page **free_tail,
                             page **ram_head, page **ram_tail,
-                            int *global_timer, void **pt, void **ipt)
+                            unsigned long *global_timer, void **pt, void **ipt)
 {
   process *tmp = pop_from_io(io_head, io_tail);
   add_to_runnable(tmp, runnable_head, runnable_tail);
@@ -506,7 +508,7 @@ void wait_for_io_completion(FILE **fp,
     // update pt (delete former entry)
     // get the key of pt to be deleted
     char *key_pt = get_key_pt((*ram_head)->pid, (*ram_head)->vpn);
-    
+
     delete_pt(pt, key_pt);
 
     // modify the page
