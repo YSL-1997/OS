@@ -18,7 +18,7 @@
   input: pid, pointer to the process struct
   return: a pointer to the node_proc struct
 */
-node_proc *create_entry_proc(char* pid, process *proc)
+node_proc *create_entry_proc(char *pid, process *proc)
 {
   node_proc *new_proc = malloc(sizeof(node_proc));
   handle_malloc_error(new_proc);
@@ -88,11 +88,11 @@ int compare_proc(const void *a, const void *b)
   node_proc *tmp_b = (node_proc *)b;
 
   // compare the values
-  if (tmp_a->key > tmp_b->key)
+  if (strcmp(tmp_a->key, tmp_b->key) > 0)
   {
     return 1;
   }
-  else if (tmp_a->key == tmp_b->key)
+  else if (strcmp(tmp_a->key, tmp_b->key) == 0)
   {
     return 0;
   }
@@ -117,11 +117,11 @@ int compare_pt(const void *a, const void *b)
   node_pt *tmp_b = (node_pt *)b;
 
   // compare the values
-  if (tmp_a->key > tmp_b->key)
+  if (strcmp(tmp_a->key, tmp_b->key) > 0)
   {
     return 1;
   }
-  else if (tmp_a->key = tmp_b->key)
+  else if (strcmp(tmp_a->key, tmp_b->key) == 0)
   {
     return 0;
   }
@@ -253,7 +253,7 @@ void add_to_ipt(void **root, node_ipt *ptr)
   this function finds the node in the process table if there's one
   input: root of the process table, pid(char*)
 */
-node_proc *find_proc(void **root, char* key)
+node_proc *find_proc(void **root, char *key)
 {
   void *result;
   node_proc *node;
@@ -332,7 +332,7 @@ node_ipt *find_ipt(void **root, unsigned long key)
   if not found, then do nothing
   input: root of process table, unsigned long pid
 */
-void delete_proc(void **root, char* key)
+void delete_proc(void **root, char *key)
 {
   node_proc *node;
 
