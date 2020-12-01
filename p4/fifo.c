@@ -292,7 +292,7 @@ void fifo(process **process_head, process **process_tail,
 */
 page **malloc_page_frames(unsigned long num_pages)
 {
-  page **ret = (page *)malloc(sizeof(page *) * 2);
+  page **ret = (page **)malloc(sizeof(page *) * 2);
 
   // malloc the first page frame (unsigned long ppn = 1)
   page *page1 = initialize_page_frame(1);

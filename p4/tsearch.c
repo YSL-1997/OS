@@ -58,7 +58,7 @@ node_pt *create_entry_pt(page *ptr)
   input: unsigned long ppn, pointer to the page struct
   return: a pointer to the node_pt struct
 */
-node_pt *create_entry_ipt(unsigned long key, page *value)
+node_ipt *create_entry_ipt(unsigned long key, page *value)
 {
   node_ipt *new_entry = malloc(sizeof(node_ipt));
   handle_malloc_error(new_entry);
