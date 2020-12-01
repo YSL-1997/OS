@@ -45,8 +45,8 @@ void add_to_ipt(void **root, node_ipt *ptr);
 
 // functions to find a node given the key
 node_proc *find_proc(void **root, char* key);
-node_proc *find_pt(void **root, char *key);
-node_proc *find_ipt(void **root, unsigned long key);
+node_pt *find_pt(void **root, char *key);
+node_ipt *find_ipt(void **root, unsigned long key);
 
 // functions to delete a node given the key
 void delete_proc(void **root, char* key);
