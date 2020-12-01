@@ -273,7 +273,7 @@ unsigned long option_parser( int argc, char* argv[]){
   unsigned long default_page_size = 4096;
   unsigned long page_size; 
   unsigned long memory_size;
-  unsigned long default_memory_size = pow(2, 30);
+  unsigned long default_memory_size = (unsigned long)pow(2, 30);
   unsigned long frame_size;
 
   while ((ch = getopt(argc, argv, "p::m::")) != -1){
