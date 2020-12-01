@@ -83,7 +83,7 @@ char** parsing(char* string){
     }
     
     // if ch is the space character or the end of string
-    if(ch == ' ' || ch == '\t' || ch =='\0'){
+    if(ch == ' ' || ch == '\t' || ch =='\0' || ch == '\n'){
       // check the character before space, if not space character, store the 
       // contiguous string
       if(str_index != 0){
@@ -272,7 +272,7 @@ unsigned long option_parser( int argc, char* argv[]){
   int ch;
   unsigned long default_page_size = 4096;
   unsigned long page_size = default_page_size; 
-  unsigned long default_memory_size = (unsigned long)pow(2, 30);
+  unsigned long default_memory_size = (unsigned long)pow(2, 20);
   unsigned long memory_size = default_memory_size;
   unsigned long frame_size;
 
@@ -286,7 +286,7 @@ unsigned long option_parser( int argc, char* argv[]){
 			}
 			else
 			{
-				page_size = (int)strtol(optarg, NULL, 10);
+				page_size = (unsigned long)strtol(optarg, NULL, 10);
 			}
 			break;
 		case 'm':
@@ -296,7 +296,7 @@ unsigned long option_parser( int argc, char* argv[]){
 			}
 			else
 			{
-				memory_size = (unsigned long int)(strtol(optarg, NULL, 10) * default_memory_size);
+				memory_size = (unsigned long)(strtol(optarg, NULL, 10) * default_memory_size);
 			}
 			break;
 
