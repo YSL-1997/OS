@@ -74,3 +74,7 @@ void handle_pthread_join_error(int err)
 {
   check_and_print(err, "pthread_join()");
 }
+
+void handle_ftell_error(){
+  
+}

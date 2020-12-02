@@ -47,7 +47,7 @@ void fifo(process **process_head, process **process_tail,
 
   //--------------------------------------------------------------------
   // start processing the tracefile
-  FILE *fp = read_file("./proj4/12million.addrtrace");
+  FILE *fp = read_file("./proj4/smallmix.addrtrace");
 
   // the working buffer that stores each line of tracefile
   char *buf = (char *)malloc(sizeof(char) * MAX_LEN);
@@ -220,17 +220,10 @@ void fifo(process **process_head, process **process_tail,
               continue;
             }
             // found, no page fault, just reference the page (+1 ns)
-            // 如果有找到，就reference （+1 ns）（io_head timer -1, 检查是否为0 if 0：go to "x"）
-            // 在reference之后，检查是否这个process已经达到了end index
-            //  if 到达end index，就remove 这个process （runnable list中），以及对应的page from pt(a lot) ipt(a lot)
-            // "x": wait_for_io_completion()
-            // printf("reference page pid= %s\n", result_pt->value->pid);
-            // printf("before reference: timer=%ld\n", global_timer);
+            
             global_timer += 1; // reference the page
             num_references += 1;
-            // printf("after reference: timer=%ld\n", global_timer);
 
-            // 在reference之后，检查是否这个process已经达到了end index
             // check if this process has terminated
             // result_proc->value is pointer to this process
             if (ftell(fp) == result_proc->value->end_index)
@@ -246,7 +239,6 @@ void fifo(process **process_head, process **process_tail,
               delete_proc(proc_table, end_proc->pid);
               // printf("process pid= %s terminated\n", end_proc->pid);
 
-              // 以及对应的page from pt(a lot) ipt(a lot)
               // need to remove the corresponding entries in pt, ipt
               // remove the page frames that corresponds to end_proc
               page *tmp = ram_head;
@@ -255,6 +247,7 @@ void fifo(process **process_head, process **process_tail,
                 page *tmp2 = tmp->ram_next;
 
                 // if we find the page that corresponds to end_proc
+                // if (!strcmp(tmp->pid, end_proc->pid))
                 if (!strncmp(tmp->pid, end_proc->pid, strlen(end_proc->pid)))
                 {
                   // need to remove tmp from ram_list, add to free_list
@@ -274,7 +267,6 @@ void fifo(process **process_head, process **process_tail,
               free(end_proc);
             }
 
-            // （io_head timer -1, 检查是否为0 if 0：go to "x"）
             // check if io list is empty
             bool io_empty = true;
             if (io_head != NULL && io_tail != NULL)
@@ -299,11 +291,6 @@ void fifo(process **process_head, process **process_tail,
               }
             }
           }
-
-          // fgets之后，如果当前行可以执行，memory reference 之后，fp == end index。说明刚刚执行的process结束了，要free掉它
-          //  即：从runnable list里删除，从process table里删除，然后：traverse ram list，将所有当前process
-          //  对应的page 移动到 free list中 （因为我们traverse page，所以可以得到pid,vpn,ppn。所以
-          //  我们可以同时将"pid vpn" 和ppn变成key，删除对应的pt entry，ipt entry）
         }
       }
     }
@@ -325,6 +312,7 @@ void fifo(process **process_head, process **process_tail,
 page **malloc_page_frames(unsigned long num_pages)
 {
   page **ret = (page **)malloc(sizeof(page *) * 2);
+  handle_malloc_error(ret);
 
   // malloc the first page frame (unsigned long ppn = 1)
   page *page1 = initialize_page_frame(1);
@@ -583,6 +571,7 @@ void wait_for_io_completion(FILE **fp,
 
   // get the current position of fp
   long cur_pos = ftell(*fp);
+  handle_ftell_error(cur_pos);
 
   // get the offset that passed into fseek()
   long offset = (*runnable_tail)->cur_index - cur_pos;
