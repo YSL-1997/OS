@@ -47,7 +47,7 @@ void fifo(process **process_head, process **process_tail,
 
   //--------------------------------------------------------------------
   // start processing the tracefile
-  FILE *fp = read_file("./tracefile.txt");
+  FILE *fp = read_file("./proj4/12million.addrtrace");
 
   // the working buffer that stores each line of tracefile
   char *buf = (char *)malloc(sizeof(char) * MAX_LEN);
@@ -166,7 +166,7 @@ void fifo(process **process_head, process **process_tail,
             // printf("before page fault: timer=%ld\n", global_timer);
             global_timer += 1;
             num_pagefault += 1;
-            printf("page fault: <%s>\n", key_pt);
+            // printf("page fault: <%s>\n", key_pt);
             // printf("after page fault: timer=%ld\n", global_timer);
 
             // get the current position of fp
@@ -177,6 +177,10 @@ void fifo(process **process_head, process **process_tail,
             result_proc->value->blocked_vpn = cur_vpn;
             result_proc->value->timer = 2000000;
             result_proc->value->io_next = NULL;
+
+            // printf("PID: %s, VPN:%s\n", result_proc->value->pid, result_proc->value->blocked_vpn);
+            // printf("TMR so far: %ld\n", num_references);
+            // printf("Clock so far: %ld\n", global_timer);
 
             // check if io list is currently empty
             bool io_empty = true;
@@ -197,7 +201,6 @@ void fifo(process **process_head, process **process_tail,
             {
               // before add_to_io, io list was not empty
               io_head->timer -= 1;
-              
 
               if (io_head->timer == 0)
               {
@@ -212,6 +215,10 @@ void fifo(process **process_head, process **process_tail,
           }
           else
           {
+            if (result_proc->value->cur_index > ftell(fp))
+            {
+              continue;
+            }
             // found, no page fault, just reference the page (+1 ns)
             // 如果有找到，就reference （+1 ns）（io_head timer -1, 检查是否为0 if 0：go to "x"）
             // 在reference之后，检查是否这个process已经达到了end index
@@ -228,6 +235,7 @@ void fifo(process **process_head, process **process_tail,
             // result_proc->value is pointer to this process
             if (ftell(fp) == result_proc->value->end_index)
             {
+              printf("process %s terminated\n", result_proc->value->pid);
               //  if 到达end index，就remove 这个process （runnable list中），
               // if this process has terminated
               // remove this process from runnable list
@@ -244,20 +252,23 @@ void fifo(process **process_head, process **process_tail,
               page *tmp = ram_head;
               while (tmp != NULL)
               {
+                page *tmp2 = tmp->ram_next;
 
                 // if we find the page that corresponds to end_proc
-                if (!strncmp(tmp->pid, end_proc->pid, strlen(tmp->pid)))
+                if (!strncmp(tmp->pid, end_proc->pid, strlen(end_proc->pid)))
                 {
                   // need to remove tmp from ram_list, add to free_list
                   // note that we do not modify anything stored in the page tmp
                   page *removed_page = remove_from_ram(tmp, &ram_head, &ram_tail);
+                  // printf("removed (%s %s)\n", removed_page->pid, removed_page->vpn);
                   add_to_free(removed_page, &free_head, &free_tail);
 
                   // remove the entry in pt and ipt
-                  delete_pt(&pt, get_key_pt(tmp->pid, tmp->vpn));
-                  delete_ipt(&ipt, tmp->ppn);
+                  delete_pt(&pt, get_key_pt(removed_page->pid, removed_page->vpn));
+                  // printf("deleted page (%s, %s) \n", removed_page->pid, removed_page->vpn);
+                  delete_ipt(&ipt, removed_page->ppn);
                 }
-                tmp = tmp->ram_next;
+                tmp = tmp2;
               }
 
               free(end_proc);
@@ -530,6 +541,7 @@ void wait_for_io_completion(FILE **fp,
     // update pt (delete former entry)
     // get the key of pt to be deleted
     char *key_pt = get_key_pt((*ram_head)->pid, (*ram_head)->vpn);
+    // printf("replaced page: (%s %s)\n", (*ram_head)->pid, (*ram_head)->vpn);
 
     delete_pt(pt, key_pt);
 
@@ -559,6 +571,7 @@ void wait_for_io_completion(FILE **fp,
     node_pt *entry_pt = create_entry_pt(*ram_tail); // create entry
     // printf("the key to be added to pt: %s\n", entry_pt->key);
     add_to_pt(pt, entry_pt);
+    // printf("add to ram: (%s %s)\n", entry_pt->value->pid, entry_pt->value->vpn);
 
     // add to ipt
     node_ipt *entry_ipt = create_entry_ipt((*ram_tail)->ppn, *ram_tail);

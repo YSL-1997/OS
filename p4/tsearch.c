@@ -195,7 +195,7 @@ void add_to_proc_table(void **root, node_proc *ptr)
 */
 void add_to_pt(void **root, node_pt *ptr)
 {
-  printf("add to page table: <%s, %ld>\n", ptr->key, ptr->value->ppn);
+  // printf("add to page table: <%s, %ld>\n", ptr->key, ptr->value->ppn);
   void *result;
   node_pt *exist;
 

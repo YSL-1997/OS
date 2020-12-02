@@ -1,0 +1,13 @@
+frame_size 256
+process table created
+process 16 terminated
+process 29 terminated
+process 27 terminated
+process 25 terminated
+process 24 terminated
+process 46 terminated
+process 4 terminated
+process 13 terminated
+2 global_timer = 19118583416
+page fault: 9559
+num of references=12000000
