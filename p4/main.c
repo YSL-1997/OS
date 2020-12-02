@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
   runnable_tail = NULL;
   proc_table = get_processes_info(&runnable_head, &runnable_tail);
   printf("process table created\n");
-  fifo(&runnable_head, &runnable_tail, 2, &proc_table);
+  fifo(&runnable_head, &runnable_tail, 256, &proc_table);
 
   printf("exit success!\n");
 

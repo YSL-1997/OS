@@ -269,7 +269,7 @@ unsigned long option_parser( int argc, char* argv[]){
   unsigned long memory_size = default_memory_size;
   unsigned long frame_size;
 
-  while ((ch = getopt(argc, argv, "p::m::")) != -1){
+  while ((ch = getopt(argc, argv, "p:m:")) != -1){
     switch (ch)
 		{
 		case 'p':

@@ -43,6 +43,7 @@ void fifo(process **process_head, process **process_tail,
   // global timer
   unsigned long global_timer = 0;
   unsigned long num_pagefault = 0;
+  unsigned long num_references = 0;
 
   //--------------------------------------------------------------------
   // start processing the tracefile
@@ -72,6 +73,7 @@ void fifo(process **process_head, process **process_tail,
       {
         printf("iohead is null global_timer = %ld\n", global_timer);
         printf("page fault: %ld\n", num_pagefault);
+        printf("num of references=%ld\n", num_references);
         exit(0);
       }
 
@@ -110,6 +112,7 @@ void fifo(process **process_head, process **process_tail,
         // no runnable processes, no blocked processes
         printf("2 global_timer = %ld\n", global_timer);
         printf("page fault: %ld\n", num_pagefault);
+        printf("num of references=%ld\n", num_references);
         exit(0);
       }
     }
@@ -217,6 +220,7 @@ void fifo(process **process_head, process **process_tail,
             // printf("reference page pid= %s\n", result_pt->value->pid);
             // printf("before reference: timer=%ld\n", global_timer);
             global_timer += 1; // reference the page
+            num_references += 1;
             // printf("after reference: timer=%ld\n", global_timer);
 
             // 在reference之后，检查是否这个process已经达到了end index
