@@ -43,9 +43,8 @@ node_pt *create_entry_pt(page *ptr)
                                                  strlen(ptr->vpn) + 2));
   handle_malloc_error(key_str);
 
-  strcat(key_str, ptr->pid);
-  strcat(key_str, " ");
-  strcat(key_str, ptr->vpn);
+  snprintf(key_str, strlen(ptr->pid) + strlen(ptr->vpn) + 2, "%s %s",
+           ptr->pid, ptr->vpn);
 
   new_entry->key = key_str;
   new_entry->value = ptr;
@@ -196,6 +195,7 @@ void add_to_proc_table(void **root, node_proc *ptr)
 */
 void add_to_pt(void **root, node_pt *ptr)
 {
+  printf("add to page table: <%s, %ld>\n", ptr->key, ptr->value->ppn);
   void *result;
   node_pt *exist;
 

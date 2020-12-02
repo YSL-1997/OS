@@ -20,8 +20,8 @@ void fifo(process **process_head, process **process_tail,
           unsigned long num_pages, void **proc_table)
 {
   // page table and inverted page table
-  void *pt;
-  void *ipt;
+  void *pt = NULL;
+  void *ipt = NULL;
 
   // head and tail pointers to the head of blocked processes
   process *io_head = NULL;
@@ -42,6 +42,7 @@ void fifo(process **process_head, process **process_tail,
 
   // global timer
   unsigned long global_timer = 0;
+  unsigned long num_pagefault = 0;
 
   //--------------------------------------------------------------------
   // start processing the tracefile
@@ -69,6 +70,8 @@ void fifo(process **process_head, process **process_tail,
       // then all processes have terminated
       if (io_head == NULL)
       {
+        printf("iohead is null global_timer = %ld\n", global_timer);
+        printf("page fault: %ld\n", num_pagefault);
         exit(0);
       }
 
@@ -81,6 +84,7 @@ void fifo(process **process_head, process **process_tail,
                                &free_head, &free_tail,
                                &ram_head, &ram_tail,
                                &global_timer, &pt, &ipt);
+        continue;
       }
     }
 
@@ -104,6 +108,8 @@ void fifo(process **process_head, process **process_tail,
       {
         // io_head == NULL
         // no runnable processes, no blocked processes
+        printf("2 global_timer = %ld\n", global_timer);
+        printf("page fault: %ld\n", num_pagefault);
         exit(0);
       }
     }
@@ -152,6 +158,14 @@ void fifo(process **process_head, process **process_tail,
             // "x": wait_for_io_completion()
             */
 
+            // modify the timer
+            // printf("page fault:\n");
+            // printf("before page fault: timer=%ld\n", global_timer);
+            global_timer += 1;
+            num_pagefault += 1;
+            printf("page fault: <%s>\n", key_pt);
+            // printf("after page fault: timer=%ld\n", global_timer);
+
             // get the current position of fp
             long cur_pos = ftell(fp);
             // modify the cur_index of this process
@@ -161,7 +175,7 @@ void fifo(process **process_head, process **process_tail,
             result_proc->value->timer = 2000000;
             result_proc->value->io_next = NULL;
 
-            // check if io list is empty
+            // check if io list is currently empty
             bool io_empty = true;
             if (io_head != NULL && io_tail != NULL)
             {
@@ -176,13 +190,11 @@ void fifo(process **process_head, process **process_tail,
             // add to io list
             add_to_io(popped_proc, &io_head, &io_tail);
 
-            // modify the timer
-            global_timer++;
-
             if (io_head->io_next != NULL && !io_empty)
             {
               // before add_to_io, io list was not empty
-              io_head->timer--;
+              io_head->timer -= 1;
+              
 
               if (io_head->timer == 0)
               {
@@ -202,8 +214,10 @@ void fifo(process **process_head, process **process_tail,
             // 在reference之后，检查是否这个process已经达到了end index
             //  if 到达end index，就remove 这个process （runnable list中），以及对应的page from pt(a lot) ipt(a lot)
             // "x": wait_for_io_completion()
-
-            global_timer++; // reference the page
+            // printf("reference page pid= %s\n", result_pt->value->pid);
+            // printf("before reference: timer=%ld\n", global_timer);
+            global_timer += 1; // reference the page
+            // printf("after reference: timer=%ld\n", global_timer);
 
             // 在reference之后，检查是否这个process已经达到了end index
             // check if this process has terminated
@@ -218,6 +232,7 @@ void fifo(process **process_head, process **process_tail,
                                                        &runnable_tail);
               // end_proc->pid, this entry needs to be deleted in proc_table
               delete_proc(proc_table, end_proc->pid);
+              // printf("process pid= %s terminated\n", end_proc->pid);
 
               // 以及对应的page from pt(a lot) ipt(a lot)
               // need to remove the corresponding entries in pt, ipt
@@ -254,7 +269,9 @@ void fifo(process **process_head, process **process_tail,
 
             if (!io_empty)
             {
-              io_head->timer--;
+              // printf("after reference: io queue: timer= %ld\n", io_head->timer);
+              io_head->timer -= 1;
+              // printf("io queue: timer= %ld\n", io_head->timer);
 
               if (io_head->timer == 0)
               {
@@ -326,6 +343,7 @@ page **malloc_page_frames(unsigned long num_pages)
 */
 process *pop_from_io(process **head, process **tail)
 {
+  // printf("popped from io: pid=%s\n", (*head)->pid);
   if (*head == NULL && *tail == NULL)
   {
     // if length of I/O list is 0
@@ -535,6 +553,7 @@ void wait_for_io_completion(FILE **fp,
     // update page table
     // since no page replacement, simply add the entry to pt
     node_pt *entry_pt = create_entry_pt(*ram_tail); // create entry
+    // printf("the key to be added to pt: %s\n", entry_pt->key);
     add_to_pt(pt, entry_pt);
 
     // add to ipt
@@ -563,6 +582,7 @@ void wait_for_io_completion(FILE **fp,
 process *remove_from_runnable(process *ptr, process **runnable_head,
                               process **runnable_tail)
 {
+  // printf("remove from runnable: pid=%s\n", ptr->pid);
   assert(*runnable_head != NULL);
   assert(*runnable_tail != NULL);
   if (*runnable_head == ptr && *runnable_tail == ptr)
@@ -603,6 +623,7 @@ process *remove_from_runnable(process *ptr, process **runnable_head,
 */
 void add_to_io(process *ptr, process **io_head, process **io_tail)
 {
+  // printf("add to io queue: pid=%s\n", ptr->pid);
   if (*io_head == *io_tail && *io_head == NULL)
   {
     // io list is empty

@@ -207,15 +207,8 @@ void* get_processes_info(process** runnable_head, process** runnable_tail)
       // set offsets of the start and end of each line from the begining of file
       // offset between the end and start is the line length and a '\n' or EOF
       unsigned long start = (unsigned long)(ftell(fp) - strlen(buffer) -1);
-      unsigned long end;
-      if(ch == '\n'){
-        end = (unsigned long)ftell(fp);
-      }
-      //if the line end with EOF, end of execution of process must be one byte 
-      //before the EOF
-      else{
-        end = (unsigned long)(ftell(fp) -1);
-      }
+      unsigned long end = (unsigned long)ftell(fp);
+      
       //check whether the pid of current line is in the process tree
       proc_node = find_proc(&root, string_arr[0]);
      
