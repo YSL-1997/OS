@@ -45,7 +45,7 @@ void fifo(process **process_head, process **process_tail,
 
   //--------------------------------------------------------------------
   // start processing the tracefile
-  FILE *fp = read_file("./proj4/bigmix.addrtrace");
+  FILE *fp = read_file("./proj4/12million.addrtrace");
 
   // the working buffer that stores each line of tracefile
   char *buf = (char *)malloc(sizeof(char) * MAX_LEN);
@@ -253,7 +253,7 @@ void fifo(process **process_head, process **process_tail,
                   // remove the entry in pt and ipt
                   delete_pt(&pt, get_key_pt(removed_page->pid, removed_page->vpn));
 
-                  delete_ipt(&ipt, removed_page->ppn);
+                  // delete_ipt(&ipt, removed_page->ppn);
                 }
                 tmp = tmp2;
               }
@@ -566,8 +566,8 @@ void wait_for_io_completion(FILE **fp,
     // printf("add to ram: (%s %s)\n", entry_pt->value->pid, entry_pt->value->vpn);
 
     // add to ipt
-    node_ipt *entry_ipt = create_entry_ipt((*ram_tail)->ppn, *ram_tail);
-    add_to_ipt(ipt, entry_ipt);
+    // node_ipt *entry_ipt = create_entry_ipt((*ram_tail)->ppn, *ram_tail);
+    // add_to_ipt(ipt, entry_ipt);
   }
 
   // now, I/O completes, go to execute the previously blocked process
