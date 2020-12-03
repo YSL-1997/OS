@@ -25,15 +25,8 @@ void wait_for_io_completion(FILE **fp,
                             process **runnable_head, process **runnable_tail,
                             page **free_head, page **free_tail,
                             page **ram_head, page **ram_tail,
-                            statistics* stat, void **pt, void **ipt);
-
-void wait_clock_io_completion(FILE **fp,
-                            process **io_head, process **io_tail,
-                            process **runnable_head, process **runnable_tail,
-                            page **free_head, page **free_tail,
-                            page **ram_head, page **ram_tail,
-                            unsigned long *global_timer, void **pt, void **ipt,
-                            unsigned long* clock_hand, unsigned long num_pages);
+                            statistics* stat, void **pt, void **ipt,
+                            page** clock_hand, int* flag);
 
 process *remove_from_runnable(process *ptr, process **runnable_head,
                               process **runnable_tail);
@@ -47,7 +40,7 @@ unsigned long num_runnable_proc(process* runnable_head);
 void fifo(process **process_head, process **process_tail,
           unsigned long num_pages, void **proc_table, statistics* stat);
 
-void clock(process **process_head, process **process_tail,
-          unsigned long num_pages, void **proc_table);
+page *page_replace(page **ram_head, page **ram_tail, page **clock_hand, int *flag);
+void page_reference(page *ptr, page **ram_head, page **ram_tail);
 
 #endif

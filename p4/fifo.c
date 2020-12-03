@@ -40,9 +40,12 @@ void fifo(process **process_head, process **process_tail,
   page *ram_head = NULL;
   page *ram_tail = NULL;
 
+  page *clock_hand = NULL;
+  int flag = 0;
+
   //--------------------------------------------------------------------
   // start processing the tracefile
-  FILE *fp = read_file("./proj4/12million.addrtrace");
+  FILE *fp = read_file("./proj4/bigmix.addrtrace");
 
   // the working buffer that stores each line of tracefile
   char *buf = (char *)malloc(sizeof(char) * MAX_LEN);
@@ -80,7 +83,7 @@ void fifo(process **process_head, process **process_tail,
                                &runnable_head, &runnable_tail,
                                &free_head, &free_tail,
                                &ram_head, &ram_tail,
-                               stat, &pt, &ipt);
+                               stat, &pt, &ipt, &clock_hand, &flag);
         continue;
       }
     }
@@ -97,7 +100,7 @@ void fifo(process **process_head, process **process_tail,
                                &runnable_head, &runnable_tail,
                                &free_head, &free_tail,
                                &ram_head, &ram_tail,
-                               stat, &pt, &ipt);
+                               stat, &pt, &ipt, &clock_hand, &flag);
 
         continue;
       }
@@ -157,8 +160,6 @@ void fifo(process **process_head, process **process_tail,
             stat->fake_AMU += stat->occupied_pages;
             stat->fake_ARP += stat->runnable_proc;
 
-
-
             // get the current position of fp
             long cur_pos = ftell(fp);
             // modify the cur_index of this process
@@ -194,7 +195,7 @@ void fifo(process **process_head, process **process_tail,
                                        &runnable_head, &runnable_tail,
                                        &free_head, &free_tail,
                                        &ram_head, &ram_tail,
-                                       stat, &pt, &ipt);
+                                       stat, &pt, &ipt, &clock_hand, &flag);
                 continue;
               }
             }
@@ -206,6 +207,9 @@ void fifo(process **process_head, process **process_tail,
               continue;
             }
             // found, no page fault, just reference the page (+1 ns)
+
+
+            page_reference(result_pt->value, &ram_head, &ram_tail);
 
             stat->RTime += 1; // reference the page
             stat->TMR += 1;
@@ -243,12 +247,12 @@ void fifo(process **process_head, process **process_tail,
                   // note that we do not modify anything stored in the page tmp
                   page *removed_page = remove_from_ram(tmp, &ram_head, &ram_tail);
                   stat->occupied_pages -= 1;
-                  
+
                   add_to_free(removed_page, &free_head, &free_tail);
 
                   // remove the entry in pt and ipt
                   delete_pt(&pt, get_key_pt(removed_page->pid, removed_page->vpn));
-                  
+
                   delete_ipt(&ipt, removed_page->ppn);
                 }
                 tmp = tmp2;
@@ -276,7 +280,7 @@ void fifo(process **process_head, process **process_tail,
                                        &runnable_head, &runnable_tail,
                                        &free_head, &free_tail,
                                        &ram_head, &ram_tail,
-                                       stat, &pt, &ipt);
+                                       stat, &pt, &ipt, &clock_hand, &flag);
                 continue;
               }
             }
@@ -380,24 +384,7 @@ void add_to_runnable(process *ptr, process **head, process **tail)
   }
 }
 
-/*
-  get the concatenated key string from a page struct ("pid vpn")
-  input: pointer to a page struct
-  return: key string
-*/
-// char *get_key_pt(page *ptr)
-// {
-//   char *key_str = (char *)malloc(sizeof(char) * (strlen(ptr->pid) +
-//                                                  strlen(ptr->vpn) + 2));
-//   handle_malloc_error(key_str);
 
-//   // strcat(key_str, ptr->pid);
-//   // strcat(key_str, " ");
-//   // strcat(key_str, ptr->vpn);
-//   snprintf(key_str, strlen(ptr->pid) + strlen(ptr->vpn) + 2,
-//            "%s %s", ptr->pid, ptr->vpn);
-//   return key_str;
-// }
 /*
   get the concatenated key string from a pid and a vpn
   input: pointer to a page struct
@@ -504,7 +491,8 @@ void wait_for_io_completion(FILE **fp,
                             process **runnable_head, process **runnable_tail,
                             page **free_head, page **free_tail,
                             page **ram_head, page **ram_tail,
-                            statistics *stat, void **pt, void **ipt)
+                            statistics *stat, void **pt, void **ipt, 
+                            page** clock_hand, int* flag)
 {
   process *tmp = pop_from_io(io_head, io_tail);
 
@@ -527,25 +515,38 @@ void wait_for_io_completion(FILE **fp,
     // need to replace a page
     // page_to_replace is ram_head;
 
-    // update pt (delete former entry)
+    
+    
+
+
+    // ram_head, ram_tail, runnable_head, runnable_tail, pt
+    // run pageReplacement algo to get the page to be replaced
+    // fifo: return: ram_head
+    // lru: return: ram_head
+    // clock: return a pointer to a page
+    // remove the page from ram list, need a pointer to store it
+    // according to the page to be replaced, remove from pt
+    // modify the page to be the new page-to-add
+    // add the page into ram list
+
+    // this function moves the page to ram_tail if needed (clock does not)
+    // this function returns the page to be replaced
+    page* page_to_replace = page_replace(ram_head, ram_tail, clock_hand, flag);
+    
     // get the key of pt to be deleted
-    char *key_pt = get_key_pt((*ram_head)->pid, (*ram_head)->vpn);
-    // printf("replaced page: (%s %s)\n", (*ram_head)->pid, (*ram_head)->vpn);
-
+    // update pt (delete former entry)
+    char *key_pt = get_key_pt(page_to_replace->pid, page_to_replace->vpn);
     delete_pt(pt, key_pt);
-
+    
     // modify the page
-    (*ram_head)->pid = (*runnable_tail)->pid;
-    (*ram_head)->vpn = (*runnable_tail)->blocked_vpn;
-    // move the page from ram_head to ram_tail
-    move_to_ram_tail(ram_head, ram_tail);
-
+    page_to_replace->pid = (*runnable_tail)->pid;
+    page_to_replace->vpn = (*runnable_tail)->blocked_vpn;
+    
     // update ipt (no need in this case)
 
     // add the "new" page to the page table
-    node_pt *entry_pt = create_entry_pt(*ram_tail); // create entry
+    node_pt *entry_pt = create_entry_pt(page_to_replace); // create entry
     add_to_pt(pt, entry_pt);
-    
   }
   else
   {
@@ -581,8 +582,6 @@ void wait_for_io_completion(FILE **fp,
 
   // modify fp
   fseek(*fp, offset, SEEK_CUR);
-
-  
 }
 
 /*
@@ -713,3 +712,4 @@ void add_to_free(page *ptr, page **free_head, page **free_tail)
     ptr->free_prev = NULL;
   }
 }
+
