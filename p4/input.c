@@ -156,7 +156,7 @@ void* get_processes_info(process** runnable_head, process** runnable_tail, unsig
   char* buffer = (char*)malloc((MAX_LEN) * sizeof(char));
   handle_malloc_error(buffer);
 
-  fp =  read_file("./proj4/bigmix.addrtrace"); 
+  fp =  read_file("./proj4/12million.addrtrace"); 
 
   while(ch != EOF){
     ch = fgetc(fp);

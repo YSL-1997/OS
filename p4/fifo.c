@@ -42,7 +42,7 @@ void fifo(process **process_head, process **process_tail,
 
   //--------------------------------------------------------------------
   // start processing the tracefile
-  FILE *fp = read_file("./proj4/bigmix.addrtrace");
+  FILE *fp = read_file("./proj4/12million.addrtrace");
 
   // the working buffer that stores each line of tracefile
   char *buf = (char *)malloc(sizeof(char) * MAX_LEN);
@@ -508,13 +508,15 @@ void wait_for_io_completion(FILE **fp,
 {
   process *tmp = pop_from_io(io_head, io_tail);
 
-  //stat->RTime += tmp->timer;
-  for (int i = 0; i < tmp->timer; i++)
-  {
-    stat->fake_AMU += stat->occupied_pages;
-    stat->fake_ARP += stat->runnable_proc;
-    stat->RTime += 1;
-  }
+  stat->RTime += tmp->timer;
+  stat->fake_AMU += stat->occupied_pages * tmp->timer;
+  stat->fake_ARP += stat->runnable_proc * tmp->timer;
+  // for (int i = 0; i < tmp->timer; i++)
+  // {
+  //   stat->fake_AMU += stat->occupied_pages;
+  //   stat->fake_ARP += stat->runnable_proc;
+  //   stat->RTime += 1;
+  // }
 
   add_to_runnable(tmp, runnable_head, runnable_tail);
   stat->runnable_proc += 1;
@@ -553,6 +555,7 @@ void wait_for_io_completion(FILE **fp,
     page_to_replace->pid = (*runnable_tail)->pid;
     page_to_replace->vpn = (*runnable_tail)->blocked_vpn;
     add_to_ram(page_to_replace, ram_head, ram_tail);
+    stat->occupied_pages += 1;
 
     // update page table
     // since no page replacement, simply add the entry to pt
@@ -579,7 +582,7 @@ void wait_for_io_completion(FILE **fp,
   // modify fp
   fseek(*fp, offset, SEEK_CUR);
 
-  stat->occupied_pages += 1;
+  
 }
 
 /*
