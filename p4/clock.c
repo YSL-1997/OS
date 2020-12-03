@@ -55,4 +55,14 @@ page *page_replace(page **ram_head, page **ram_tail, page **clock_hand, int *fla
       }
     }
   }
+  return NULL;
+}
+
+/* 
+  clock page reference
+  move the referenced page to the ram_tail
+*/
+void page_reference(page *ptr, page **ram_head, page **ram_tail){
+  ptr->ref_bit = 1;
+  return;
 }
