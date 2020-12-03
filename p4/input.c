@@ -140,7 +140,7 @@ bool is_empty(char *s)
   input: the head and tail of runnable list of process
   return: processes tree
 */
-void* get_processes_info(process** runnable_head, process** runnable_tail) 
+void* get_processes_info(process** runnable_head, process** runnable_tail, unsigned long* num_process) 
 {
   char ch = 'a'; //initialize character variable
   int read_len = 0;// index of character of each line
@@ -156,7 +156,7 @@ void* get_processes_info(process** runnable_head, process** runnable_tail)
   char* buffer = (char*)malloc((MAX_LEN) * sizeof(char));
   handle_malloc_error(buffer);
 
-  fp =  read_file("./proj4/smallmix.addrtrace"); 
+  fp =  read_file("./proj4/bigmix.addrtrace"); 
 
   while(ch != EOF){
     ch = fgetc(fp);
@@ -232,6 +232,8 @@ void* get_processes_info(process** runnable_head, process** runnable_tail)
           new_process->runnable_prev = *runnable_tail;
           *runnable_tail = new_process;
         }
+
+        *num_process = *num_process + 1;
 
         // add a node to process tree
         add_to_proc_table(&root, create_entry_proc(string_arr[0], new_process));

@@ -15,10 +15,10 @@
 typedef struct statistics{
 
   // Average Memory Utilization 
-  double AMU;
+  double fake_AMU;
 
   // Average Runable Processes
-  double ARP;
+  double fake_ARP;
 
   // Total Memory References
   unsigned long TMR;
@@ -29,6 +29,14 @@ typedef struct statistics{
   // Running Time
   unsigned long RTime;
 
+  // # of page frames occupied
+  unsigned long occupied_pages;
+
+  // # of running process
+  unsigned long runnable_proc;
+
 }statistics;
+
+statistics* stat_init();
 
 #endif

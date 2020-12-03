@@ -17,7 +17,7 @@ static int MAX_LEN = 4096;
          process table
 */
 void fifo(process **process_head, process **process_tail,
-          unsigned long num_pages, void **proc_table)
+          unsigned long num_pages, void **proc_table, statistics *stat)
 {
   // page table and inverted page table
   void *pt = NULL;
@@ -40,14 +40,9 @@ void fifo(process **process_head, process **process_tail,
   page *ram_head = NULL;
   page *ram_tail = NULL;
 
-  // global timer
-  unsigned long global_timer = 0;
-  unsigned long num_pagefault = 0;
-  unsigned long num_references = 0;
-
   //--------------------------------------------------------------------
   // start processing the tracefile
-  FILE *fp = read_file("./proj4/smallmix.addrtrace");
+  FILE *fp = read_file("./proj4/bigmix.addrtrace");
 
   // the working buffer that stores each line of tracefile
   char *buf = (char *)malloc(sizeof(char) * MAX_LEN);
@@ -71,10 +66,10 @@ void fifo(process **process_head, process **process_tail,
       // then all processes have terminated
       if (io_head == NULL)
       {
-        printf("iohead is null global_timer = %ld\n", global_timer);
-        printf("page fault: %ld\n", num_pagefault);
-        printf("num of references=%ld\n", num_references);
-        exit(0);
+        printf("total memory reference TMR = %ld\n", stat->TMR);
+        printf("total page faults TPI = %ld\n", stat->TPI);
+        printf("running time RTime = %ld\n", stat->RTime);
+        break;
       }
 
       // if we've reached EOF & io_list is not empty,
@@ -85,7 +80,7 @@ void fifo(process **process_head, process **process_tail,
                                &runnable_head, &runnable_tail,
                                &free_head, &free_tail,
                                &ram_head, &ram_tail,
-                               &global_timer, &pt, &ipt);
+                               stat, &pt, &ipt);
         continue;
       }
     }
@@ -102,7 +97,7 @@ void fifo(process **process_head, process **process_tail,
                                &runnable_head, &runnable_tail,
                                &free_head, &free_tail,
                                &ram_head, &ram_tail,
-                               &global_timer, &pt, &ipt);
+                               stat, &pt, &ipt);
 
         continue;
       }
@@ -110,10 +105,10 @@ void fifo(process **process_head, process **process_tail,
       {
         // io_head == NULL
         // no runnable processes, no blocked processes
-        printf("2 global_timer = %ld\n", global_timer);
-        printf("page fault: %ld\n", num_pagefault);
-        printf("num of references=%ld\n", num_references);
-        exit(0);
+        printf("total memory reference TMR = %ld\n", stat->TMR);
+        printf("total page faults TPI = %ld\n", stat->TPI);
+        printf("running time RTime = %ld\n", stat->RTime);
+        break;
       }
     }
 
@@ -154,20 +149,15 @@ void fifo(process **process_head, process **process_tail,
 
           if (result_pt == NULL)
           {
-            /* not found, i.e. page fault
-            // (+1 ns)（io_head timer -1, 检查是否为0 if 0：go to "x"）
-            // 回溯file pointer，然后更新process的blocked_index (即回溯后的fp), blocked vpn,
-            // isBlocked = true, 将process从runnable list移除，加入io queue (2000000)
-            // "x": wait_for_io_completion()
-            */
-
+            // not found, i.e. page fault
             // modify the timer
-            // printf("page fault:\n");
-            // printf("before page fault: timer=%ld\n", global_timer);
-            global_timer += 1;
-            num_pagefault += 1;
-            // printf("page fault: <%s>\n", key_pt);
-            // printf("after page fault: timer=%ld\n", global_timer);
+
+            stat->RTime += 1;
+            stat->TPI += 1;
+            stat->fake_AMU += stat->occupied_pages;
+            stat->fake_ARP += stat->runnable_proc;
+
+
 
             // get the current position of fp
             long cur_pos = ftell(fp);
@@ -177,10 +167,6 @@ void fifo(process **process_head, process **process_tail,
             result_proc->value->blocked_vpn = cur_vpn;
             result_proc->value->timer = 2000000;
             result_proc->value->io_next = NULL;
-
-            // printf("PID: %s, VPN:%s\n", result_proc->value->pid, result_proc->value->blocked_vpn);
-            // printf("TMR so far: %ld\n", num_references);
-            // printf("Clock so far: %ld\n", global_timer);
 
             // check if io list is currently empty
             bool io_empty = true;
@@ -193,7 +179,7 @@ void fifo(process **process_head, process **process_tail,
             process *popped_proc = remove_from_runnable(result_proc->value,
                                                         &runnable_head,
                                                         &runnable_tail);
-
+            stat->runnable_proc -= 1;
             // add to io list
             add_to_io(popped_proc, &io_head, &io_tail);
 
@@ -208,7 +194,7 @@ void fifo(process **process_head, process **process_tail,
                                        &runnable_head, &runnable_tail,
                                        &free_head, &free_tail,
                                        &ram_head, &ram_tail,
-                                       &global_timer, &pt, &ipt);
+                                       stat, &pt, &ipt);
                 continue;
               }
             }
@@ -220,21 +206,24 @@ void fifo(process **process_head, process **process_tail,
               continue;
             }
             // found, no page fault, just reference the page (+1 ns)
-            
-            global_timer += 1; // reference the page
-            num_references += 1;
+
+            stat->RTime += 1; // reference the page
+            stat->TMR += 1;
+            stat->fake_AMU += stat->occupied_pages;
+            stat->fake_ARP += stat->runnable_proc;
 
             // check if this process has terminated
             // result_proc->value is pointer to this process
             if (ftell(fp) == result_proc->value->end_index)
             {
               printf("process %s terminated\n", result_proc->value->pid);
-              //  if 到达end index，就remove 这个process （runnable list中），
+
               // if this process has terminated
               // remove this process from runnable list
               process *end_proc = remove_from_runnable(result_proc->value,
                                                        &runnable_head,
                                                        &runnable_tail);
+              stat->runnable_proc -= 1;
               // end_proc->pid, this entry needs to be deleted in proc_table
               delete_proc(proc_table, end_proc->pid);
               // printf("process pid= %s terminated\n", end_proc->pid);
@@ -253,12 +242,13 @@ void fifo(process **process_head, process **process_tail,
                   // need to remove tmp from ram_list, add to free_list
                   // note that we do not modify anything stored in the page tmp
                   page *removed_page = remove_from_ram(tmp, &ram_head, &ram_tail);
-                  // printf("removed (%s %s)\n", removed_page->pid, removed_page->vpn);
+                  stat->occupied_pages -= 1;
+                  
                   add_to_free(removed_page, &free_head, &free_tail);
 
                   // remove the entry in pt and ipt
                   delete_pt(&pt, get_key_pt(removed_page->pid, removed_page->vpn));
-                  // printf("deleted page (%s, %s) \n", removed_page->pid, removed_page->vpn);
+                  
                   delete_ipt(&ipt, removed_page->ppn);
                 }
                 tmp = tmp2;
@@ -286,7 +276,7 @@ void fifo(process **process_head, process **process_tail,
                                        &runnable_head, &runnable_tail,
                                        &free_head, &free_tail,
                                        &ram_head, &ram_tail,
-                                       &global_timer, &pt, &ipt);
+                                       stat, &pt, &ipt);
                 continue;
               }
             }
@@ -514,11 +504,20 @@ void wait_for_io_completion(FILE **fp,
                             process **runnable_head, process **runnable_tail,
                             page **free_head, page **free_tail,
                             page **ram_head, page **ram_tail,
-                            unsigned long *global_timer, void **pt, void **ipt)
+                            statistics *stat, void **pt, void **ipt)
 {
   process *tmp = pop_from_io(io_head, io_tail);
+
+  //stat->RTime += tmp->timer;
+  for (int i = 0; i < tmp->timer; i++)
+  {
+    stat->fake_AMU += stat->occupied_pages;
+    stat->fake_ARP += stat->runnable_proc;
+    stat->RTime += 1;
+  }
+
   add_to_runnable(tmp, runnable_head, runnable_tail);
-  *global_timer += tmp->timer;
+  stat->runnable_proc += 1;
 
   // specific to FIFO, get the page to replace-------------
   if (*free_head == NULL)
@@ -544,6 +543,7 @@ void wait_for_io_completion(FILE **fp,
     // add the "new" page to the page table
     node_pt *entry_pt = create_entry_pt(*ram_tail); // create entry
     add_to_pt(pt, entry_pt);
+    
   }
   else
   {
@@ -571,13 +571,15 @@ void wait_for_io_completion(FILE **fp,
 
   // get the current position of fp
   long cur_pos = ftell(*fp);
-  handle_ftell_error(cur_pos);
+  // handle_ftell_error(cur_pos);
 
   // get the offset that passed into fseek()
   long offset = (*runnable_tail)->cur_index - cur_pos;
 
   // modify fp
   fseek(*fp, offset, SEEK_CUR);
+
+  stat->occupied_pages += 1;
 }
 
 /*

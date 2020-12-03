@@ -25,7 +25,7 @@ void wait_for_io_completion(FILE **fp,
                             process **runnable_head, process **runnable_tail,
                             page **free_head, page **free_tail,
                             page **ram_head, page **ram_tail,
-                            unsigned long *global_timer, void **pt, void **ipt);
+                            statistics* stat, void **pt, void **ipt);
 
 void wait_clock_io_completion(FILE **fp,
                             process **io_head, process **io_tail,
@@ -45,7 +45,7 @@ unsigned long num_ram(page* ram_head);
 unsigned long num_runnable_proc(process* runnable_head);
 
 void fifo(process **process_head, process **process_tail,
-          unsigned long num_pages, void **proc_table);
+          unsigned long num_pages, void **proc_table, statistics* stat);
 
 void clock(process **process_head, process **process_tail,
           unsigned long num_pages, void **proc_table);
