@@ -9,6 +9,7 @@
 #include "tsearch.h"
 #include "assert.h"
 #include "errorHandling.h"
+#include "statistics.h"
 
 
 
@@ -26,14 +27,27 @@ void wait_for_io_completion(FILE **fp,
                             page **ram_head, page **ram_tail,
                             unsigned long *global_timer, void **pt, void **ipt);
 
+void wait_clock_io_completion(FILE **fp,
+                            process **io_head, process **io_tail,
+                            process **runnable_head, process **runnable_tail,
+                            page **free_head, page **free_tail,
+                            page **ram_head, page **ram_tail,
+                            unsigned long *global_timer, void **pt, void **ipt,
+                            unsigned long* clock_hand, unsigned long num_pages);
+
 process *remove_from_runnable(process *ptr, process **runnable_head,
                               process **runnable_tail);
 
 void add_to_io(process *ptr, process **io_head, process **io_tail);
 page *remove_from_ram(page *ptr, page **ram_head, page **ram_tail);
 void add_to_free(page *ptr, page **free_head, page **free_tail);
+unsigned long num_ram(page* ram_head);
+unsigned long num_runnable_proc(process* runnable_head);
 
 void fifo(process **process_head, process **process_tail,
+          unsigned long num_pages, void **proc_table);
+
+void clock(process **process_head, process **process_tail,
           unsigned long num_pages, void **proc_table);
 
 #endif

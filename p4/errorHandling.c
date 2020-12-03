@@ -39,42 +39,12 @@ void check_and_print(int err, char* function_name)
   }
 }
 
-// on success, gettimeofday() returns 0
-void handle_gettime_error(int err)
-{
-  check_and_print(err, "gettimeofday()");
-}
 
-// on success, sem_init() returns 0
-void handle_sem_init_error(int err)
-{
-  check_and_print(err, "sem_init()");
-}
 
-// on success, sem_wait() returns 0
-void handle_sem_wait_error(int err)
-{
-  check_and_print(err, "sem_wait()");
-}
-
-// on success sem_post() returns 0
-void handle_sem_post_error(int err)
-{
-  check_and_print(err, "sem_post()");
-}
-
-// on success, pthread_create() returns 0
-void handle_pthread_create_error(int err)
-{
-  check_and_print(err, "pthread_create()");
-}
-
-// on success, pthread_join() returns 0
-void handle_pthread_join_error(int err)
-{
-  check_and_print(err, "pthread_join()");
-}
-
-void handle_ftell_error(){
-  
-}
+// void handle_ftell_error(FILE* fp){
+//   if(ftell(fp) == -1){
+//     fprintf(stderr, "ftell error: failed to find the offest\n");
+//     fprintf(stderr, "exiting...\n");
+//     exit(EXIT_FAILURE);
+//   }
+// }
