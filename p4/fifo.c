@@ -194,6 +194,7 @@ void fifo(process **process_head, process **process_tail,
             {
               io_empty = false;
             }
+            printf("PID: %s, VPN: %s\nTMR so far: %ld\nClock so far: %ld\n",result_proc->value->pid, result_proc->value->blocked_vpn, stat->TMR, stat->RTime);
 
             // remove from runnable list
             process *popped_proc = remove_from_runnable(result_proc->value,

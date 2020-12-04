@@ -17,6 +17,7 @@
 page *page_replace(page **ram_head, page **ram_tail, page **clock_hand, int *flag)
 {
   page *ret = *ram_head;
+  // printf("replace page: (%s %s, %ld)\n", ret->pid,ret->vpn, ret->ppn);
 
   // move the head to tail
   move_to_ram_tail(ram_head, ram_tail);
@@ -47,6 +48,7 @@ void page_reference(page *ptr, page **ram_head, page **ram_tail)
   // ptr is at the head of ram list
   else if (ptr == *ram_head && ptr != *ram_tail)
   {
+    // printf("move (%s %s, %ld) to last\n", ptr->pid, ptr->vpn, ptr->ppn);
     *ram_head = ptr->ram_next;
     (*ram_head)->ram_prev = NULL;
     (*ram_tail)->ram_next = ptr;
@@ -57,6 +59,7 @@ void page_reference(page *ptr, page **ram_head, page **ram_tail)
 
   else
   {
+    // printf("move (%s %s, %ld) to last\n", ptr->pid, ptr->vpn, ptr->ppn);
     ptr->ram_prev->ram_next = ptr->ram_next;
     ptr->ram_next->ram_prev = ptr->ram_prev;
     (*ram_tail)->ram_next = ptr;
