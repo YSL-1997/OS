@@ -69,9 +69,6 @@ void basic(process **process_head, process **process_tail,
       // then all processes have terminated
       if (io_head == NULL)
       {
-        printf("total memory reference TMR = %ld\n", stat->TMR);
-        printf("total page faults TPI = %ld\n", stat->TPI);
-        printf("running time RTime = %ld\n", stat->RTime);
         break;
       }
 
@@ -106,11 +103,7 @@ void basic(process **process_head, process **process_tail,
       }
       else
       {
-
         // no runnable processes, no blocked processes
-        printf("total memory reference TMR = %ld\n", stat->TMR);
-        printf("total page faults TPI = %ld\n", stat->TPI);
-        printf("running time RTime = %ld\n", stat->RTime);
         break;
       }
     }
@@ -252,25 +245,37 @@ void basic(process **process_head, process **process_tail,
               while (tmp != NULL)
               {
                 page *tmp2 = tmp->ram_next;
+                // int max = strlen(tmp->pid) > strlen(end_proc->pid) ?
+                //           strlen(tmp->pid) : strlen(end_proc->pid);
+
+                // int max = 0;
+                // if (strlen(tmp->pid) > strlen(end_proc->pid))
+                // {
+                //   max = strlen(tmp->pid);
+                // }
+                // else
+                // {
+                //   max = strlen(end_proc->pid);
+                // }
+
                 // if we find the page that corresponds to end_proc
 
-                int max = strlen(tmp->pid) > strlen(end_proc->pid) ? strlen(tmp->pid) : strlen(end_proc->pid);
-
-                if (!strncmp(tmp->pid, end_proc->pid, max))
+                // if (!strncmp(tmp->pid, end_proc->pid, max))  is evil!
+                if (strcmp(tmp->pid, end_proc->pid) == 0)
                 {
-
                   // need to remove tmp from ram_list, add to free_list
                   // note that we do not modify anything stored in the page tmp
-                  page *removed_page = remove_from_ram(tmp, &ram_head, &ram_tail);
+                  page *removed_page = remove_from_ram(tmp, &ram_head,
+                                                       &ram_tail);
                   stat->occupied_pages -= 1;
 
                   add_to_free(removed_page, &free_head, &free_tail);
 
                   // remove the entry in page table
-                  char *key_pt_del = get_key_pt(removed_page->pid, removed_page->vpn);
+                  char *key_pt_del = get_key_pt(removed_page->pid,
+                                                removed_page->vpn);
                   delete_pt(&pt, key_pt_del);
                   free(key_pt_del);
-                  // free(removed_page->pid);
                   free(removed_page->vpn);
                 }
                 tmp = tmp2;
@@ -537,6 +542,7 @@ void wait_for_io_completion(FILE **fp,
   stat->RTime += tmp->timer;
   stat->fake_AMU += stat->occupied_pages * tmp->timer;
   stat->fake_ARP += stat->runnable_proc * tmp->timer;
+  // below is the original approach, which was very slow
   // for (int i = 0; i < tmp->timer; i++)
   // {
   //   stat->fake_AMU += stat->occupied_pages;
@@ -547,7 +553,7 @@ void wait_for_io_completion(FILE **fp,
   add_to_runnable(tmp, runnable_head, runnable_tail);
   stat->runnable_proc += 1;
 
-  // specific to FIFO, get the page to replace-------------
+  // get the page to replace
   if (*free_head == NULL)
   {
     // need to replace a page
@@ -568,7 +574,7 @@ void wait_for_io_completion(FILE **fp,
     page_to_replace->vpn = (*runnable_tail)->blocked_vpn;
 
     // add the "new" page to the page table
-    node_pt *entry_pt = create_entry_pt(page_to_replace); // create entry
+    node_pt *entry_pt = create_entry_pt(page_to_replace);
     add_to_pt(pt, entry_pt);
   }
   else
@@ -577,11 +583,6 @@ void wait_for_io_completion(FILE **fp,
     // take free_head as the page to allocate
     page *page_to_replace = pop_from_free(free_head, free_tail);
     page_to_replace->pid = (*runnable_tail)->pid;
-    // if (page_to_replace->vpn != NULL)
-    // {
-    //   free(page_to_replace->vpn);
-    // }
-
     page_to_replace->vpn = (*runnable_tail)->blocked_vpn;
     add_to_ram(page_to_replace, ram_head, ram_tail);
     stat->occupied_pages += 1;
@@ -613,7 +614,6 @@ void wait_for_io_completion(FILE **fp,
 process *remove_from_runnable(process *ptr, process **runnable_head,
                               process **runnable_tail)
 {
-  // printf("remove from runnable: pid=%s\n", ptr->pid);
   assert(*runnable_head != NULL);
   assert(*runnable_tail != NULL);
   if (*runnable_head == ptr && *runnable_tail == ptr)
@@ -648,6 +648,11 @@ process *remove_from_runnable(process *ptr, process **runnable_head,
   }
 }
 
+/*
+  this function removes a page frame from ram list
+  input: a pointer to a page, ram head and ram tail
+  return: the pointer to the page that removed
+*/
 page *remove_from_ram(page *ptr, page **ram_head, page **ram_tail)
 {
 
@@ -693,6 +698,10 @@ page *remove_from_ram(page *ptr, page **ram_head, page **ram_tail)
   }
 }
 
+/*
+  this function adds the page to the tail of the free list
+  input: pointer to the page frame, free head, free tail
+*/
 void add_to_free(page *ptr, page **free_head, page **free_tail)
 {
 
