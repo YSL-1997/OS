@@ -238,6 +238,7 @@ void *get_processes_info(process **runnable_head, process **runnable_tail,
 
         // add a node to process tree
         add_to_proc_table(&root, create_entry_proc(string_arr[0], new_process));
+        free(string_arr[1]);
       }
       //if the process exists in process tree, only need to update end_index
       else

@@ -113,11 +113,7 @@ void basic(process **process_head, process **process_tail,
     // read one line of the trace file at fp
     if (fgets(buf, MAX_LEN, fp) != NULL)
     {
-      char **pid_vpn_pair = (char **)malloc(sizeof(char *) * 2);
-      handle_malloc_error(pid_vpn_pair);
-
-      // now the line is stored in buf, parse it
-      pid_vpn_pair = parsing(buf);
+      char **pid_vpn_pair = parsing(buf);
 
       cur_pid = pid_vpn_pair[0]; // current pid
       cur_vpn = pid_vpn_pair[1]; // current vpn
@@ -206,7 +202,7 @@ void basic(process **process_head, process **process_tail,
           // if page exists in memory
           else
           {
-            //check whether current location is less than the current index of 
+            //check whether current location is less than the current index of
             // page, if so, the current trace has been implemented, then skip.
             if (result_proc->value->cur_index >
                 (unsigned)handle_ftell_error(ftell(fp)))
@@ -293,8 +289,17 @@ void basic(process **process_head, process **process_tail,
           }
         }
       }
+      free(pid_vpn_pair);
     }
+    
   } while (true);
+  free(buf);
+  while(free_head != NULL){
+    page* tmp = free_head->free_next;
+    free(free_head);
+    free_head = tmp;
+  }
+  free(free_arr);
 }
 
 /*
@@ -564,7 +569,7 @@ void wait_for_io_completion(FILE **fp,
     page *page_to_replace = pop_from_free(free_head, free_tail);
     page_to_replace->pid = (*runnable_tail)->pid;
     page_to_replace->vpn = (*runnable_tail)->blocked_vpn;
-    
+
     add_to_ram(page_to_replace, ram_head, ram_tail);
     stat->occupied_pages += 1;
 
@@ -701,3 +706,4 @@ void add_to_free(page *ptr, page **free_head, page **free_tail)
     ptr->free_prev = NULL;
   }
 }
+

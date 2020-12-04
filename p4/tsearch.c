@@ -245,7 +245,7 @@ void delete_proc(void **root, char *key)
   else
   {
     tdelete(node, root, compare_proc);
-    // free(node);
+    free(node);
   }
 }
 
@@ -265,6 +265,6 @@ void delete_pt(void **root, char *key)
   else
   {
     tdelete(node, root, compare_pt);
-    // free(node);
+    free(node);
   }
 }
