@@ -245,18 +245,7 @@ void basic(process **process_head, process **process_tail,
               while (tmp != NULL)
               {
                 page *tmp2 = tmp->ram_next;
-                // int max = strlen(tmp->pid) > strlen(end_proc->pid) ?
-                //           strlen(tmp->pid) : strlen(end_proc->pid);
-
-                // int max = 0;
-                // if (strlen(tmp->pid) > strlen(end_proc->pid))
-                // {
-                //   max = strlen(tmp->pid);
-                // }
-                // else
-                // {
-                //   max = strlen(end_proc->pid);
-                // }
+              
 
                 // if we find the page that corresponds to end_proc
 
