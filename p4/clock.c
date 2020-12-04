@@ -16,7 +16,9 @@
              flag is 1 => has initialized clock_hand
   
 */
-page *page_replace(page **ram_head, page **ram_tail, page **clock_hand, int *flag)
+page *page_replace(page **ram_head, __attribute__((unused)) page **ram_tail,
+                   __attribute__((unused)) page **clock_hand,
+                   __attribute__((unused)) int *flag)
 {
   if (*flag == 0)
   {
@@ -44,6 +46,7 @@ page *page_replace(page **ram_head, page **ram_tail, page **clock_hand, int *fla
     }
     else
     {
+      // set the ref_bit to be zero, and go on to the next page frame
       (*clock_hand)->ref_bit = 0;
       if ((*clock_hand)->ram_next == NULL)
       {
@@ -60,9 +63,12 @@ page *page_replace(page **ram_head, page **ram_tail, page **clock_hand, int *fla
 
 /* 
   clock page reference
-  move the referenced page to the ram_tail
+  modify the ref_bit of the page to be 1
+  input: pointer to the page, ram_head, ram_tail
 */
-void page_reference(page *ptr, page **ram_head, page **ram_tail){
+void page_reference(page *ptr, __attribute__((unused)) page **ram_head,
+                    __attribute__((unused)) page **ram_tail)
+{
   ptr->ref_bit = 1;
   return;
 }

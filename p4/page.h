@@ -19,9 +19,6 @@ typedef struct page{
   
   int ref_bit;
   // reference bit
-  
-  int valid_bit;
-  // valid bit
 
   struct page* pt_next;
   // pointer to the next page in page table

@@ -18,7 +18,6 @@ page *initialize_page_frame(unsigned long ppn)
   new_page->vpn = "";
   new_page->ppn = ppn;
   new_page->ref_bit = 0;
-  new_page->valid_bit = 0;
   new_page->pt_next = NULL;
   new_page->pt_prev = NULL;
   new_page->ipt_next = NULL;

@@ -1,46 +1,36 @@
 #ifndef PAGEALGORITHMS_H_
 #define PAGEALGORITHMS_H_
 
-#define _GNU_SOURCE
-#include <search.h>
-#include "input.h"
 #include "page.h"
-#include "process.h"
-#include "tsearch.h"
 #include "assert.h"
-#include "errorHandling.h"
-#include "statistics.h"
 
+/*
+  this is the api for the three page replacement algorithms
+  after calling this function, the page frame has been moved but not yet updated
+  (e.g. in FIFO and LRU, the first page has been moved to the last
+        in Clock, just move the clock_hand and find the page to be replaced)
+  input:
+  FIFO and LRU only operates on the first two parameters: ram_head and ram_tail
+  Clock requires the last two params, with the clock_hand and the flag that 
+  indicates whether the clock_hand has been initialized or not.
 
+  return:
+  a pointer to a page to be replaced
+*/
+page *page_replace(page **ram_head, page **ram_tail, page **clock_hand,
+                   int *flag);
 
-page **malloc_page_frames(unsigned long num_pages);
-process *pop_from_io(process **head, process **tail);
-void add_to_runnable(process *ptr, process **head, process **tail);
-char *get_key_pt(char *s1, char *s2);
-void move_to_ram_tail(page **ram_head, page **ram_tail);
-page *pop_from_free(page **free_head, page **free_tail);
-void add_to_ram(page *ptr, page **head, page **tail);
-void wait_for_io_completion(FILE **fp,
-                            process **io_head, process **io_tail,
-                            process **runnable_head, process **runnable_tail,
-                            page **free_head, page **free_tail,
-                            page **ram_head, page **ram_tail,
-                            statistics* stat, void **pt, void **ipt,
-                            page** clock_hand, int* flag);
-
-process *remove_from_runnable(process *ptr, process **runnable_head,
-                              process **runnable_tail);
-
-void add_to_io(process *ptr, process **io_head, process **io_tail);
-page *remove_from_ram(page *ptr, page **ram_head, page **ram_tail);
-void add_to_free(page *ptr, page **free_head, page **free_tail);
-unsigned long num_ram(page* ram_head);
-unsigned long num_runnable_proc(process* runnable_head);
-
-void fifo(process **process_head, process **process_tail,
-          unsigned long num_pages, void **proc_table, statistics* stat);
-
-page *page_replace(page **ram_head, page **ram_tail, page **clock_hand, int *flag);
+/*
+  this is the api for referencing a page for three algorithms
+  after calling this function:
+    FIFO: do nothing
+    LRU: moves the page to the ram tail
+    Clock: set the ref_bit of the page to be 0
+    
+  input: a pointer to a page to be referenced, ram head and ram tail 
+*/
 void page_reference(page *ptr, page **ram_head, page **ram_tail);
+
+void move_to_ram_tail(page **ram_head, page **ram_tail);
 
 #endif

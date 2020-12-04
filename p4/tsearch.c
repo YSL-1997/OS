@@ -53,22 +53,6 @@ node_pt *create_entry_pt(page *ptr)
 }
 
 /*
-  this function creates an entry of the inverted page table
-  input: unsigned long ppn, pointer to the page struct
-  return: a pointer to the node_pt struct
-*/
-node_ipt *create_entry_ipt(unsigned long key, page *value)
-{
-  node_ipt *new_entry = malloc(sizeof(node_ipt));
-  handle_malloc_error(new_entry);
-
-  new_entry->key = key;
-  new_entry->value = value;
-
-  return new_entry;
-}
-
-/*
   compare the two keys of two nodes for the binary tree
   for the process table
   input: two pointers to process struct
@@ -130,33 +114,6 @@ int compare_pt(const void *a, const void *b)
   }
 }
 
-/*
-  compare the two keys of two nodes for the binary tree
-  for the inverted page table
-  input: two pointers to page struct
-  output: 1 if a > b
-          0 if a == b
-	        -1 if a < b
-*/
-int compare_ipt(const void *a, const void *b)
-{
-  // cast the params into process*
-  node_ipt *tmp_a = (node_ipt *)a;
-  node_ipt *tmp_b = (node_ipt *)b;
-
-  if (tmp_a->key > tmp_b->key)
-  {
-    return 1;
-  }
-  else if (tmp_a->key == tmp_b->key)
-  {
-    return 0;
-  }
-  else
-  {
-    return -1;
-  }
-}
 
 /*
   this function adds an entry to the process table
@@ -219,35 +176,6 @@ void add_to_pt(void **root, node_pt *ptr)
   }
 }
 
-/*
-  this function adds an entry to the inverted page table
-  input: address of the pointer to the root of inverted pt 
-         entry to be added
-*/
-void add_to_ipt(void **root, node_ipt *ptr)
-{
-  void *result;
-  node_ipt *exist;
-
-  if ((result = tsearch(ptr, root, compare_ipt)) == NULL)
-  {
-    // add to process table failed
-    fprintf(stderr, "insufficient memory\n");
-    exit(EXIT_FAILURE);
-  }
-  else
-  {
-    // check if the to-be-added node's key already existed
-    exist = *(node_ipt **)result;
-
-    if (exist != ptr)
-    {
-      // the ptr that we want to add already exists
-      // no need to add to table
-      free(ptr);
-    }
-  }
-}
 
 /*
   this function finds the node in the process table if there's one
@@ -302,32 +230,6 @@ node_pt *find_pt(void **root, char *key)
 }
 
 /*
-  this function finds the node in the inverted page table if there's one
-  input: root of the inverted page table, unsigned long ppn
-*/
-node_ipt *find_ipt(void **root, unsigned long key)
-{
-  void *result;
-  node_ipt *node;
-  node_ipt search_node;
-
-  search_node.key = key;
-
-  if ((result = tfind(&search_node, root, compare_ipt)) == NULL)
-  {
-    // no node found
-    node = NULL;
-  }
-  else
-  {
-    // node found
-    node = *(node_ipt **)result;
-  }
-
-  return node;
-}
-
-/*
   this function deletes a node in process table
   if not found, then do nothing
   input: root of process table, unsigned long pid
@@ -365,55 +267,4 @@ void delete_pt(void **root, char *key)
     tdelete(node, root, compare_pt);
     // free(node);
   }
-}
-
-/*
-  this function deletes a node in inverted table
-  if not found, then do nothing
-  input: root of inverted page table, unsigned long ppn
-*/
-void delete_ipt(void **root, unsigned long key)
-{
-  node_ipt *node;
-
-  if ((node = find_ipt(root, key)) == NULL)
-  {
-    // nothing to delete
-  }
-  else
-  {
-    tdelete(node, root, compare_ipt);
-    free(node);
-  }
-}
-
-/*
-  this function frees node when destroying the process table
-*/
-void free_proc(void *ptr)
-{
-  node_proc *node = ptr;
-  free(node->value->pid);
-  free(node->value->blocked_vpn);
-  free(node);
-}
-
-/*
-  this function frees node when destroying the page table
-*/
-void free_pt(void *ptr)
-{
-  node_pt *node = ptr;
-  free(node->value->pid);
-  free(node->value->vpn);
-  free(node);
-}
-
-/*
-  this function frees node when destroying the inverted page table
-*/
-void free_ipt(void *ptr)
-{
-  node_ipt *node = ptr;
-  free(node);
 }

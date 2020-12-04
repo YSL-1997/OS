@@ -14,7 +14,9 @@
   return: the pointer to the page to be replaced
 
 */
-page *page_replace(page **ram_head, page **ram_tail, page **clock_hand, int *flag)
+page *page_replace(page **ram_head, page **ram_tail,
+                   __attribute__((unused)) page **clock_hand, 
+                   __attribute__((unused)) int *flag)
 {
   page *ret = *ram_head;
   // printf("replace page: (%s %s, %ld)\n", ret->pid,ret->vpn, ret->ppn);

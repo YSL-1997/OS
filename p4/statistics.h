@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 // create a struct of statistics
 typedef struct statistics{
 
