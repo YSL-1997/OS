@@ -393,6 +393,8 @@ void delete_ipt(void **root, unsigned long key)
 void free_proc(void *ptr)
 {
   node_proc *node = ptr;
+  free(node->value->pid);
+  free(node->value->blocked_vpn);
   free(node);
 }
 
@@ -402,6 +404,8 @@ void free_proc(void *ptr)
 void free_pt(void *ptr)
 {
   node_pt *node = ptr;
+  free(node->value->pid);
+  free(node->value->vpn);
   free(node);
 }
 

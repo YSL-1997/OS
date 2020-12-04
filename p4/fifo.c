@@ -52,8 +52,8 @@ void fifo(process **process_head, process **process_tail,
   handle_malloc_error(buf);
 
   // stores the current information of the line we've read
-  char *cur_pid = "";
-  char *cur_vpn = "";
+  char *cur_pid = NULL;
+  char *cur_vpn = NULL;
 
   /*
      Important notes: fgets may return NULL for errors as well as EOF
@@ -134,6 +134,8 @@ void fifo(process **process_head, process **process_tail,
       if (result_proc == NULL)
       {
         // not found in process table => process has terminated, skip this line
+        free(cur_pid);
+        free(cur_vpn);
         continue;
       }
       else
@@ -142,13 +144,17 @@ void fifo(process **process_head, process **process_tail,
         if (result_proc->value->is_blocked)
         {
           // if this process is blocked, then it must be in io_queue, skip
+          free(cur_pid);
+          free(cur_vpn);
           continue;
         }
         else
         {
           // this process is not blocked, go to pt to see if there's page fault
           char *key_pt = get_key_pt(cur_pid, cur_vpn);
+          free(cur_pid);
           node_pt *result_pt = find_pt(&pt, key_pt);
+          free(key_pt);
 
           if (result_pt == NULL)
           {
@@ -165,7 +171,20 @@ void fifo(process **process_head, process **process_tail,
             // modify the cur_index of this process
             result_proc->value->cur_index = cur_pos - strlen(buf);
             result_proc->value->is_blocked = true;
+
+            // if (result_proc->value->blocked_vpn != NULL &&
+            //     strcmp(result_proc->value->blocked_vpn, "") > 0)
+            // {
+            //   free(result_proc->value->blocked_vpn);
+            //   result_proc->value->blocked_vpn = cur_vpn;
+            // }
+            // else
+            // {
+            //   result_proc->value->blocked_vpn = cur_vpn;
+            // }
+
             result_proc->value->blocked_vpn = cur_vpn;
+
             result_proc->value->timer = 2000000;
             result_proc->value->io_next = NULL;
 
@@ -207,7 +226,7 @@ void fifo(process **process_head, process **process_tail,
               continue;
             }
             // found, no page fault, just reference the page (+1 ns)
-
+            free(cur_vpn);
 
             page_reference(result_pt->value, &ram_head, &ram_tail);
 
@@ -251,14 +270,17 @@ void fifo(process **process_head, process **process_tail,
                   add_to_free(removed_page, &free_head, &free_tail);
 
                   // remove the entry in pt and ipt
-                  delete_pt(&pt, get_key_pt(removed_page->pid, removed_page->vpn));
-
+                  char* key_pt_del = get_key_pt(removed_page->pid, removed_page->vpn);
+                  delete_pt(&pt, key_pt_del);
+                  free(key_pt_del);
+                  // free(removed_page->pid);
+                  free(removed_page->vpn);
                   // delete_ipt(&ipt, removed_page->ppn);
                 }
                 tmp = tmp2;
               }
-
-              free(end_proc);
+              free(end_proc->pid);
+              
             }
 
             // check if io list is empty
@@ -288,12 +310,11 @@ void fifo(process **process_head, process **process_tail,
         }
       }
     }
-    else
-    {
-      fprintf(stderr, "fgets() error\n");
-      exit(EXIT_FAILURE);
-    }
-
+    // else
+    // {
+    //   fprintf(stderr, "fgets() error\n");
+    //   exit(EXIT_FAILURE);
+    // }
   } while (true);
 }
 
@@ -383,7 +404,6 @@ void add_to_runnable(process *ptr, process **head, process **tail)
     (*tail)->runnable_next = NULL;
   }
 }
-
 
 /*
   get the concatenated key string from a pid and a vpn
@@ -491,8 +511,8 @@ void wait_for_io_completion(FILE **fp,
                             process **runnable_head, process **runnable_tail,
                             page **free_head, page **free_tail,
                             page **ram_head, page **ram_tail,
-                            statistics *stat, void **pt, void **ipt, 
-                            page** clock_hand, int* flag)
+                            statistics *stat, void **pt, void **ipt,
+                            page **clock_hand, int *flag)
 {
   process *tmp = pop_from_io(io_head, io_tail);
 
@@ -515,10 +535,6 @@ void wait_for_io_completion(FILE **fp,
     // need to replace a page
     // page_to_replace is ram_head;
 
-    
-    
-
-
     // ram_head, ram_tail, runnable_head, runnable_tail, pt
     // run pageReplacement algo to get the page to be replaced
     // fifo: return: ram_head
@@ -531,17 +547,17 @@ void wait_for_io_completion(FILE **fp,
 
     // this function moves the page to ram_tail if needed (clock does not)
     // this function returns the page to be replaced
-    page* page_to_replace = page_replace(ram_head, ram_tail, clock_hand, flag);
-    
+    page *page_to_replace = page_replace(ram_head, ram_tail, clock_hand, flag);
+
     // get the key of pt to be deleted
     // update pt (delete former entry)
     char *key_pt = get_key_pt(page_to_replace->pid, page_to_replace->vpn);
     delete_pt(pt, key_pt);
-    
+
     // modify the page
     page_to_replace->pid = (*runnable_tail)->pid;
     page_to_replace->vpn = (*runnable_tail)->blocked_vpn;
-    
+
     // update ipt (no need in this case)
 
     // add the "new" page to the page table
@@ -712,4 +728,3 @@ void add_to_free(page *ptr, page **free_head, page **free_tail)
     ptr->free_prev = NULL;
   }
 }
-

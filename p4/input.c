@@ -241,10 +241,14 @@ void* get_processes_info(process** runnable_head, process** runnable_tail, unsig
       //if the process exists in process tree, only need to update end_index
       else{
         (proc_node->value)->end_index = end;
+        free(string_arr[0]);
+        free(string_arr[1]);
+        free(string_arr);
       }
       
       // if there is new line, reset index
       if(ch == '\n'){
+        
 	      read_len = 0;
 	      line_index++; 
       }
