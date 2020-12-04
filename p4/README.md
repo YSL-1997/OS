@@ -30,7 +30,7 @@ In the page and process structures, we create some points to the next page/proce
 | --- | --- | --- | --- | --- | --- |  --- |
 |FIFO  | 0.306535|	0.000012|	4,000	|167	|334,000,058|	0.052  |
 |LRU   | 0.306535|	0.000012	|4,000|	167	|334,000,058	|0.026 |
-|CLOCK | 0.306535	|0.000012	|4,000	|167	|334,0000,58	|0.02 |
+|CLOCK | 0.306535	|0.000012	|4,000	|167	|334,0000,58	|0.027|
  
 - bigmix.addrtrace  tracefile <br/>
 
