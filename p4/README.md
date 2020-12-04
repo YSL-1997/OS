@@ -1,5 +1,12 @@
 # CS537 Project 4
 ### Instruction: [http://pages.cs.wisc.edu/~bart/537/programs/program4.html](http://pages.cs.wisc.edu/~bart/537/programs/program4.html)
+
+## Important note
+The tsearch module is cited from:
+https://github.com/increscent/c_examples/blob/main/tsearch/main.c and https://nixdoc.net/man-pages/Linux/man3/tsearch.3.html#EXAMPLE
+
+We made some changes to it so that it fits our implementation.
+
 ## Implementation
 ### Data structure
 - process
@@ -8,6 +15,7 @@
 - page tree
 - statistics <br/>
 In the page and process structures, we create some points to the next page/process to simulate the double linked list, including I/O list, runnable list, occupied frame list and free list.
+
 ### Modules
 - input: The module pasrses the first pass of tracefile, including finding all the PID's, and marking the start and end of execution (first and last memory reference) of each process as well as reporting error for the traces that don't match the format. The frame size in memory is got by parsing the input arguments.
 

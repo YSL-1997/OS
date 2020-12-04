@@ -40,6 +40,7 @@ void basic(process **process_head, process **process_tail,
   page *ram_head = NULL;
   page *ram_tail = NULL;
 
+  // used for clock algorithm
   page *clock_hand = NULL;
   int flag = 0;
 
@@ -205,8 +206,8 @@ void basic(process **process_head, process **process_tail,
           // if page exists in memory
           else
           {
-            //check whether the current location is less than the current index
-            // of page, if so, the current trace has been implemented, then skip.
+            //check whether current location is less than the current index of 
+            // page, if so, the current trace has been implemented, then skip.
             if (result_proc->value->cur_index >
                 (unsigned)handle_ftell_error(ftell(fp)))
             {
@@ -228,9 +229,7 @@ void basic(process **process_head, process **process_tail,
             if ((unsigned)handle_ftell_error(ftell(fp)) ==
                 result_proc->value->end_index)
             {
-              printf("process %s terminated\n", result_proc->value->pid);
-
-              // if this process has terminated
+              // this process has terminated
               // remove this process from runnable list
               process *end_proc = remove_from_runnable(result_proc->value,
                                                        &runnable_head,
@@ -245,9 +244,6 @@ void basic(process **process_head, process **process_tail,
               while (tmp != NULL)
               {
                 page *tmp2 = tmp->ram_next;
-              
-
-                // if we find the page that corresponds to end_proc
 
                 // if (!strncmp(tmp->pid, end_proc->pid, max))  is evil!
                 if (strcmp(tmp->pid, end_proc->pid) == 0)
@@ -269,7 +265,6 @@ void basic(process **process_head, process **process_tail,
                 }
                 tmp = tmp2;
               }
-
               free(end_proc->pid);
               free(end_proc);
             }
@@ -425,9 +420,6 @@ char *get_key_pt(char *s1, char *s2)
                                                  strlen(s2) + 2));
   handle_malloc_error(key_str);
 
-  // strcat(key_str, s1);
-  // strcat(key_str, " ");
-  // strcat(key_str, s2);
   snprintf(key_str, strlen(s1) + strlen(s2) + 2, "%s %s", s1, s2);
   return key_str;
 }
@@ -444,7 +436,6 @@ void move_to_ram_tail(page **ram_head, page **ram_tail)
   }
   if (*ram_head != *ram_tail)
   {
-
     page *tmp = *ram_head;
     *ram_head = tmp->ram_next;
     (*ram_head)->ram_prev = NULL;
@@ -573,6 +564,7 @@ void wait_for_io_completion(FILE **fp,
     page *page_to_replace = pop_from_free(free_head, free_tail);
     page_to_replace->pid = (*runnable_tail)->pid;
     page_to_replace->vpn = (*runnable_tail)->blocked_vpn;
+    
     add_to_ram(page_to_replace, ram_head, ram_tail);
     stat->occupied_pages += 1;
 
