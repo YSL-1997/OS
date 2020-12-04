@@ -6,7 +6,7 @@
 - page
 - process tree
 - page tree
-- statistics
+- statistics <br/>
 In the page and process structures, we create some points to the next page/process to simulate the double linked list, including I/O list, runnable list, occupied frame list and free list.
 ### Modules
 - input: The module pasrses the first pass of tracefile, including finding all the PID's, and marking the start and end of execution (first and last memory reference) of each process as well as reporting error for the traces that don't match the format. The frame size in memory is got by parsing the input arguments.
