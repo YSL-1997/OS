@@ -17,11 +17,11 @@ In the page and process structures, we create some points to the next page/proce
 
 ### Results
 - smallmix.addrtrace  tracefile <br/>
-       | "AMU"    |"ARP"	    |"TMR" "TPI"	 |"RTime"	|"ExecTime"| <br/>
+  Algo     | "AMU"    |"ARP"	    |"TMR" "TPI"	 |"RTime"	|"ExecTime"|
  --- | --- | --- | --- | --- | --- |
-FIFO |  0.372576|	0.000003|	1,555	332|	664,000,002|	0.014 |  <br/>
-LRU   | 0.372576	|0.000003|	1,555	332|	664,000,002|	0.026 |  <br/>
-CLOCK | 0.372576|	0.000003|	1,555	332|	664,000,002|	0.017 | <br/>
+FIFO |  0.372576|	0.000003|	1,555	332|	664,000,002|	0.014 | 
+LRU   | 0.372576	|0.000003|	1,555	332|	664,000,002|	0.026 |  
+CLOCK | 0.372576|	0.000003|	1,555	332|	664,000,002|	0.017 | 
 
 - 4000.addrtrace  tracefile  <br/>
        "AMU"    "ARP"	    "TMR" "TPI"	 "RTime"	"ExecTime" <br/>
