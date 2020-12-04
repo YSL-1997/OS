@@ -29,7 +29,7 @@ In the page and process structures, we create some points to the next page/proce
 | Algorithm     | "AMU"    |"ARP"	    |"TMR" |"TPI"	 |"RTime"	|"ExecTime"|
 | --- | --- | --- | --- | --- | --- |  --- |
 |FIFO  | 0.306535|	0.000012|	4,000	|167	|334,000,058|	0.052  |
-|LRU   | 0.306535|	0.000012	|4,000	167	|334,000,058	|0.026 |
+|LRU   | 0.306535|	0.000012	|4,000|	167	|334,000,058	|0.026 |
 |CLOCK | 0.306535	|0.000012	|4,000	|167	|334,0000,58	|0.02 |
  
 - bigmix.addrtrace  tracefile <br/>
@@ -37,7 +37,7 @@ In the page and process structures, we create some points to the next page/proce
 | Algorithm     | "AMU"    |"ARP"	    |"TMR" |"TPI"	 |"RTime"	|"ExecTime"|
 | --- | --- | --- | --- | --- | --- |--- |
 |FIFO  | 0.999916|	0.000001	|4,534,297	|2,453,097	|4,906,194,201,210	|22.277|
-|LRU  |  0.999915	|0.000001|	4,534,297	|2,449,409|	4,898,818,200,824	|22.598|
+|LRU  | 0.999915	|0.000001|	4,534,297	|2,449,409|	4,898,818,200,824	|22.598|
 CLOCK | 0.999915|	0.000001|	4,534,297	|2,449,409	|4,898,818,200,824	|22.598 |
 
 - 12million.addrtrace  tracefile <br/>
