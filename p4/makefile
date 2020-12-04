@@ -1,3 +1,5 @@
+all: 537pfsim-fifo 537pfsim-lru 537pfsim-clock
+
 537pfsim-fifo: main.o fifo.o basic.o input.o tsearch.o \
 statistics.o process.o page.o errorHandling.o
 	gcc -Wall -Wextra -pedantic -o 537pfsim-fifo main.o fifo.o basic.o \
