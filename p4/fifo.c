@@ -194,7 +194,7 @@ void fifo(process **process_head, process **process_tail,
             {
               io_empty = false;
             }
-            printf("PID: %s, VPN: %s\nTMR so far: %ld\nClock so far: %ld\n",result_proc->value->pid, result_proc->value->blocked_vpn, stat->TMR, stat->RTime);
+            // printf("PID: %s, VPN: %s\nTMR so far: %ld\nClock so far: %ld\n",result_proc->value->pid, result_proc->value->blocked_vpn, stat->TMR, stat->RTime);
 
             // remove from runnable list
             process *popped_proc = remove_from_runnable(result_proc->value,
@@ -255,14 +255,19 @@ void fifo(process **process_head, process **process_tail,
               // need to remove the corresponding entries in pt, ipt
               // remove the page frames that corresponds to end_proc
               page *tmp = ram_head;
+              printf("delete:\n");
               while (tmp != NULL)
               {
                 page *tmp2 = tmp->ram_next;
-
                 // if we find the page that corresponds to end_proc
                 // if (!strcmp(tmp->pid, end_proc->pid))
-                if (!strncmp(tmp->pid, end_proc->pid, strlen(end_proc->pid)))
+                int max = strlen(tmp->pid) > strlen(end_proc->pid) ? strlen(tmp->pid) : strlen(end_proc->pid);
+
+                if (!strncmp(tmp->pid, end_proc->pid, max))
+
                 {
+
+                  // printf(" (%s %s, %ld)", tmp->pid, tmp->vpn, tmp->ppn);
                   // need to remove tmp from ram_list, add to free_list
                   // note that we do not modify anything stored in the page tmp
                   page *removed_page = remove_from_ram(tmp, &ram_head, &ram_tail);
@@ -271,7 +276,7 @@ void fifo(process **process_head, process **process_tail,
                   add_to_free(removed_page, &free_head, &free_tail);
 
                   // remove the entry in pt and ipt
-                  char* key_pt_del = get_key_pt(removed_page->pid, removed_page->vpn);
+                  char *key_pt_del = get_key_pt(removed_page->pid, removed_page->vpn);
                   delete_pt(&pt, key_pt_del);
                   free(key_pt_del);
                   // free(removed_page->pid);
@@ -280,8 +285,18 @@ void fifo(process **process_head, process **process_tail,
                 }
                 tmp = tmp2;
               }
+
               free(end_proc->pid);
-              
+              free(end_proc);
+              // printf("\n");
+              // printf("now in ram list:");
+              // page *tempo = ram_head;
+              // while (tempo != NULL)
+              // {
+              //   printf(" (%s %s, %ld)", tempo->pid, tempo->vpn, tempo->ppn);
+              //   tempo = tempo->ram_next;
+              // }
+              // printf("\n");
             }
 
             // check if io list is empty
@@ -386,6 +401,29 @@ process *pop_from_io(process **head, process **tail)
 }
 
 /*
+  this function adds a process to the tail of io list
+  input: pointer to the to-be-added process, io_head, io_tail
+*/
+void add_to_io(process *ptr, process **io_head, process **io_tail)
+{
+  // printf("add to io queue: pid=%s\n", ptr->pid);
+  if (*io_head == *io_tail && *io_head == NULL)
+  {
+    // io list is empty
+    *io_head = ptr;
+    *io_tail = ptr;
+    ptr->io_next = NULL;
+  }
+  else
+  {
+    // io list has at least one processes
+    (*io_tail)->io_next = ptr;
+    *io_tail = ptr;
+    ptr->io_next = NULL;
+  }
+}
+
+/*
   this function adds a process popped from io_queue to runnable queue
   input: a pointer to a process struct, runnable_head, runnable_tail
 */
@@ -396,6 +434,8 @@ void add_to_runnable(process *ptr, process **head, process **tail)
     // runnable list is empty
     *head = ptr;
     *tail = ptr;
+    ptr->runnable_next = NULL;
+    ptr->runnable_prev = NULL;
   }
   else
   {
@@ -472,6 +512,8 @@ page *pop_from_free(page **free_head, page **free_tail)
     page *tmp = *free_head;
     *free_head = (*free_head)->free_next;
     (*free_head)->free_prev = NULL;
+    tmp->free_next = NULL;
+    tmp->free_prev = NULL;
     return tmp;
   }
 }
@@ -493,6 +535,7 @@ void add_to_ram(page *ptr, page **head, page **tail)
     (*tail)->ram_next = ptr;
     ptr->ram_prev = *tail;
     *tail = ptr;
+    ptr->ram_next = NULL;
   }
 }
 
@@ -554,6 +597,8 @@ void wait_for_io_completion(FILE **fp,
     // update pt (delete former entry)
     char *key_pt = get_key_pt(page_to_replace->pid, page_to_replace->vpn);
     delete_pt(pt, key_pt);
+    free(key_pt);
+    free(page_to_replace->vpn);
 
     // modify the page
     page_to_replace->pid = (*runnable_tail)->pid;
@@ -571,6 +616,11 @@ void wait_for_io_completion(FILE **fp,
     // take free_head as the page to allocate
     page *page_to_replace = pop_from_free(free_head, free_tail);
     page_to_replace->pid = (*runnable_tail)->pid;
+    // if (page_to_replace->vpn != NULL)
+    // {
+    //   free(page_to_replace->vpn);
+    // }
+
     page_to_replace->vpn = (*runnable_tail)->blocked_vpn;
     add_to_ram(page_to_replace, ram_head, ram_tail);
     stat->occupied_pages += 1;
@@ -641,28 +691,6 @@ process *remove_from_runnable(process *ptr, process **runnable_head,
     ptr->runnable_next = NULL;
     ptr->runnable_prev = NULL;
     return ptr;
-  }
-}
-
-/*
-  this function adds a process to the tail of io list
-  input: pointer to the to-be-added process, io_head, io_tail
-*/
-void add_to_io(process *ptr, process **io_head, process **io_tail)
-{
-  // printf("add to io queue: pid=%s\n", ptr->pid);
-  if (*io_head == *io_tail && *io_head == NULL)
-  {
-    // io list is empty
-    *io_head = ptr;
-    *io_tail = ptr;
-  }
-  else
-  {
-    // io list has at least one processes
-    (*io_tail)->io_next = ptr;
-    *io_tail = ptr;
-    ptr->io_next = NULL;
   }
 }
 
