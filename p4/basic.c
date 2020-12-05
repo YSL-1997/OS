@@ -126,6 +126,7 @@ void basic(process **process_head, process **process_tail,
         // not found in process table => process has terminated, skip this line
         free(cur_pid);
         free(cur_vpn);
+        free(pid_vpn_pair);
         continue;
       }
       else
@@ -136,6 +137,7 @@ void basic(process **process_head, process **process_tail,
           // if this process is blocked, then it must be in io_queue, skip
           free(cur_pid);
           free(cur_vpn);
+          free(pid_vpn_pair);
           continue;
         }
         else
