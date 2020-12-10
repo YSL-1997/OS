@@ -192,6 +192,7 @@ page *page_replace(page **ram_head,
           {
             e.data = (void *)handle_ftell_error(ftell(fp_min));
             hsearch(e, ENTER);
+            printf("pid %s , vpn %s are found.", cur_pid, cur_vpn);
           }
           else
           {
