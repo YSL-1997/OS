@@ -1,4 +1,4 @@
-all: 537pfsim-fifo 537pfsim-lru 537pfsim-clock 537pfsim-min
+all: 537pfsim-fifo 537pfsim-lru 537pfsim-clock 537pfsim-opt
 
 537pfsim-fifo: main.o fifo.o basic.o input.o tsearch.o \
 statistics.o process.o page.o errorHandling.o
@@ -15,9 +15,9 @@ statistics.o process.o page.o errorHandling.o
 	gcc -Wall -Wextra -pedantic -o 537pfsim-clock main.o clock.o basic.o \
 	input.o tsearch.o statistics.o process.o page.o errorHandling.o
 
-537pfsim-min: main.o min.o basic.o input.o tsearch.o \
+537pfsim-opt: main.o opt.o basic.o input.o tsearch.o \
 statistics.o process.o page.o errorHandling.o
-	gcc -Wall -Wextra -pedantic -o 537pfsim-min main.o min.o basic.o \
+	gcc -Wall -Wextra -pedantic -o 537pfsim-opt main.o opt.o basic.o \
 	input.o tsearch.o statistics.o process.o page.o errorHandling.o
 
 main.o: main.c basic.h
@@ -27,8 +27,8 @@ basic.o: basic.c input.h process.h tsearch.h errorHandling.h page.h \
 		  basic.h statistics.h
 	gcc -Wall -Wextra -pedantic -c basic.c
 
-min.o: min.c pageAlgorithms.h page.h basic.h
-	gcc -Wall -Wextra -pedantic -c min.c
+opt.o: opt.c pageAlgorithms.h page.h basic.h
+	gcc -Wall -Wextra -pedantic -c opt.c
 
 clock.o: clock.c pageAlgorithms.h page.h basic.h
 	gcc -Wall -Wextra -pedantic -c clock.c
@@ -58,4 +58,4 @@ errorHandling.o: errorHandling.c errorHandling.h
 	gcc -Wall -Wextra -pedantic -c errorHandling.c
 
 clean:
-	rm -f 537pfsim-fifo 537pfsim-lru 537pfsim-clock 537pfsim-min *.o
+	rm -f 537pfsim-fifo 537pfsim-lru 537pfsim-clock 537pfsim-opt *.o
