@@ -3,7 +3,8 @@
 
 #include "page.h"
 #include "assert.h"
-#include "basic.h"
+#include "tsearch.h"
+#include "input.h"
 
 /*
   this is the api for the three page replacement algorithms
