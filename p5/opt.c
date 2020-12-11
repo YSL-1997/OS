@@ -58,10 +58,10 @@ page *page_replace(page **ram_head,
 
   char *cur_pid = NULL;
   char *cur_vpn = NULL;
-  
+
   node_pt *result_pt = NULL; // store the page table search result
 
-  fp_min = read_file(filename); // file pointer used in MIN Algorithm
+  fp_min = read_file(filename);   // file pointer used in MIN Algorithm
   node_bitmap bitmap[frame_size]; // store the visited info for each page frame
 
   // initialize all pages with visited = 0
@@ -82,7 +82,7 @@ page *page_replace(page **ram_head,
     cur_vpn = pid_vpn_pair[1]; // current vpn
 
     node_proc *result_proc = find_proc(proc_table, cur_pid);
-    
+
     // if pid is not in process table, i.e. the process has teminated
     if (result_proc == NULL)
     {
@@ -107,12 +107,14 @@ page *page_replace(page **ram_head,
       else
       {
         // printf("(%s, %s) has not been executed\n", cur_pid, cur_vpn);
-        char *key_pt = (char*)malloc(sizeof(char) * (strlen(cur_pid) +
-						     strlen(cur_vpn) + 2));
-	handle_malloc_error(key_pt);
-	snprintf(key_pt, strlen(cur_pid) + strlen(cur_pid) + 2, "%s %s",
-		 cur_pid, cur_vpn);
-	
+        
+        // get the key to find in page table
+        char *key_pt = (char *)malloc(sizeof(char) * (strlen(cur_pid) +
+                                                      strlen(cur_vpn) + 2));
+        handle_malloc_error(key_pt);
+        snprintf(key_pt, strlen(cur_pid) + strlen(cur_pid) + 2, "%s %s",
+                 cur_pid, cur_vpn);
+
         result_pt = find_pt(&pt, key_pt);
 
         // check whether the trace is in ram
@@ -123,6 +125,7 @@ page *page_replace(page **ram_head,
           free(cur_pid);
           free(cur_vpn);
           free(pid_vpn_pair);
+          free(key_pt);
           continue;
         }
         else
@@ -130,7 +133,7 @@ page *page_replace(page **ram_head,
           // printf("(%s, %s) is in ram\n", cur_pid, cur_vpn);
           if (bitmap[result_pt->value->ppn - 1].visited == 0)
           {
-            // printf("(%s, %s) has not been visited is the latest one\n", 
+            // printf("(%s, %s) has not been visited is the latest one\n",
             //        result_pt->value->pid, result_pt->value->vpn);
             // means this page has not been recorded yet
             bitmap[result_pt->value->ppn - 1].visited = 1;
