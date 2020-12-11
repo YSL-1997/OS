@@ -107,7 +107,12 @@ page *page_replace(page **ram_head,
       else
       {
         // printf("(%s, %s) has not been executed\n", cur_pid, cur_vpn);
-        char *key_pt = get_key_pt(cur_pid, cur_vpn);
+        char *key_pt = (char*)malloc(sizeof(char) * (strlen(cur_pid) +
+						     strlen(cur_vpn) + 2));
+	handle_malloc_error(key_pt);
+	snprintf(key_pt, strlen(cur_pid) + strlen(cur_pid) + 2, "%s %s",
+		 cur_pid, cur_vpn);
+	
         result_pt = find_pt(&pt, key_pt);
 
         // check whether the trace is in ram
