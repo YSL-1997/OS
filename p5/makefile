@@ -17,18 +17,18 @@ statistics.o process.o page.o errorHandling.o
 
 537pfsim-min: main.o min.o basic.o input.o tsearch.o \
 statistics.o process.o page.o errorHandling.o
-	gcc -g -Wall -Wextra -pedantic -o 537pfsim-min main.o min.o basic.o \
+	gcc -Wall -Wextra -pedantic -o 537pfsim-min main.o min.o basic.o \
 	input.o tsearch.o statistics.o process.o page.o errorHandling.o
 
 main.o: main.c basic.h
-	gcc -g -Wall -Wextra -pedantic -c main.c
+	gcc -Wall -Wextra -pedantic -c main.c
 
 basic.o: basic.c input.h process.h tsearch.h errorHandling.h page.h \
 		  basic.h statistics.h
-	gcc -g -Wall -Wextra -pedantic -c basic.c
+	gcc -Wall -Wextra -pedantic -c basic.c
 
 min.o: min.c pageAlgorithms.h page.h basic.h
-	gcc -g -Wall -Wextra -pedantic -c min.c
+	gcc -Wall -Wextra -pedantic -c min.c
 
 clock.o: clock.c pageAlgorithms.h page.h basic.h
 	gcc -Wall -Wextra -pedantic -c clock.c

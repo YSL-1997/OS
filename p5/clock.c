@@ -19,10 +19,10 @@
 page *page_replace(page **ram_head, __attribute__((unused)) page **ram_tail,
                    __attribute__((unused)) page **clock_hand,
                    __attribute__((unused)) int *flag,
-                   __attribute__((unused)) void* pt, 
-                   __attribute__((unused)) char *filename, 
+                   __attribute__((unused)) void *pt,
+                   __attribute__((unused)) char *filename,
                    __attribute__((unused)) void **proc_table,
-                    __attribute__((unused)) unsigned long frame_size)
+                   __attribute__((unused)) unsigned long frame_size)
 {
   if (*flag == 0)
   {
@@ -70,9 +70,22 @@ page *page_replace(page **ram_head, __attribute__((unused)) page **ram_tail,
   modify the ref_bit of the page to be 1
   input: pointer to the page, ram_head, ram_tail
 */
-void page_reference(page *ptr, __attribute__((unused)) page **ram_head,
-                    __attribute__((unused)) page **ram_tail)
+void page_reference(page *ptr,
+                    __attribute__((unused)) page **ram_head,
+                    __attribute__((unused)) page **ram_tail,
+                    void *proc_table, FILE *fp)
 {
   ptr->ref_bit = 1;
+
+  // update the cur_index of the corresponding process
+  node_proc *result_proc = find_proc(proc_table, ptr->pid);
+  if (result_proc == NULL)
+  {
+    // not found in process table => process has terminated, skip this line
+  }
+  else
+  {
+    result_proc->value->cur_index = handle_ftell_error(ftell(fp));
+  }
   return;
 }

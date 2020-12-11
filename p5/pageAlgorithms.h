@@ -19,7 +19,7 @@
   a pointer to a page to be replaced
 */
 page *page_replace(page **ram_head, page **ram_tail, page **clock_hand,
-                   int *flag, void* pt, char *filename, void **proc_table,
+                   int *flag, void *pt, char *filename, void **proc_table,
                    unsigned long frame_size);
 
 /*
@@ -31,7 +31,8 @@ page *page_replace(page **ram_head, page **ram_tail, page **clock_hand,
     
   input: a pointer to a page to be referenced, ram head and ram tail 
 */
-void page_reference(page *ptr, page **ram_head, page **ram_tail);
+void page_reference(page *ptr, page **ram_head, page **ram_tail,
+                    void *proc_table, FILE *fp);
 
 void move_to_ram_tail(page **ram_head, page **ram_tail);
 

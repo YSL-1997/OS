@@ -81,7 +81,7 @@ void basic(process **process_head, process **process_tail,
                                &runnable_head, &runnable_tail,
                                &free_head, &free_tail,
                                &ram_head, &ram_tail,
-                               stat, &pt, &clock_hand, &flag, filename, 
+                               stat, &pt, &clock_hand, &flag, filename,
                                proc_table, num_pages);
         continue;
       }
@@ -99,7 +99,7 @@ void basic(process **process_head, process **process_tail,
                                &runnable_head, &runnable_tail,
                                &free_head, &free_tail,
                                &ram_head, &ram_tail,
-                               stat, &pt, &clock_hand, &flag, filename, 
+                               stat, &pt, &clock_hand, &flag, filename,
                                proc_table, num_pages);
 
         continue;
@@ -197,7 +197,7 @@ void basic(process **process_head, process **process_tail,
                                        &runnable_head, &runnable_tail,
                                        &free_head, &free_tail,
                                        &ram_head, &ram_tail,
-                                       stat, &pt, &clock_hand, &flag, filename, 
+                                       stat, &pt, &clock_hand, &flag, filename,
                                        proc_table, num_pages);
                 continue;
               }
@@ -217,7 +217,8 @@ void basic(process **process_head, process **process_tail,
 
             free(cur_vpn);
             // reference the page
-            page_reference(result_pt->value, &ram_head, &ram_tail);
+            page_reference(result_pt->value, &ram_head, &ram_tail,
+                           proc_table, fp);
 
             // update the stats
             stat->RTime += 1;
@@ -288,7 +289,7 @@ void basic(process **process_head, process **process_tail,
                                        &runnable_head, &runnable_tail,
                                        &free_head, &free_tail,
                                        &ram_head, &ram_tail,
-                                       stat, &pt, &clock_hand, &flag, filename, 
+                                       stat, &pt, &clock_hand, &flag, filename,
                                        proc_table, num_pages);
                 continue;
               }
@@ -298,11 +299,12 @@ void basic(process **process_head, process **process_tail,
       }
       free(pid_vpn_pair);
     }
-    
+
   } while (true);
   free(buf);
-  while(free_head != NULL){
-    page* tmp = free_head->free_next;
+  while (free_head != NULL)
+  {
+    page *tmp = free_head->free_next;
     free(free_head);
     free_head = tmp;
   }
@@ -527,7 +529,7 @@ void wait_for_io_completion(FILE **fp,
                             page **free_head, page **free_tail,
                             page **ram_head, page **ram_tail,
                             statistics *stat, void **pt,
-                            page **clock_hand, int *flag, char *filename, 
+                            page **clock_hand, int *flag, char *filename,
                             void **proc_table, unsigned long num_pages)
 {
   process *tmp = pop_from_io(io_head, io_tail);
@@ -554,7 +556,7 @@ void wait_for_io_completion(FILE **fp,
     // this function moves the page to ram_tail if needed (clock does not)
     // this function returns the page to be replaced
     page *page_to_replace = page_replace(ram_head, ram_tail, clock_hand, flag,
-                                        *pt, filename, proc_table, num_pages);
+                                         *pt, filename, proc_table, num_pages);
 
     // get the key of pt to be deleted
     // update pt (delete former entry)
@@ -715,4 +717,3 @@ void add_to_free(page *ptr, page **free_head, page **free_tail)
     ptr->free_prev = NULL;
   }
 }
-

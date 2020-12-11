@@ -15,10 +15,10 @@
 
 */
 page *page_replace(page **ram_head, page **ram_tail,
-                   __attribute__((unused)) page **clock_hand, 
+                   __attribute__((unused)) page **clock_hand,
                    __attribute__((unused)) int *flag,
-                   __attribute__((unused)) void* pt, 
-                   __attribute__((unused)) char *filename, 
+                   __attribute__((unused)) void *pt,
+                   __attribute__((unused)) char *filename,
                    __attribute__((unused)) void **proc_table,
                    __attribute__((unused)) unsigned long frame_size)
 {
@@ -34,10 +34,21 @@ page *page_replace(page **ram_head, page **ram_tail,
   lru page reference
   move the referenced page to the ram_tail
 */
-void page_reference(page *ptr, page **ram_head, page **ram_tail)
+void page_reference(page *ptr, page **ram_head, page **ram_tail,
+                    void *proc_table, FILE *fp)
 {
   assert(*ram_head != NULL);
   assert(*ram_tail != NULL);
+
+  // update the cur_index of the corresponding process
+  node_proc *result_proc = find_proc(proc_table, ptr->pid);
+  if (result_proc == NULL)
+  {
+    // not found in process table => process has terminated, skip this line
+  }
+  else{
+    result_proc->value->cur_index = handle_ftell_error(ftell(fp));
+  }
 
   // ptr is the only page in ram list
   if (ptr == *ram_head && ptr == *ram_tail)

@@ -17,10 +17,20 @@ typedef struct node_bitmap
   min page reference
   input: pointer to a page, ram head, ram tail
 */
-void page_reference(__attribute__((unused)) page *ptr,
+void page_reference(page *ptr,
                     __attribute__((unused)) page **ram_head,
-                    __attribute__((unused)) page **ram_tail)
+                    __attribute__((unused)) page **ram_tail,
+                    void *proc_table, FILE *fp)
 {
+  node_proc *result_proc = find_proc(proc_table, ptr->pid);
+  if (result_proc == NULL)
+  {
+    // not found in process table => process has terminated, skip this line
+  }
+  else
+  {
+    result_proc->value->cur_index = handle_ftell_error(ftell(fp));
+  }
   return;
 }
 
@@ -31,6 +41,7 @@ page *page_replace(page **ram_head,
                    void *pt, char *filename, void **proc_table,
                    unsigned long frame_size)
 {
+  printf("hello\n");
   FILE *fp_min;                               // read trace file
   int MAX_LEN = 4096;                         // line max length
   char *buf = malloc(MAX_LEN * sizeof(char)); //store the line string
@@ -52,7 +63,8 @@ page *page_replace(page **ram_head,
 
   fp_min = read_file(filename);
   node_bitmap bitmap[frame_size];
-  for(unsigned long i = 0; i < frame_size; i++){
+  for (unsigned long i = 0; i < frame_size; i++)
+  {
     bitmap[i].visited = 0;
     bitmap[i].ptr_pg = NULL;
   }
@@ -65,7 +77,7 @@ page *page_replace(page **ram_head,
 
     cur_pid = pid_vpn_pair[0]; // current pid
     cur_vpn = pid_vpn_pair[1]; // current vpn
-    // printf("out: %s\n", cur_pid);
+
     node_proc *result_proc = find_proc(proc_table, cur_pid);
     // if not finding the pid in process table, means the process has teminated
     // this may not happen, because we evict all pages related to terminated
@@ -81,7 +93,7 @@ page *page_replace(page **ram_head,
     {
       //check whether current location is less than the current index of
       // page, if so, the current trace has been implemented, then skip.
-      if (result_proc->value->cur_index >
+      if (result_proc->value->cur_index >=
           (unsigned)handle_ftell_error(ftell(fp_min)))
       {
         printf("(%s, %s) has been executed\n", cur_pid, cur_vpn);
@@ -142,7 +154,7 @@ page *page_replace(page **ram_head,
             // means this page has not been recorded yet
             bitmap[result_pt->value->ppn - 1].visited = 1;
             bitmap[result_pt->value->ppn - 1].ptr_pg = result_pt->value;
-            
+
             if (max_ftell < handle_ftell_error(ftell(fp_min)))
             {
               max_ftell = handle_ftell_error(ftell(fp_min));
@@ -194,19 +206,20 @@ page *page_replace(page **ram_head,
   // for(unsigned long i = 0; i < key_index; i++){
   //   free(key_array[i]);
   // }
-  
+
   for (unsigned long i = 0; i < frame_size; i++)
   {
     if (bitmap[i].visited == 0)
     {
-      page* tmp = *ram_head;
-      while(tmp->ppn != i+1){
+      page *tmp = *ram_head;
+      while (tmp->ppn != i + 1)
+      {
         tmp = tmp->ram_next;
       }
 
       free(buf);
       fclose(fp_min);
-      printf("page ((%s, %s), %ld) replaced\n",tmp->pid, tmp->vpn, tmp->ppn);
+      printf("page ((%s, %s), %ld) replaced\n", tmp->pid, tmp->vpn, tmp->ppn);
       return tmp;
     }
   }
@@ -214,6 +227,6 @@ page *page_replace(page **ram_head,
   page *ret = bitmap[max_index].ptr_pg;
   free(buf);
   fclose(fp_min);
-  printf("page ((%s, %s), %ld) replaced\n",ret->pid, ret->vpn, ret->ppn);
+  printf("page ((%s, %s), %ld) replaced\n", ret->pid, ret->vpn, ret->ppn);
   return ret;
 }

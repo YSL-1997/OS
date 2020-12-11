@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
   statistics *stat = stat_init(num_process);
 
   // start execution
-  basic(&runnable_head, &runnable_tail, 2, &proc_table, stat,
+  basic(&runnable_head, &runnable_tail, frame_size, &proc_table, stat,
         argv[argc - 1]);
   
   // print out the stats
