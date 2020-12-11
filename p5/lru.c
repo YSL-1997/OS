@@ -35,20 +35,11 @@ page *page_replace(page **ram_head, page **ram_tail,
   move the referenced page to the ram_tail
 */
 void page_reference(page *ptr, page **ram_head, page **ram_tail,
-                    void *proc_table, FILE *fp)
+                    __attribute__((unused)) void *proc_table, 
+                    __attribute__((unused)) FILE *fp)
 {
   assert(*ram_head != NULL);
   assert(*ram_tail != NULL);
-
-  // update the cur_index of the corresponding process
-  node_proc *result_proc = find_proc(proc_table, ptr->pid);
-  if (result_proc == NULL)
-  {
-    // not found in process table => process has terminated, skip this line
-  }
-  else{
-    result_proc->value->cur_index = handle_ftell_error(ftell(fp));
-  }
 
   // ptr is the only page in ram list
   if (ptr == *ram_head && ptr == *ram_tail)

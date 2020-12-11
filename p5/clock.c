@@ -73,19 +73,9 @@ page *page_replace(page **ram_head, __attribute__((unused)) page **ram_tail,
 void page_reference(page *ptr,
                     __attribute__((unused)) page **ram_head,
                     __attribute__((unused)) page **ram_tail,
-                    void *proc_table, FILE *fp)
+                    __attribute__((unused)) void *proc_table, 
+                    __attribute__((unused)) FILE *fp)
 {
   ptr->ref_bit = 1;
-
-  // update the cur_index of the corresponding process
-  node_proc *result_proc = find_proc(proc_table, ptr->pid);
-  if (result_proc == NULL)
-  {
-    // not found in process table => process has terminated, skip this line
-  }
-  else
-  {
-    result_proc->value->cur_index = handle_ftell_error(ftell(fp));
-  }
   return;
 }

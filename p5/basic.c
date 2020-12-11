@@ -232,7 +232,6 @@ void basic(process **process_head, process **process_tail,
                 result_proc->value->end_index)
             {
               // this process has terminated
-              printf("process %s terminated\n", result_proc->value->pid);
               // remove this process from runnable list
               process *end_proc = remove_from_runnable(result_proc->value,
                                                        &runnable_head,
