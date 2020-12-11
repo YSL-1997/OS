@@ -58,4 +58,4 @@ errorHandling.o: errorHandling.c errorHandling.h
 	gcc -Wall -Wextra -pedantic -c errorHandling.c
 
 clean:
-	rm -f 537pfsim-fifo 537pfsim-lru 537pfsim-clock *.o
+	rm -f 537pfsim-fifo 537pfsim-lru 537pfsim-clock 537pfsim-min *.o
