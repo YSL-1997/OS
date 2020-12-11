@@ -27,16 +27,16 @@ basic.o: basic.c input.h process.h tsearch.h errorHandling.h page.h \
 		  basic.h statistics.h
 	gcc -Wall -Wextra -pedantic -c basic.c
 
-opt.o: opt.c pageAlgorithms.h page.h basic.h
+opt.o: opt.c pageAlgorithms.h page.h tsearch.h input.h
 	gcc -Wall -Wextra -pedantic -c opt.c
 
-clock.o: clock.c pageAlgorithms.h page.h basic.h
+clock.o: clock.c pageAlgorithms.h page.h tsearch.h input.h
 	gcc -Wall -Wextra -pedantic -c clock.c
 
-fifo.o: fifo.c pageAlgorithms.h page.h basic.h
+fifo.o: fifo.c pageAlgorithms.h page.h tsearch.h input.h
 	gcc -Wall -Wextra -pedantic -c fifo.c
 
-lru.o: lru.c pageAlgorithms.h page.h
+lru.o: lru.c pageAlgorithms.h page.h tsearch.h input.h
 	gcc -Wall -Wextra -pedantic -c lru.c
 
 input.o: input.c input.h process.h tsearch.h errorHandling.h
